@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: msantha-poultry-manager
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_TIMEZONE
+        value: Africa/Blantyre
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: 3306
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: PAYCHANGU_SECRET_KEY
+        sync: false
+      - key: PAYCHANGU_WEBHOOK_SECRET
+        sync: false
+      - key: SMS_PROVIDER
+        value: africas_talking
+      - key: SMS_SENDER_ID
+        value: MSANTHA
+      - key: SMS_API_KEY
+        sync: false
+      - key: SMS_USERNAME
+        sync: false

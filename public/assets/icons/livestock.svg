@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <!-- Boer Goat & Livestock with Ear Tag -->
+  <path d="M18 10c-.5 0-1 .2-1.4.5C15.5 8.5 14 7 11 7H8C6 7 4.5 8.5 4.5 10.5v3c0 1 .8 1.8 1.8 1.8h1.2v3.7h2v-3.7h3v3.7h2v-3.7h1c1 0 1.8-.8 1.8-1.8v-3c0-.6-.3-1-1-1z" fill="#b45309"/>
+  <!-- Horns -->
+  <path d="M8 7c-.6-1.5-1.5-2.2-2.5-2.5.3 1.5 1 2.5 1.7 3l.8-.5z" fill="#78350f"/>
+  <!-- Ear Tag (Yellow) -->
+  <polygon points="17.5,11 19.5,12 18.5,13.5 16.5,12.5" fill="#f59e0b" stroke="#78350f" stroke-width="0.5"/>
+  <circle cx="8" cy="10" r="0.9" fill="#ffffff"/>
+  <!-- Beard / Snout -->
+  <path d="M5.5 13.5l-1 2 2-.5" stroke="#78350f" stroke-width="1.2" stroke-linecap="round"/>
+</svg>

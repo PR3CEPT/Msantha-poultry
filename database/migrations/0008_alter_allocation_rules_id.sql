@@ -1,0 +1,1 @@
+ALTER TABLE incubation_allocation_rules MODIFY id INT UNSIGNED AUTO_INCREMENT;

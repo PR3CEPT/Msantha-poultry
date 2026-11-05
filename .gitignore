@@ -1,0 +1,29 @@
+# Dependencies
+/vendor/
+node_modules/
+
+# Environment files
+.env
+.env.backup
+.env.local
+!.env.example
+
+# Storage and logs
+/storage/logs/*.log
+/storage/cache/*
+!/storage/cache/.gitkeep
+!/storage/logs/.gitkeep
+!/storage/imports/.gitkeep
+/storage/backups/*.sql
+!/storage/backups/.gitkeep
+
+# Operating System & IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Legacy app build artifacts
+legacy_app/dist/
+legacy_app/build/
+legacy_app/node_modules/

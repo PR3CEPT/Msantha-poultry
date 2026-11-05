@@ -1,0 +1,86 @@
+<?php declare(strict_types=1); ?>
+
+<div class="p-3 p-md-4">
+    <?php include __DIR__ . '/_print_header.php'; ?>
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2">
+                <a href="<?= url('/reports') ?>" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Reports</a>
+                <h1 class="h3 fw-bold mb-0 text-dark">Flock Mortality % Analysis</h1>
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle fs-6">
+                    Flock Dynamics
+                </span>
+            </div>
+            <p class="text-muted small mb-0 mt-1">Batch intake, mortality rates, cumulative deaths, and surviving headcounts across all species.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="<?= url('/reports/mortality?format=csv') ?>" class="btn btn-outline-success btn-sm">
+                <i class="bi bi-download me-1"></i>Export CSV
+            </a>
+            <button onclick="window.print()" class="btn btn-outline-dark btn-sm">
+                <i class="bi bi-printer me-1"></i>Print Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-heart-pulse me-2 text-danger"></i>Flock Intake & Mortality Metrics</h5>
+            <span class="badge bg-light text-secondary border"><?= count($flocks) ?> Flocks Analyzed</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small text-uppercase">
+                    <tr>
+                        <th class="ps-3">Batch Code</th>
+                        <th>Breed</th>
+                        <th>Start Date</th>
+                        <th class="text-end">Start Count</th>
+                        <th class="text-end">Total Deaths</th>
+                        <th class="text-end">Total Sold</th>
+                        <th class="text-end">Current Stock</th>
+                        <th class="text-center">Mortality %</th>
+                        <th class="text-center pe-3">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($flocks)): ?>
+                        <tr><td colspan="9" class="text-center py-4 text-muted">No flock batches found.</td></tr>
+                    <?php else: ?>
+                        <?php foreach ($flocks as $f): ?>
+                            <?php
+                            $rate = (float) $f['mortality_rate'];
+                            $badgeClass = $rate >= 2.0 ? 'bg-danger text-white' : ($rate >= 1.0 ? 'bg-warning text-dark' : 'bg-success text-white');
+                            ?>
+                            <tr>
+                                <td class="ps-3">
+                                    <a href="<?= url("/flocks/{$f['flock_id']}") ?>" class="fw-bold text-dark text-decoration-none">
+                                        <?= e($f['batch_code']) ?>
+                                    </a>
+                                </td>
+                                <td><?= e($f['breed_name']) ?></td>
+                                <td><?= date('d-M-Y', strtotime($f['start_date'])) ?></td>
+                                <td class="text-end fw-semibold"><?= number_format((int)$f['start_count']) ?></td>
+                                <td class="text-end text-danger fw-bold">-<?= number_format((int)$f['total_deaths']) ?></td>
+                                <td class="text-end text-success fw-bold"><?= number_format((int)$f['total_sold']) ?></td>
+                                <td class="text-end fw-bold text-dark"><?= number_format((int)$f['current_stock']) ?></td>
+                                <td class="text-center">
+                                    <span class="badge <?= $badgeClass ?>"><?= number_format($rate, 2) ?>%</span>
+                                </td>
+                                <td class="text-center pe-3">
+                                    <span class="badge <?= $f['is_active'] ? 'bg-success' : 'bg-secondary' ?>">
+                                        <?= $f['is_active'] ? 'Active' : 'Closed' ?>
+                                    </span>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

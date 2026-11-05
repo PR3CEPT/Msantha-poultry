@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none">
+  <!-- Dairy & Zebu Cattle with Ear Tag -->
+  <path d="M19 8c-.6 0-1.1.2-1.5.5C16.8 6.5 15.5 5 13 5H9C6.8 5 5 6.8 5 9v4c0 1.1.9 2 2 2h1v4h2v-4h4v4h2v-4h1c1.1 0 2-.9 2-2V9c0-.6-.4-1-1-1z" fill="#0f766e"/>
+  <!-- Horns -->
+  <path d="M7 6c-.5-1.5-1.5-2-3-2 .5 1.5 1 2.5 2 3l1-1zM15 6c.5-1.5 1.5-2 3-2-.5 1.5-1 2.5-2 3l-1-1z" fill="#b45309"/>
+  <!-- Ear tag (Yellow, MIGS signature) -->
+  <polygon points="19,10 21,11 20,13 18,12" fill="#f59e0b" stroke="#78350f" stroke-width="0.5"/>
+  <circle cx="9.5" cy="9.5" r="1" fill="#ffffff"/>
+  <path d="M6 11c0 1.5 1 2.5 2.5 2.5s2.5-1 2.5-2.5H6z" fill="#f43f5e"/>
+</svg>

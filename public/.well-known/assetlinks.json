@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.msanthafarm.app",
+      "sha256_cert_fingerprints": [
+        "14:6D:E9:7F:02:8F:CE:CE:F6:ED:BE:42:07:07:95:9E:D4:F6:A3:D8:1F:B5:4E:94:07:23:4C:E4:0C:FB:5E:64"
+      ]
+    }
+  }
+]

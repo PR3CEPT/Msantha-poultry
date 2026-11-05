@@ -1,0 +1,12 @@
+.git
+.github
+.env
+.env.backup
+.env.local
+storage/logs/*.log
+storage/cache/*
+!storage/cache/.gitkeep
+storage/backups/*.sql
+tests
+node_modules
+legacy_app

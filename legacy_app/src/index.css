@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@layer utilities {
+  /* Safe padding for Android smartphones with gesture navigation bars */
+  .safe-bottom {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  header,
+  aside,
+  nav,
+  .no-print,
+  button {
+    display: none !important;
+  }
+
+  .printable-receipt,
+  .printable-report {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+}
