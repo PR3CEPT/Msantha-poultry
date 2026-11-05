@@ -52,3 +52,4 @@ EXPOSE 10000
 
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["apache2-foreground"]
+
