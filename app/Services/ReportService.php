@@ -63,16 +63,27 @@ class ReportService
     }
 
     /**
-     * 2. Mortality % per flock report.
+     * 2. Mortality % per flock report with customizable date period.
      * @return array<int, array<string, mixed>>
      */
-    public function getMortalityPerFlock(?int $flockId = null): array
+    public function getMortalityPerFlock(?int $flockId = null, ?string $from = null, ?string $to = null): array
     {
         $where = " WHERE 1=1";
         $params = [];
         if ($flockId !== null) {
             $where .= " AND f.id = ?";
             $params[] = $flockId;
+        }
+
+        $dateFilter = "";
+        $dateParams = [];
+        if ($from !== null && $from !== '') {
+            $dateFilter .= " AND event_date >= ?";
+            $dateParams[] = $from;
+        }
+        if ($to !== null && $to !== '') {
+            $dateFilter .= " AND event_date <= ?";
+            $dateParams[] = $to;
         }
 
         $sql = "
@@ -83,17 +94,18 @@ class ReportService
                 f.start_date,
                 f.start_count,
                 f.status,
-                COALESCE((SELECT SUM(quantity) FROM flock_events WHERE flock_id = f.id AND event_type = 'death'), 0) AS total_deaths,
-                COALESCE((SELECT SUM(quantity) FROM flock_events WHERE flock_id = f.id AND event_type = 'sale'), 0) AS total_sold,
-                COALESCE((SELECT SUM(quantity) FROM flock_events WHERE flock_id = f.id AND event_type = 'cull'), 0) AS total_culled,
-                COALESCE((SELECT SUM(quantity) FROM flock_events WHERE flock_id = f.id AND event_type = 'addition'), 0) AS total_additions
+                COALESCE((SELECT SUM(quantity) FROM flock_events WHERE flock_id = f.id AND event_type = 'death' {$dateFilter}), 0) AS total_deaths,
+                COALESCE((SELECT SUM(quantity) FROM flock_events WHERE flock_id = f.id AND event_type = 'sale' {$dateFilter}), 0) AS total_sold,
+                COALESCE((SELECT SUM(quantity) FROM flock_events WHERE flock_id = f.id AND event_type = 'cull' {$dateFilter}), 0) AS total_culled,
+                COALESCE((SELECT SUM(quantity) FROM flock_events WHERE flock_id = f.id AND event_type = 'addition' {$dateFilter}), 0) AS total_additions
             FROM flocks f
             LEFT JOIN breeds b ON b.id = f.breed_id
             {$where}
             ORDER BY f.start_date DESC, f.id DESC
         ";
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($params);
+        $allParams = array_merge($dateParams, $dateParams, $dateParams, $dateParams, $params);
+        $stmt->execute($allParams);
         $flocks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $results = [];
@@ -185,10 +197,10 @@ class ReportService
     }
 
     /**
-     * 4. Egg productivity report.
+     * 4. Egg productivity report with customizable daily/weekly/monthly grouping.
      * @return array<int, array<string, mixed>>
      */
-    public function getEggProductivityReport(?string $from = null, ?string $to = null, ?int $breedId = null): array
+    public function getEggProductivityReport(?string $from = null, ?string $to = null, ?int $breedId = null, string $groupFormat = 'auto'): array
     {
         $where = " WHERE 1=1";
         $params = [];
@@ -205,9 +217,12 @@ class ReportService
             $params[] = $breedId;
         }
 
+        $isDaily = ($groupFormat === 'daily') || ($groupFormat === 'auto' && $from && $to && (strtotime($to) - strtotime($from) <= 14 * 86400));
+        $dateCol = $isDaily ? "DATE_FORMAT(ep.prod_date, '%d-%b-%Y')" : "DATE_FORMAT(ep.prod_date, '%Y-%m')";
+
         $sql = "
             SELECT 
-                DATE_FORMAT(ep.prod_date, '%Y-%m') AS month_key,
+                {$dateCol} AS period_key,
                 b.name AS breed_name,
                 SUM(ep.collected) AS total_collected,
                 SUM(ep.broken) AS total_broken,
@@ -217,8 +232,8 @@ class ReportService
             FROM egg_production_daily ep
             LEFT JOIN breeds b ON b.id = ep.breed_id
             {$where}
-            GROUP BY month_key, ep.breed_id
-            ORDER BY month_key DESC, ep.breed_id ASC
+            GROUP BY period_key, ep.breed_id
+            ORDER BY ep.prod_date DESC, ep.breed_id ASC
         ";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute($params);
@@ -231,7 +246,7 @@ class ReportService
             $loose = $col % 30;
 
             $results[] = [
-                'month' => (string) $r['month_key'],
+                'month' => (string) $r['period_key'],
                 'breed' => (string) ($r['breed_name'] ?: 'Layers / General'),
                 'collected' => $col,
                 'broken' => (int) $r['total_broken'],

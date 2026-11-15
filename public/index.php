@@ -230,6 +230,10 @@ $router->post('/webhooks/paychangu', [PaymentController::class, 'webhook']);
 $router->get('/admin/payments', [PaymentController::class, 'adminIndex']);
 $router->post('/admin/payments/reverify', [PaymentController::class, 'reverify']);
 
+// Notification API Routes
+$router->post('/api/notifications/mark-seen', [\App\Controllers\Api\NotificationController::class, 'markSeen']);
+$router->post('/api/notifications/dismiss', [\App\Controllers\Api\NotificationController::class, 'dismiss']);
+
 // Reports Routes
 $router->get('/reports', [ReportController::class, 'index']);
 $router->get('/reports/mortality', [ReportController::class, 'mortality']);

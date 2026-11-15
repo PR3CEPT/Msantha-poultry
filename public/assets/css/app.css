@@ -359,6 +359,95 @@ body {
     box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
+/* True Folding Z-Fold Interactive Component */
+.zfold-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.zfold-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+.zfold-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.zfold-card.is-unfolded {
+    border-color: #1b6d39;
+    box-shadow: 0 6px 18px rgba(27, 109, 57, 0.08);
+}
+
+.zfold-header {
+    padding: 0.85rem 1.15rem;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    transition: background-color 0.15s ease;
+}
+
+.zfold-header:hover {
+    background-color: #f8fafc;
+}
+
+.zfold-tier-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.zfold-tier-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.zfold-toggle-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    color: #475569;
+    border: none;
+    transition: transform 0.2s ease, background-color 0.15s ease;
+    font-size: 0.75rem;
+}
+
+.zfold-card.is-unfolded .zfold-toggle-btn {
+    transform: rotate(180deg);
+    background: #1b6d39;
+    color: #ffffff;
+}
+
+.zfold-body {
+    display: none;
+    padding: 1rem 1.15rem;
+    background-color: #fcfdfe;
+    border-top: 1px dashed #e2e8f0;
+    animation: foldDown 0.2s ease forwards;
+}
+
+.zfold-card.is-unfolded .zfold-body {
+    display: block;
+}
+
+@keyframes foldDown {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* Responsive tweaks for narrow mobile screens (360px - 400px) */
 @media (max-width: 400px) {
     .app-topbar {

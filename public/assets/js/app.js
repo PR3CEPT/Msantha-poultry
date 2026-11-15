@@ -389,4 +389,101 @@ export class App {
 // Auto-initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     App.init();
+
+    // Global Folding Z-Fold Interactive Controller
+    document.addEventListener('click', (e) => {
+        // 1. Z-fold card header click -> toggle fold
+        const header = e.target.closest('.zfold-header');
+        if (header) {
+            // Don't toggle if user clicked a link, button or .no-fold element
+            if (e.target.closest('a') || e.target.closest('button:not(.zfold-toggle-btn)') || e.target.closest('.no-fold')) {
+                return;
+            }
+            const card = header.closest('.zfold-card');
+            if (card) {
+                card.classList.toggle('is-unfolded');
+            }
+        }
+
+        // 2. Expand all / Collapse all button
+        const toggleAllBtn = e.target.closest('[data-zfold-toggle-all]');
+        if (toggleAllBtn) {
+            const containerSelector = toggleAllBtn.dataset.zfoldToggleAll || '.zfold-container';
+            const container = document.querySelector(containerSelector);
+            if (container) {
+                const cards = container.querySelectorAll('.zfold-card');
+                const shouldExpand = toggleAllBtn.dataset.state !== 'expanded';
+                cards.forEach(c => {
+                    if (shouldExpand) c.classList.add('is-unfolded');
+                    else c.classList.remove('is-unfolded');
+                });
+                toggleAllBtn.dataset.state = shouldExpand ? 'expanded' : 'collapsed';
+                toggleAllBtn.innerHTML = shouldExpand 
+                    ? '<i class="bi bi-chevron-bar-contract me-1"></i>Fold All' 
+                    : '<i class="bi bi-chevron-bar-expand me-1"></i>Unfold All';
+            }
+        }
+    });
 });
+
+// Global Notification Action Handlers
+window.markAllNotificationsSeen = async function() {
+    try {
+        const appUrl = window.APP_URL || '';
+        const res = await fetch(appUrl + '/api/notifications/mark-seen', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: '_csrf_token=' + encodeURIComponent(window.CSRF_TOKEN || '') + '&key=all'
+        });
+        const data = await res.json();
+        if (data.success) {
+            const badge = document.getElementById('topbarUnreadBadge');
+            if (badge) badge.remove();
+            document.querySelectorAll('.notification-item.is-unread').forEach(el => {
+                el.classList.remove('is-unread');
+                el.classList.add('is-seen');
+                const dot = el.querySelector('.unread-dot');
+                if (dot) dot.remove();
+                const trailTag = el.querySelector('.seen-trail-tag');
+                if (trailTag) trailTag.classList.remove('d-none');
+            });
+            const sub = document.getElementById('notificationSubtitle');
+            if (sub) sub.textContent = 'All alerts marked as seen (in trail)';
+        }
+    } catch (e) {
+        console.error('Failed to mark notifications seen', e);
+    }
+};
+
+window.dismissNotification = async function(event, key) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+    try {
+        const appUrl = window.APP_URL || '';
+        const res = await fetch(appUrl + '/api/notifications/dismiss', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: '_csrf_token=' + encodeURIComponent(window.CSRF_TOKEN || '') + '&key=' + encodeURIComponent(key)
+        });
+        const data = await res.json();
+        if (data.success) {
+            const item = document.getElementById('notif_' + key);
+            if (item) {
+                item.style.transition = 'all 0.2s ease';
+                item.style.opacity = '0';
+                item.style.transform = 'translateX(20px)';
+                setTimeout(() => item.remove(), 220);
+            }
+        }
+    } catch (e) {
+        console.error('Failed to dismiss notification', e);
+    }
+};

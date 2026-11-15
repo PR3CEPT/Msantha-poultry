@@ -76,104 +76,127 @@
             </form>
         </div>
 
-        <!-- Table View -->
-        <div class="table-responsive d-none d-md-block">
-            <table class="table-modern align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th class="ps-3 py-3" style="width: 140px;">Collection Date</th>
-                        <th class="py-3">Breed / Flock</th>
-                        <th class="text-end py-3" style="width: 140px;">Eggs Harvested</th>
-                        <th class="text-end py-3" style="width: 130px;">Trays (30/tray)</th>
-                        <th class="text-end py-3" style="width: 110px;">Broken</th>
-                        <th class="text-end py-3" style="width: 110px;">Consumed</th>
-                        <th class="text-end pe-3 py-3" style="width: 130px;">Hatchery Inflow</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($records)): ?>
-                        <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">
-                                <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
-                                No egg collection records found matching criteria.
-                            </td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($records as $r): ?>
-                            <?php
-                            $collected = (int) $r['collected'];
-                            $trays = floor($collected / 30);
-                            $broken = (int) $r['broken'];
-                            ?>
-                            <tr>
-                                <td class="ps-3 py-2.5 font-monospace fw-bold text-dark small">
-                                    <?= date('d-M-Y', strtotime($r['prod_date'])) ?>
-                                </td>
-                                <td class="py-2.5">
-                                    <span class="badge bg-light text-dark border">
-                                        <?= e($r['breed_name'] ?? $r['batch_code'] ?? 'Quails / Mixed') ?>
-                                    </span>
-                                </td>
-                                <td class="text-end py-2.5 fw-bold text-dark fs-6">
-                                    <?= number_format($collected) ?>
-                                </td>
-                                <td class="text-end py-2.5 fw-semibold text-warning-emphasis">
-                                    <?= number_format($trays) ?> <small class="text-muted" style="font-size: 0.7rem;">trays</small>
-                                </td>
-                                <td class="text-end py-2.5">
-                                    <span class="<?= $broken > 0 ? 'text-danger fw-semibold' : 'text-muted' ?>">
-                                        <?= number_format($broken) ?>
-                                    </span>
-                                </td>
-                                <td class="text-end py-2.5 text-muted">
-                                    <?= number_format((int)$r['consumed']) ?>
-                                </td>
-                                <td class="text-end pe-3 py-2.5">
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold">
-                                        <?= number_format((int)$r['incubated']) ?>
-                                    </span>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+        <!-- Z-Fold Controls -->
+        <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-white">
+            <div class="d-flex align-items-center gap-2">
+                <span class="fw-bold text-dark fs-6"><i class="bi bi-egg me-1 text-warning"></i>Daily Egg Harvest Records</span>
+                <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                    <?= count($records) ?> Harvest Days
+                </span>
+            </div>
+            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold shadow-sm" data-zfold-toggle-all="#eggHarvestContainer">
+                <i class="bi bi-chevron-bar-expand me-1"></i>Unfold All
+            </button>
         </div>
 
-        <!-- Mobile Card View (< 768px) -->
-        <div class="d-md-none p-3">
+        <!-- Z-Fold Egg Collection Cards -->
+        <div class="p-3 zfold-container" id="eggHarvestContainer">
             <?php if (empty($records)): ?>
-                <div class="text-center py-4 text-muted">No egg records found.</div>
+                <div class="p-5 text-center text-muted">
+                    <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
+                    <h6 class="fw-bold text-dark">No Egg Collection Records Found</h6>
+                    <p class="small text-muted mb-0">No harvests recorded matching your search or date criteria.</p>
+                </div>
             <?php else: ?>
-                <div class="d-flex flex-column gap-3">
-                    <?php foreach ($records as $r): ?>
-                        <div class="card border rounded-3 p-3 shadow-sm bg-white">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <div class="fw-bold text-dark"><?= date('d-M-Y', strtotime($r['prod_date'])) ?></div>
-                                    <small class="text-muted"><?= e($r['breed_name'] ?? 'Quail / Flock') ?></small>
+                <?php foreach ($records as $r): ?>
+                    <?php
+                    $collected = (int) $r['collected'];
+                    $trays = floor($collected / 30);
+                    $loose = $collected % 30;
+                    $broken = (int) $r['broken'];
+                    $consumed = (int) $r['consumed'];
+                    $incubated = (int) $r['incubated'];
+                    $sold = (int) ($r['sold'] ?? 0);
+                    ?>
+                    <div class="zfold-card mb-2.5">
+                        <div class="zfold-header">
+                            <!-- Tier 1: Collection Date & Breed on Left <---> Eggs & Trays on Right -->
+                            <div class="zfold-tier-top">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="fw-bold font-monospace text-dark small" style="font-size: 0.82rem;">
+                                        <i class="bi bi-calendar3 me-1 text-muted"></i><?= date('d-M-Y', strtotime($r['prod_date'])) ?>
+                                    </span>
+                                    <span class="badge bg-light text-dark border" style="font-size: 0.72rem;">
+                                        <?= e($r['breed_name'] ?? $r['batch_code'] ?? 'Layers / Quails') ?>
+                                    </span>
+                                    <?php if ($trays > 0): ?>
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size: 0.68rem;">
+                                            <?= number_format($trays) ?> Trays <?= $loose > 0 ? "+ {$loose} eggs" : '' ?>
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
-                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
-                                    <?= floor((int)$r['collected'] / 30) ?> Trays
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fs-6 fw-bold text-dark font-monospace">
+                                        <?= number_format($collected) ?> <small class="text-muted fw-normal" style="font-size: 0.72rem;">Eggs</small>
+                                    </span>
+                                    <button type="button" class="zfold-toggle-btn" aria-label="Toggle collection details">
+                                        <i class="bi bi-chevron-down"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Tier 2: Allocation Breakdown on Left <---> Broken/Loss on Right -->
+                            <div class="zfold-tier-bottom mt-1">
+                                <div class="d-flex align-items-center gap-2 text-muted small">
+                                    <span>Hatchery: <strong class="text-success font-monospace"><?= number_format($incubated) ?></strong></span>
+                                    <span>&bull;</span>
+                                    <span>Consumed: <strong class="text-info font-monospace"><?= number_format($consumed) ?></strong></span>
+                                    <?php if ($sold > 0): ?>
+                                        <span>&bull;</span>
+                                        <span>Sold: <strong class="text-primary font-monospace"><?= number_format($sold) ?></strong></span>
+                                    <?php endif; ?>
+                                </div>
+                                <span class="badge <?= $broken > 0 ? 'bg-danger-subtle text-danger border border-danger-subtle' : 'bg-light text-muted border' ?>" style="font-size: 0.7rem;">
+                                    Broken: <?= number_format($broken) ?> eggs
                                 </span>
                             </div>
-                            <div class="row g-2 text-center py-2 bg-light rounded-2 my-1">
-                                <div class="col-4">
-                                    <small class="text-muted d-block">Collected</small>
-                                    <span class="fw-bold text-dark fs-6"><?= number_format((int)$r['collected']) ?></span>
+                        </div>
+
+                        <!-- Z-Fold Body: Detailed Allocation Breakdown -->
+                        <div class="zfold-body">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-4">
+                                    <div class="p-3 bg-white rounded-3 border h-100">
+                                        <span class="text-muted small d-block mb-1 text-uppercase fw-semibold" style="font-size: 0.7rem;">Tray Conversions</span>
+                                        <div class="d-flex justify-content-between py-1 border-bottom small">
+                                            <span class="text-muted">Total Gross Collected:</span>
+                                            <strong class="text-dark font-monospace"><?= number_format($collected) ?> eggs</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between py-1 border-bottom small">
+                                            <span class="text-muted">Standard 30-Egg Trays:</span>
+                                            <strong class="text-warning-emphasis font-monospace"><?= number_format($trays) ?> trays</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between pt-1 small">
+                                            <span class="text-muted">Loose Remainder:</span>
+                                            <strong class="text-secondary font-monospace"><?= $loose ?> loose eggs</strong>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-4">
-                                    <small class="text-muted d-block">Broken</small>
-                                    <span class="fw-semibold text-danger"><?= number_format((int)$r['broken']) ?></span>
+                                <div class="col-12 col-md-4">
+                                    <div class="p-3 bg-white rounded-3 border h-100">
+                                        <span class="text-muted small d-block mb-1 text-uppercase fw-semibold" style="font-size: 0.7rem;">Harvest Dispositions</span>
+                                        <div class="small mb-1">To Incubation: <span class="badge bg-success-subtle text-success"><?= number_format($incubated) ?> eggs</span></div>
+                                        <div class="small mb-1">Farm / Staff Consumed: <span class="badge bg-info-subtle text-info"><?= number_format($consumed) ?> eggs</span></div>
+                                        <div class="small mb-1">Damaged / Broken: <span class="badge bg-danger-subtle text-danger"><?= number_format($broken) ?> eggs</span></div>
+                                    </div>
                                 </div>
-                                <div class="col-4">
-                                    <small class="text-muted d-block">Incubated</small>
-                                    <span class="fw-semibold text-success"><?= number_format((int)$r['incubated']) ?></span>
+                                <div class="col-12 col-md-4">
+                                    <div class="p-3 bg-white rounded-3 border h-100 d-flex flex-column justify-content-between">
+                                        <div>
+                                            <span class="text-muted small d-block mb-1 text-uppercase fw-semibold" style="font-size: 0.7rem;">Notes & Pen Provenance</span>
+                                            <p class="small text-muted mb-2 font-monospace">Daily egg recording for flock <?= e($r['batch_code'] ?? 'General') ?>.</p>
+                                        </div>
+                                        <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                                            <a href="<?= url('/eggs/create') ?>" class="btn btn-outline-warning btn-sm rounded-pill px-3 text-dark fw-bold" style="font-size: 0.75rem;">
+                                                <i class="bi bi-plus-circle me-1"></i>New Entry
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    <?php endforeach; ?>
-                </div>
+                    </div>
+                <?php endforeach; ?>
             <?php endif; ?>
         </div>
     </div>

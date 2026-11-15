@@ -207,108 +207,26 @@
         </form>
     </div>
 
-    <!-- Ledger Table Container: Desktop (Z-Fold Scan) -->
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4 d-none d-md-block">
-        <div class="table-responsive">
-            <table class="table-modern align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th class="ps-3 py-3" style="width: 170px;">Date & Unit</th>
-                        <th class="py-3">Particulars & Description</th>
-                        <th class="py-3" style="width: 150px;">Category</th>
-                        <th class="text-end py-3" style="width: 150px;">Inflow (Receipt)</th>
-                        <th class="text-end py-3" style="width: 150px;">Outflow (Expense)</th>
-                        <th class="text-end pe-3 py-3" style="width: 120px;">Classification</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($entries)): ?>
-                        <tr>
-                            <td colspan="6" class="text-center py-5 text-muted">
-                                <i class="bi bi-wallet2 display-6 d-block mb-2 text-muted"></i>
-                                No ledger records found matching criteria.
-                            </td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($entries as $e): ?>
-                            <?php
-                            $rec = (int) $e['receipt'];
-                            $exp = (int) $e['expenditure'];
-                            $isMonthTotal = ($e['entry_kind'] === 'month_total');
-                            ?>
-                            <tr class="<?= $isMonthTotal ? 'bg-warning-subtle fw-semibold' : '' ?>" style="transition: background-color 0.15s ease;">
-                                <td class="ps-3 py-2.5">
-                                    <div class="fw-bold text-dark font-monospace small">
-                                        <?= !empty($e['entry_date']) ? date('d-M-Y', strtotime($e['entry_date'])) : '—' ?>
-                                    </div>
-                                    <span class="badge bg-light text-secondary border mt-0.5" style="font-size: 0.65rem;">
-                                        <?= e($e['unit_name']) ?>
-                                    </span>
-                                </td>
-                                <td class="py-2.5">
-                                    <div class="text-dark fw-semibold"><?= e($e['description'] ?: 'General transaction entry') ?></div>
-                                </td>
-                                <td class="py-2.5">
-                                    <span class="badge bg-light text-dark border fw-normal" style="font-size: 0.72rem;">
-                                        <?= e($e['category_name'] ?: 'General') ?>
-                                    </span>
-                                </td>
-                                <td class="text-end py-2.5">
-                                    <?php if ($rec > 0): ?>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold fs-6">
-                                            +<?= number_format($rec) ?> <small style="font-size: 0.65rem;">MWK</small>
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="text-muted small">—</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="text-end py-2.5">
-                                    <?php if ($exp > 0): ?>
-                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold fs-6">
-                                            -<?= number_format($exp) ?> <small style="font-size: 0.65rem;">MWK</small>
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="text-muted small">—</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="text-end pe-3 py-2.5">
-                                    <?php if ($isMonthTotal): ?>
-                                        <span class="badge bg-warning text-dark border border-warning" style="font-size: 0.68rem;">Month Close</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-light text-secondary border" style="font-size: 0.68rem;">Direct Entry</span>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+    <!-- Z-Fold Financial Ledger Header & Controls -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-2">
+            <span class="fw-bold text-dark fs-6"><i class="bi bi-journal-text me-1 text-success"></i>Cash Book Ledger Records</span>
+            <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                Showing <?= count($entries) ?> of <?= number_format($totalRows) ?>
+            </span>
         </div>
-
-        <!-- Desktop Pagination -->
-        <?php if ($totalPages > 1): ?>
-            <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center py-2 px-3">
-                <span class="text-muted small">Showing <?= count($entries) ?> of <?= number_format($totalRows) ?> entries</span>
-                <nav aria-label="Finance navigation">
-                    <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                            <a class="page-link rounded-start-pill" href="<?= url('/finance?unit=' . urlencode($selectedUnit) . '&page=' . ($page - 1) . '&kind=' . urlencode($kind) . '&q=' . urlencode($search) . '&month=' . urlencode($yearMonth)) ?>">Previous</a>
-                        </li>
-                        <li class="page-item active"><span class="page-link"><?= $page ?> / <?= $totalPages ?></span></li>
-                        <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
-                            <a class="page-link rounded-end-pill" href="<?= url('/finance?unit=' . urlencode($selectedUnit) . '&page=' . ($page + 1) . '&kind=' . urlencode($kind) . '&q=' . urlencode($search) . '&month=' . urlencode($yearMonth)) ?>">Next</a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        <?php endif; ?>
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold shadow-sm" data-zfold-toggle-all="#financeZfoldContainer">
+            <i class="bi bi-chevron-bar-expand me-1"></i>Unfold All
+        </button>
     </div>
 
-    <!-- Mobile Folded Card View (< 768px - Z-Fold Method) -->
-    <div class="d-flex flex-column gap-2.5 d-md-none mb-4">
+    <!-- Z-Fold Ledger Cards Container -->
+    <div class="zfold-container mb-4" id="financeZfoldContainer">
         <?php if (empty($entries)): ?>
-            <div class="card border-0 shadow-sm rounded-4 p-4 text-center text-muted bg-white">
-                No ledger records found.
+            <div class="card border-0 shadow-sm rounded-4 p-5 text-center text-muted bg-white">
+                <i class="bi bi-wallet2 display-6 d-block mb-2 text-muted"></i>
+                <h6 class="fw-bold text-dark">No Ledger Records Found</h6>
+                <p class="small text-muted mb-0">No cash transactions or month closes match your selected unit or date filters.</p>
             </div>
         <?php else: ?>
             <?php foreach ($entries as $e): ?>
@@ -317,59 +235,143 @@
                 $exp = (int) $e['expenditure'];
                 $isMonthTotal = ($e['entry_kind'] === 'month_total');
                 ?>
-                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white <?= $isMonthTotal ? 'border-start border-4 border-warning' : '' ?>">
-                    <!-- Top Z-Line: Date + Unit (Left) & Kind (Right) -->
-                    <div class="d-flex justify-content-between align-items-center mb-1.5">
-                        <div class="d-flex align-items-center gap-1.5">
-                            <span class="fw-bold font-monospace small text-dark"><?= !empty($e['entry_date']) ? date('d-M-Y', strtotime($e['entry_date'])) : '—' ?></span>
-                            <span class="badge bg-light text-muted border" style="font-size: 0.65rem;"><?= e($e['unit_name']) ?></span>
+                <div class="zfold-card mb-2.5 <?= $isMonthTotal ? 'border-start border-4 border-warning' : '' ?>">
+                    <!-- Z-Fold Header: 2-Tier Folding Scan -->
+                    <div class="zfold-header">
+                        <!-- Tier 1: Date & Unit on Left <---> Amount in MWK & Chevron on Right -->
+                        <div class="zfold-tier-top">
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="fw-bold font-monospace text-dark small" style="font-size: 0.82rem;">
+                                    <i class="bi bi-calendar3 me-1 text-muted"></i><?= !empty($e['entry_date']) ? date('d-M-Y', strtotime($e['entry_date'])) : '—' ?>
+                                </span>
+                                <span class="badge bg-light text-secondary border" style="font-size: 0.72rem;">
+                                    <?= e($e['unit_name']) ?>
+                                </span>
+                                <?php if ($isMonthTotal): ?>
+                                    <span class="badge bg-warning text-dark border border-warning" style="font-size: 0.65rem;">
+                                        <i class="bi bi-lock-fill me-1"></i>Month Close
+                                    </span>
+                                <?php else: ?>
+                                    <span class="badge bg-light text-muted border font-monospace" style="font-size: 0.65rem;">
+                                        Direct Entry
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <?php if ($rec > 0): ?>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold fs-6 px-2.5 py-1">
+                                        +<?= number_format($rec) ?> <small style="font-size: 0.65rem;">MWK</small>
+                                    </span>
+                                <?php elseif ($exp > 0): ?>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold fs-6 px-2.5 py-1">
+                                        -<?= number_format($exp) ?> <small style="font-size: 0.65rem;">MWK</small>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="badge bg-light text-dark border fw-bold fs-6 px-2.5 py-1">0 MWK</span>
+                                <?php endif; ?>
+                                <button type="button" class="zfold-toggle-btn" aria-label="Toggle transaction breakdown">
+                                    <i class="bi bi-chevron-down"></i>
+                                </button>
+                            </div>
                         </div>
-                        <span class="badge <?= $isMonthTotal ? 'bg-warning text-dark' : 'bg-light text-secondary border' ?>" style="font-size: 0.65rem;">
-                            <?= $isMonthTotal ? 'Month Close' : 'Transaction' ?>
-                        </span>
+
+                        <!-- Tier 2: Description on Left <---> Category & Voucher on Right -->
+                        <div class="zfold-tier-bottom mt-1">
+                            <div class="text-truncate" style="max-width: 70%;">
+                                <span class="text-dark fw-bold small" style="font-size: 0.85rem;">
+                                    <?= e($e['description'] ?: 'General transaction entry') ?>
+                                </span>
+                            </div>
+                            <div class="d-flex align-items-center gap-1.5">
+                                <span class="badge bg-light text-dark border fw-normal" style="font-size: 0.72rem;">
+                                    <?= e($e['category_name'] ?: 'General') ?>
+                                </span>
+                                <?php if (!empty($e['voucher_no']) || !empty($e['cheque_no'])): ?>
+                                    <span class="text-muted font-monospace small" style="font-size: 0.7rem;">
+                                        Ref: <?= e($e['voucher_no'] ?: $e['cheque_no']) ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Middle: Particulars / Description -->
-                    <div class="fw-semibold text-dark small mb-1.5"><?= e($e['description'] ?: 'General transaction') ?></div>
+                    <!-- Z-Fold Body: Full Financial Audit Details -->
+                    <div class="zfold-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-md-4">
+                                <div class="p-3 bg-white rounded-3 border h-100">
+                                    <span class="text-muted small d-block mb-1 text-uppercase fw-semibold" style="font-size: 0.7rem;">Transaction Breakdown</span>
+                                    <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                                        <span class="small text-muted">Receipt (Inflow):</span>
+                                        <span class="fw-bold text-success font-monospace">+<?= number_format($rec) ?> MWK</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                                        <span class="small text-muted">Expenditure (Outflow):</span>
+                                        <span class="fw-bold text-danger font-monospace">-<?= number_format($exp) ?> MWK</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center pt-1">
+                                        <span class="small fw-semibold text-dark">Net Impact:</span>
+                                        <span class="fw-bold <?= ($rec - $exp) >= 0 ? 'text-success' : 'text-danger' ?> font-monospace">
+                                            <?= ($rec - $exp) >= 0 ? '+' : '' ?><?= number_format($rec - $exp) ?> MWK
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
 
-                    <!-- Bottom Z-Line: Category (Left) & Amount (Right) -->
-                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                        <span class="badge bg-light text-dark border fw-normal" style="font-size: 0.68rem;"><?= e($e['category_name'] ?: 'General') ?></span>
-                        <div>
-                            <?php if ($rec > 0): ?>
-                                <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold fs-6">
-                                    +<?= number_format($rec) ?> <small style="font-size: 0.65rem;">MWK</small>
-                                </span>
-                            <?php elseif ($exp > 0): ?>
-                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold fs-6">
-                                    -<?= number_format($exp) ?> <small style="font-size: 0.65rem;">MWK</small>
-                                </span>
-                            <?php else: ?>
-                                <span class="text-muted small">0 MWK</span>
-                            <?php endif; ?>
+                            <div class="col-12 col-md-4">
+                                <div class="p-3 bg-white rounded-3 border h-100">
+                                    <span class="text-muted small d-block mb-1 text-uppercase fw-semibold" style="font-size: 0.7rem;">Classification & Reference</span>
+                                    <div class="mb-1"><strong class="small text-dark">Business Unit:</strong> <span class="badge bg-light text-dark border"><?= e($e['unit_name']) ?></span></div>
+                                    <div class="mb-1"><strong class="small text-dark">Category:</strong> <span class="badge bg-light text-dark border"><?= e($e['category_name'] ?: 'General') ?></span></div>
+                                    <?php if (!empty($e['voucher_no'])): ?>
+                                        <div class="mb-1"><strong class="small text-dark">Voucher #:</strong> <span class="font-monospace small"><?= e($e['voucher_no']) ?></span></div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($e['cheque_no'])): ?>
+                                        <div><strong class="small text-dark">Cheque #:</strong> <span class="font-monospace small"><?= e($e['cheque_no']) ?></span></div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <div class="p-3 bg-white rounded-3 border h-100 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <span class="text-muted small d-block mb-1 text-uppercase fw-semibold" style="font-size: 0.7rem;">Ledger Metadata & Notes</span>
+                                        <p class="small text-muted mb-2 font-monospace" style="font-size: 0.75rem;">
+                                            <?= !empty($e['notes']) ? e($e['notes']) : 'No supplementary transaction remarks.' ?>
+                                        </p>
+                                    </div>
+                                    <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                                        <a href="<?= url('/finance/receipt?id=' . $e['id']) ?>" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill px-3" style="font-size: 0.75rem;">
+                                            <i class="bi bi-printer me-1"></i>Print Voucher
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             <?php endforeach; ?>
-
-            <!-- Mobile Pagination -->
-            <?php if ($totalPages > 1): ?>
-                <div class="d-flex justify-content-center mt-2">
-                    <nav aria-label="Mobile finance pagination">
-                        <ul class="pagination pagination-sm mb-0">
-                            <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                                <a class="page-link rounded-start-pill" href="<?= url('/finance?unit=' . urlencode($selectedUnit) . '&page=' . ($page - 1) . '&kind=' . urlencode($kind) . '&q=' . urlencode($search) . '&month=' . urlencode($yearMonth)) ?>">Prev</a>
-                            </li>
-                            <li class="page-item active"><span class="page-link"><?= $page ?> / <?= $totalPages ?></span></li>
-                            <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
-                                <a class="page-link rounded-end-pill" href="<?= url('/finance?unit=' . urlencode($selectedUnit) . '&page=' . ($page + 1) . '&kind=' . urlencode($kind) . '&q=' . urlencode($search) . '&month=' . urlencode($yearMonth)) ?>">Next</a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-            <?php endif; ?>
         <?php endif; ?>
     </div>
+
+    <!-- Unified Z-Fold Pagination -->
+    <?php if ($totalPages > 1): ?>
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+            <span class="text-muted small">Showing <?= count($entries) ?> of <?= number_format($totalRows) ?> entries</span>
+            <nav aria-label="Finance navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+                        <a class="page-link rounded-start-pill" href="<?= url('/finance?unit=' . urlencode($selectedUnit) . '&page=' . ($page - 1) . '&kind=' . urlencode($kind) . '&q=' . urlencode($search) . '&month=' . urlencode($yearMonth)) ?>">Previous</a>
+                    </li>
+                    <li class="page-item active"><span class="page-link"><?= $page ?> / <?= $totalPages ?></span></li>
+                    <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
+                        <a class="page-link rounded-end-pill" href="<?= url('/finance?unit=' . urlencode($selectedUnit) . '&page=' . ($page + 1) . '&kind=' . urlencode($kind) . '&q=' . urlencode($search) . '&month=' . urlencode($yearMonth)) ?>">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    <?php endif; ?>
 
     <!-- Bank Movements Section (Z-Fold Layout) -->
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">

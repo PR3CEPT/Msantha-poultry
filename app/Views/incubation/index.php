@@ -2,7 +2,8 @@
 
 <div class="p-3 p-md-4">
     <!-- Header Section -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div
+        class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
             <div class="d-flex align-items-center gap-2">
                 <h1 class="h3 fw-bold mb-0 text-dark">Hatchery & Incubation Services</h1>
@@ -10,7 +11,8 @@
                     <?= number_format($stats['total_batches']) ?> Batches
                 </span>
             </div>
-            <p class="text-muted small mb-0 mt-1">Batch tracking, customer egg setting, candling, hatch percentage monitoring, and fee settlements.</p>
+            <p class="text-muted small mb-0 mt-1">Batch tracking, customer egg setting, candling, hatch percentage
+                monitoring, and fee settlements.</p>
         </div>
         <div class="d-flex gap-2">
             <a href="<?= url('/incubation/receive') ?>" class="btn btn-success fw-bold">
@@ -52,14 +54,16 @@
         <div class="col-6 col-lg-3">
             <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-info">
                 <span class="text-muted small fw-semibold text-uppercase">Total Invoiced</span>
-                <div class="fs-3 fw-bold text-dark mt-1"><?= number_format($stats['total_cost']) ?> <small class="fs-6 text-muted">MWK</small></div>
+                <div class="fs-3 fw-bold text-dark mt-1"><?= number_format($stats['total_cost']) ?> <small
+                        class="fs-6 text-muted">MWK</small></div>
                 <small class="text-muted">Collected: <?= number_format($stats['total_paid']) ?> MWK</small>
             </div>
         </div>
         <div class="col-6 col-lg-3">
             <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-danger">
                 <span class="text-muted small fw-semibold text-uppercase">Outstanding Balance</span>
-                <div class="fs-3 fw-bold text-danger mt-1"><?= number_format($stats['total_balance']) ?> <small class="fs-6 text-muted">MWK</small></div>
+                <div class="fs-3 fw-bold text-danger mt-1"><?= number_format($stats['total_balance']) ?> <small
+                        class="fs-6 text-muted">MWK</small></div>
                 <small class="text-muted">Customer receivables</small>
             </div>
         </div>
@@ -74,7 +78,9 @@
                     <h6 class="fw-bold mb-0 text-dark small text-uppercase">
                         <i class="bi bi-arrow-left-right text-warning me-1"></i>Transfer to Hatcher Today
                     </h6>
-                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"><?= count($transferToday) ?> Due</span>
+                    <span
+                        class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle"><?= count($transferToday) ?>
+                        Due</span>
                 </div>
                 <div class="card-body p-2">
                     <?php if (empty($transferToday)): ?>
@@ -82,10 +88,12 @@
                     <?php else: ?>
                         <div class="list-group list-group-flush">
                             <?php foreach ($transferToday as $t): ?>
-                                <a href="<?= url("/incubation-jobs/{$t['id']}") ?>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-2 border-0 rounded-2 mb-1">
+                                <a href="<?= url("/incubation-jobs/{$t['id']}") ?>"
+                                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-2 border-0 rounded-2 mb-1">
                                     <div>
-                                        <div class="fw-semibold text-dark small">Batch #<?= $t['id'] ?> &middot; <?= e($t['customer_name']) ?></div>
-                                        <small class="text-muted"><?= number_format((int)$t['eggs_incubated']) ?> eggs</small>
+                                        <div class="fw-semibold text-dark small">Batch #<?= $t['id'] ?> &middot;
+                                            <?= e($t['customer_name']) ?></div>
+                                        <small class="text-muted"><?= number_format((int) $t['eggs_incubated']) ?> eggs</small>
                                     </div>
                                     <span class="badge bg-warning text-dark"><i class="bi bi-chevron-right"></i></span>
                                 </a>
@@ -103,7 +111,8 @@
                     <h6 class="fw-bold mb-0 text-dark small text-uppercase">
                         <i class="bi bi-egg-fried text-success me-1"></i>Hatching Soon (Next 3 Days)
                     </h6>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle"><?= count($hatchingSoon) ?></span>
+                    <span
+                        class="badge bg-success-subtle text-success border border-success-subtle"><?= count($hatchingSoon) ?></span>
                 </div>
                 <div class="card-body p-2">
                     <?php if (empty($hatchingSoon)): ?>
@@ -111,12 +120,16 @@
                     <?php else: ?>
                         <div class="list-group list-group-flush">
                             <?php foreach ($hatchingSoon as $h): ?>
-                                <a href="<?= url("/incubation-jobs/{$h['id']}") ?>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-2 border-0 rounded-2 mb-1">
+                                <a href="<?= url("/incubation-jobs/{$h['id']}") ?>"
+                                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-2 border-0 rounded-2 mb-1">
                                     <div>
-                                        <div class="fw-semibold text-dark small">Batch #<?= $h['id'] ?> &middot; <?= e($h['customer_name']) ?></div>
-                                        <small class="text-muted">Due: <?= date('d-M', strtotime($h['expected_hatch_date'])) ?> &middot; <?= number_format((int)$h['eggs_incubated']) ?> eggs</small>
+                                        <div class="fw-semibold text-dark small">Batch #<?= $h['id'] ?> &middot;
+                                            <?= e($h['customer_name']) ?></div>
+                                        <small class="text-muted">Due: <?= date('d-M', strtotime($h['expected_hatch_date'])) ?>
+                                            &middot; <?= number_format((int) $h['eggs_incubated']) ?> eggs</small>
                                     </div>
-                                    <span class="badge bg-success-subtle text-success border"><i class="bi bi-chevron-right"></i></span>
+                                    <span class="badge bg-success-subtle text-success border"><i
+                                            class="bi bi-chevron-right"></i></span>
                                 </a>
                             <?php endforeach; ?>
                         </div>
@@ -140,12 +153,14 @@
                     <?php else: ?>
                         <div class="list-group list-group-flush">
                             <?php foreach ($unpaidBalances as $u): ?>
-                                <a href="<?= url("/incubation-jobs/{$u['id']}") ?>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-2 border-0 rounded-2 mb-1">
+                                <a href="<?= url("/incubation-jobs/{$u['id']}") ?>"
+                                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-2 border-0 rounded-2 mb-1">
                                     <div>
                                         <div class="fw-semibold text-dark small"><?= e($u['customer_name']) ?></div>
-                                        <small class="text-muted">Batch #<?= $u['id'] ?> &middot; <?= e($u['customer_phone'] ?? 'No phone') ?></small>
+                                        <small class="text-muted">Batch #<?= $u['id'] ?> &middot;
+                                            <?= e($u['customer_phone'] ?? 'No phone') ?></small>
                                     </div>
-                                    <span class="text-danger fw-bold small"><?= number_format((int)$u['balance']) ?> MWK</span>
+                                    <span class="text-danger fw-bold small"><?= number_format((int) $u['balance']) ?> MWK</span>
                                 </a>
                             <?php endforeach; ?>
                         </div>
@@ -162,17 +177,22 @@
                 <div class="col-md-5">
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
-                        <input type="text" name="q" value="<?= e($search ?? '') ?>" class="form-control" placeholder="Search customer, phone, or batch ref...">
+                        <input type="text" name="q" value="<?= e($search ?? '') ?>" class="form-control"
+                            placeholder="Search customer, phone, or batch ref...">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <select name="status" class="form-select">
                         <option value="all" <?= ($status ?? 'all') === 'all' ? 'selected' : '' ?>>All Statuses</option>
-                        <option value="incubating" <?= ($status ?? '') === 'incubating' ? 'selected' : '' ?>>Incubating (In Setter)</option>
-                        <option value="hatching" <?= ($status ?? '') === 'hatching' ? 'selected' : '' ?>>Hatching (In Hatcher)</option>
-                        <option value="completed" <?= ($status ?? '') === 'completed' ? 'selected' : '' ?>>Completed</option>
+                        <option value="incubating" <?= ($status ?? '') === 'incubating' ? 'selected' : '' ?>>Incubating (In
+                            Setter)</option>
+                        <option value="hatching" <?= ($status ?? '') === 'hatching' ? 'selected' : '' ?>>Hatching (In
+                            Hatcher)</option>
+                        <option value="completed" <?= ($status ?? '') === 'completed' ? 'selected' : '' ?>>Completed
+                        </option>
                         <option value="received" <?= ($status ?? '') === 'received' ? 'selected' : '' ?>>Received</option>
-                        <option value="cancelled" <?= ($status ?? '') === 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
+                        <option value="cancelled" <?= ($status ?? '') === 'cancelled' ? 'selected' : '' ?>>Cancelled
+                        </option>
                     </select>
                 </div>
                 <div class="col-auto">
@@ -184,168 +204,200 @@
             </form>
         </div>
 
-        <!-- Desktop Table View -->
-        <div class="table-responsive d-none d-md-block">
-            <table class="table-modern align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th class="ps-3 py-3" style="width: 140px;">Batch Date</th>
-                        <th class="py-3">Customer</th>
-                        <th class="text-end py-3" style="width: 110px;">Eggs Set</th>
-                        <th class="text-end py-3" style="width: 110px;">Hatched</th>
-                        <th class="text-end py-3" style="width: 90px;">Hatch %</th>
-                        <th class="text-end py-3" style="width: 120px;">Cost</th>
-                        <th class="text-end py-3" style="width: 120px;">Paid</th>
-                        <th class="text-end py-3" style="width: 130px;">Balance</th>
-                        <th class="text-center py-3" style="width: 120px;">Status</th>
-                        <th class="text-end pe-3 py-3" style="width: 90px;">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($jobs)): ?>
-                        <tr>
-                            <td colspan="10" class="text-center py-5 text-muted">
-                                <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
-                                No incubation batches found matching criteria.
-                            </td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($jobs as $j): ?>
-                            <?php
-                            $eggs = (int) $j['eggs_incubated'];
-                            $hatched = (int) $j['hatched'];
-                            $hatchPct = !empty($j['hatch_percent']) ? (float)$j['hatch_percent'] : ($eggs > 0 ? round(($hatched / $eggs) * 100, 1) : 0);
-                            $cost = (int) $j['cost'];
-                            $paid = (int) $j['total_paid'];
-                            $isOwnerBatch = !empty($j['customer_is_internal']) || stripos((string)($j['customer_name'] ?? ''), 'msantha') !== false;
-                            $bal = $isOwnerBatch ? 0 : (int) $j['balance'];
-                            $jobStatus = strtolower((string)$j['status']);
-                            ?>
-                            <tr>
-                                <td class="ps-3 fw-semibold text-dark">
-                                    <?= !empty($j['date_received']) ? date('d-M-Y', strtotime($j['date_received'])) : '—' ?>
-                                </td>
-                                <td>
-                                    <div class="fw-semibold text-dark"><?= e($j['customer_name'] ?? '—') ?></div>
-                                    <small class="text-muted"><?= e($j['customer_phone'] ?? 'No phone') ?></small>
-                                    <?php if ($isOwnerBatch): ?>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle ms-1" style="font-size: 0.65rem;">Owner / Complimentary</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="text-end fw-bold text-dark"><?= number_format($eggs) ?></td>
-                                <td class="text-end fw-semibold text-success"><?= number_format($hatched) ?></td>
-                                <td class="text-end">
-                                    <?php if ($hatchPct > 0): ?>
-                                        <span class="badge <?= $hatchPct >= 65 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-warning-subtle text-warning-emphasis border border-warning-subtle' ?>">
-                                            <?= $hatchPct ?>%
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="text-muted">—</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="text-end fw-semibold text-dark">
-                                    <?php if ($isOwnerBatch): ?>
-                                        <span class="text-muted">Internal</span>
-                                    <?php else: ?>
-                                        <?= number_format($cost) ?> <small class="text-muted">MWK</small>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="text-end text-success fw-semibold">
-                                    <?php if ($isOwnerBatch): ?>
-                                        <span class="badge bg-light text-muted border">Complimentary</span>
-                                    <?php else: ?>
-                                        <?= number_format($paid) ?> <small class="text-muted">MWK</small>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="text-end">
-                                    <?php if ($isOwnerBatch): ?>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle">0 MWK (Owner)</span>
-                                    <?php else: ?>
-                                        <span class="fw-bold <?= $bal > 0 ? 'text-danger' : ($bal < 0 ? 'text-warning' : 'text-muted') ?>">
-                                            <?= number_format($bal) ?> <small>MWK</small>
-                                        </span>
-                                        <?php if ($bal < 0): ?>
-                                            <span class="badge bg-warning-subtle text-warning border ms-1" title="Customer Overpaid" style="font-size: 0.65rem;">Overpaid</span>
-                                        <?php endif; ?>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="text-center">
-                                    <?php if ($jobStatus === 'incubating'): ?>
-                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">Incubating</span>
-                                    <?php elseif ($jobStatus === 'hatching'): ?>
-                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">Hatching</span>
-                                    <?php elseif ($jobStatus === 'completed'): ?>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Completed</span>
-                                    <?php elseif ($jobStatus === 'cancelled'): ?>
-                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">Cancelled</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-light text-secondary border px-2 py-1"><?= ucfirst($jobStatus) ?></span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="text-end pe-3">
-                                    <a href="<?= url("/incubation-jobs/{$j['id']}") ?>" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i> View
-                                    </a>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+        <!-- Z-Fold Controls -->
+        <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-white">
+            <div class="d-flex align-items-center gap-2">
+                <span class="fw-bold text-dark fs-6"><i class="bi bi-boxes me-1 text-success"></i>Incubation Hatchery
+                    Batches</span>
+                <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                    <?= count($jobs) ?> Batches Loaded
+                </span>
+            </div>
+            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold shadow-sm"
+                data-zfold-toggle-all="#incubationBatchesContainer">
+                <i class="bi bi-chevron-bar-expand me-1"></i>Unfold All
+            </button>
         </div>
 
-        <!-- Mobile Card View (< 768px) -->
-        <div class="d-md-none p-3">
+        <!-- Z-Fold Incubation Batch Cards -->
+        <div class="p-3 zfold-container" id="incubationBatchesContainer">
             <?php if (empty($jobs)): ?>
-                <div class="text-center py-4 text-muted">No incubation batches found.</div>
+                <div class="p-5 text-center text-muted">
+                    <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
+                    <h6 class="fw-bold text-dark">No Incubation Batches Found</h6>
+                    <p class="small text-muted mb-0">No records match the filter criteria.</p>
+                </div>
             <?php else: ?>
-                <div class="d-flex flex-column gap-3">
-                    <?php foreach ($jobs as $j): ?>
-                        <?php
-                        $eggs = (int) $j['eggs_incubated'];
-                        $hatched = (int) $j['hatched'];
-                        $hatchPct = !empty($j['hatch_percent']) ? (float)$j['hatch_percent'] : ($eggs > 0 ? round(($hatched / $eggs) * 100, 1) : 0);
-                        $isOwnerBatch = !empty($j['customer_is_internal']) || stripos((string)($j['customer_name'] ?? ''), 'msantha') !== false;
-                        $bal = $isOwnerBatch ? 0 : (int) $j['balance'];
-                        ?>
-                        <div class="card border rounded-3 p-3 shadow-sm bg-white">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <a href="<?= url("/incubation-jobs/{$j['id']}") ?>" class="fw-bold text-dark text-decoration-none fs-6">
-                                        <?= e($j['customer_name'] ?? 'Customer') ?>
-                                    </a>
+                <?php foreach ($jobs as $j): ?>
+                    <?php
+                    $eggs = (int) $j['eggs_incubated'];
+                    $hatched = (int) $j['hatched'];
+                    $hatchPct = !empty($j['hatch_percent']) ? (float) $j['hatch_percent'] : ($eggs > 0 ? round(($hatched / $eggs) * 100, 1) : 0);
+                    $cost = (int) $j['cost'];
+                    $paid = (int) $j['total_paid'];
+                    $isOwnerBatch = !empty($j['customer_is_internal']) || stripos((string) ($j['customer_name'] ?? ''), 'msantha') !== false;
+                    $bal = $isOwnerBatch ? 0 : (int) $j['balance'];
+                    $jobStatus = strtolower((string) $j['status']);
+                    $statusBadge = match ($jobStatus) {
+                        'incubating' => 'bg-primary-subtle text-primary border border-primary-subtle',
+                        'hatching' => 'bg-warning-subtle text-warning-emphasis border border-warning-subtle',
+                        'completed' => 'bg-success-subtle text-success border border-success-subtle',
+                        'cancelled' => 'bg-danger-subtle text-danger border border-danger-subtle',
+                        default => 'bg-light text-secondary border'
+                    };
+                    ?>
+                    <div
+                        class="zfold-card mb-2.5 <?= $isOwnerBatch ? 'border-start border-4 border-success' : ($bal > 0 ? 'border-start border-4 border-warning' : '') ?>">
+                        <div class="zfold-header">
+                            <!-- Tier 1: Intake Date & Customer Name on Left <---> Status, Hatch % & Chevron on Right -->
+                            <div class="zfold-tier-top">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="fw-bold font-monospace text-dark small" style="font-size: 0.82rem;">
+                                        <i
+                                            class="bi bi-calendar3 me-1 text-muted"></i><?= !empty($j['date_received']) ? date('d-M-Y', strtotime($j['date_received'])) : '—' ?>
+                                    </span>
+                                    <span class="fw-bold text-dark fs-6">
+                                        <?= e($j['customer_name'] ?? 'Walk-In Customer') ?>
+                                    </span>
                                     <?php if ($isOwnerBatch): ?>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle d-inline-block ms-1" style="font-size: 0.65rem;">Owner / Complimentary</span>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle"
+                                            style="font-size: 0.65rem;">
+                                            <i class="bi bi-patch-check-fill me-1"></i>Owner / Complimentary
+                                        </span>
                                     <?php endif; ?>
-                                    <small class="text-muted d-block"><?= !empty($j['date_received']) ? date('d-M-Y', strtotime($j['date_received'])) : '—' ?></small>
+                                    <?php if (!empty($j['customer_phone'])): ?>
+                                        <span class="badge bg-light text-muted border font-monospace" style="font-size: 0.68rem;">
+                                            <?= e($j['customer_phone']) ?>
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
-                                <span class="badge bg-success-subtle text-success border border-success-subtle"><?= ucfirst(e($j['status'])) ?></span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge <?= $statusBadge ?> fw-bold px-2 py-1" style="font-size: 0.72rem;">
+                                        <?= strtoupper($jobStatus) ?>
+                                    </span>
+                                    <?php if ($hatchPct > 0): ?>
+                                        <span
+                                            class="badge <?= $hatchPct >= 65 ? 'bg-success text-white' : 'bg-warning text-dark' ?> fw-bold px-2 py-1"
+                                            style="font-size: 0.72rem;">
+                                            <?= $hatchPct ?>% Hatch
+                                        </span>
+                                    <?php endif; ?>
+                                    <button type="button" class="zfold-toggle-btn" aria-label="Toggle batch breakdown">
+                                        <i class="bi bi-chevron-down"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="row g-2 text-center py-2 bg-light rounded-2 my-2">
-                                <div class="col-4">
-                                    <small class="text-muted d-block">Eggs Set</small>
-                                    <span class="fw-bold text-dark"><?= number_format($eggs) ?></span>
+
+                            <!-- Tier 2: Eggs Set & Hatched on Left <---> Balance Due on Right -->
+                            <div class="zfold-tier-bottom mt-1">
+                                <div class="d-flex align-items-center gap-2 text-muted small">
+                                    <span>Set: <strong class="text-dark font-monospace"><?= number_format($eggs) ?>
+                                            eggs</strong></span>
+                                    <span>&bull;</span>
+                                    <span>Hatched: <strong class="text-success font-monospace"><?= number_format($hatched) ?>
+                                            chicks</strong></span>
+                                    <?php if (!empty($j['expected_hatch_date'])): ?>
+                                        <span>&bull;</span>
+                                        <span>Due: <strong
+                                                class="text-dark font-monospace"><?= date('d-M', strtotime($j['expected_hatch_date'])) ?></strong></span>
+                                    <?php endif; ?>
                                 </div>
-                                <div class="col-4">
-                                    <small class="text-muted d-block">Hatched</small>
-                                    <span class="fw-bold text-success"><?= number_format($hatched) ?></span>
+                                <div>
+                                    <?php if ($isOwnerBatch): ?>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold"
+                                            style="font-size: 0.72rem;">
+                                            0 MWK (Owner)
+                                        </span>
+                                    <?php elseif ($bal > 0): ?>
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold"
+                                            style="font-size: 0.72rem;">
+                                            <?= number_format($bal) ?> MWK DUE
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold"
+                                            style="font-size: 0.72rem;">
+                                            Paid in Full
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
-                                <div class="col-4">
-                                    <small class="text-muted d-block">Hatch %</small>
-                                    <span class="fw-bold text-primary"><?= $hatchPct ?>%</span>
-                                </div>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center small mt-2">
-                                <span class="text-muted">Balance Due:</span>
-                                <?php if ($isOwnerBatch): ?>
-                                    <span class="badge bg-success-subtle text-success">0 MWK (Owner)</span>
-                                <?php else: ?>
-                                    <strong class="<?= $bal > 0 ? 'text-danger' : 'text-success' ?>"><?= number_format($bal) ?> MWK</strong>
-                                <?php endif; ?>
                             </div>
                         </div>
-                    <?php endforeach; ?>
-                </div>
+
+                        <!-- Z-Fold Body: Detailed Hatchery Lifecycle & Actions -->
+                        <div class="zfold-body">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-4">
+                                    <div class="p-3 bg-white rounded-3 border h-100">
+                                        <span class="text-muted small d-block mb-1 text-uppercase fw-semibold"
+                                            style="font-size: 0.7rem;">Hatchery Timeline</span>
+                                        <div class="d-flex justify-content-between py-1 border-bottom small">
+                                            <span class="text-muted">Intake Date:</span>
+                                            <span
+                                                class="fw-semibold text-dark font-monospace"><?= !empty($j['date_received']) ? date('d-M-Y', strtotime($j['date_received'])) : '—' ?></span>
+                                        </div>
+                                        <div class="d-flex justify-content-between py-1 border-bottom small">
+                                            <span class="text-muted">Day 18 Transfer:</span>
+                                            <span
+                                                class="fw-semibold text-warning-emphasis font-monospace"><?= !empty($j['date_transfer']) ? date('d-M-Y', strtotime($j['date_transfer'])) : 'Auto' ?></span>
+                                        </div>
+                                        <div class="d-flex justify-content-between pt-1 small">
+                                            <span class="text-muted">Hatch Day:</span>
+                                            <span
+                                                class="fw-bold text-success font-monospace"><?= !empty($j['date_hatched']) ? date('d-M-Y', strtotime($j['date_hatched'])) : (!empty($j['expected_hatch_date']) ? date('d-M-Y', strtotime($j['expected_hatch_date'])) : 'Pending') ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <div class="p-3 bg-white rounded-3 border h-100">
+                                        <span class="text-muted small d-block mb-1 text-uppercase fw-semibold"
+                                            style="font-size: 0.7rem;">Financial Settlement</span>
+                                        <?php if ($isOwnerBatch): ?>
+                                            <div
+                                                class="p-2 bg-success-subtle text-success rounded-3 small fw-semibold text-center mt-2">
+                                                <i class="bi bi-check-circle-fill me-1"></i>Owner Hatch: Complimentary zero-balance.
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="d-flex justify-content-between py-1 border-bottom small">
+                                                <span class="text-muted">Total Batch Cost:</span>
+                                                <span class="fw-semibold text-dark font-monospace"><?= number_format($cost) ?>
+                                                    MWK</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between py-1 border-bottom small">
+                                                <span class="text-muted">Payments Made:</span>
+                                                <span class="fw-semibold text-success font-monospace"><?= number_format($paid) ?>
+                                                    MWK</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between pt-1 small">
+                                                <span class="fw-semibold text-dark">Balance Due:</span>
+                                                <strong class="font-monospace <?= $bal > 0 ? 'text-danger' : 'text-success' ?>">
+                                                    <?= number_format($bal) ?> MWK
+                                                </strong>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <div class="p-3 bg-white rounded-3 border h-100 d-flex flex-column justify-content-between">
+                                        <div>
+                                            <span class="text-muted small d-block mb-1 text-uppercase fw-semibold"
+                                                style="font-size: 0.7rem;">Batch Operations</span>
+                                            <small class="text-muted d-block mb-2 font-monospace">Job Reference
+                                                #<?= e((string) $j['id']) ?> &bull;
+                                                <?= e($j['breed_name'] ?? 'Local/Mixed') ?></small>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+                                            <a href="<?= url("/incubation-jobs/{$j['id']}") ?>"
+                                                class="btn btn-primary btn-sm rounded-pill px-3 fw-bold"
+                                                style="font-size: 0.75rem;">
+                                                <i class="bi bi-eye me-1"></i>View Lifecycle &rarr;
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             <?php endif; ?>
         </div>
 
@@ -359,7 +411,8 @@
                     <ul class="pagination pagination-sm mb-0">
                         <?php if ($page > 1): ?>
                             <li class="page-item">
-                                <a class="page-link" href="<?= url('/incubation-jobs?page=' . ($page - 1) . '&status=' . urlencode($status) . '&q=' . urlencode($search)) ?>">Previous</a>
+                                <a class="page-link"
+                                    href="<?= url('/incubation-jobs?page=' . ($page - 1) . '&status=' . urlencode($status) . '&q=' . urlencode($search)) ?>">Previous</a>
                             </li>
                         <?php endif; ?>
                         <li class="page-item active">
@@ -367,7 +420,8 @@
                         </li>
                         <?php if ($page < $totalPages): ?>
                             <li class="page-item">
-                                <a class="page-link" href="<?= url('/incubation-jobs?page=' . ($page + 1) . '&status=' . urlencode($status) . '&q=' . urlencode($search)) ?>">Next</a>
+                                <a class="page-link"
+                                    href="<?= url('/incubation-jobs?page=' . ($page + 1) . '&status=' . urlencode($status) . '&q=' . urlencode($search)) ?>">Next</a>
                             </li>
                         <?php endif; ?>
                     </ul>

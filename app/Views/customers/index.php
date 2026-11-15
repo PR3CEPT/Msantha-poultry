@@ -70,116 +70,138 @@
             </form>
         </div>
 
-        <!-- Desktop Table View -->
-        <div class="table-responsive d-none d-md-block">
-            <table class="table-modern align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th class="ps-3 py-3" style="width: 220px;">Customer Name</th>
-                        <th class="py-3" style="width: 150px;">Phone Number</th>
-                        <th class="py-3">Location</th>
-                        <th class="text-end py-3" style="width: 100px;">Batches</th>
-                        <th class="text-end py-3" style="width: 140px;">Total Invoiced</th>
-                        <th class="text-end py-3" style="width: 140px;">Amount Paid</th>
-                        <th class="text-end pe-3 py-3" style="width: 140px;">Balance Due</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($customers)): ?>
-                        <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">
-                                <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
-                                No customers found matching criteria.
-                            </td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($customers as $c): ?>
-                            <?php
-                            $invoiced = (int) $c['total_invoiced'];
-                            $paid = (int) $c['total_paid'];
-                            $bal = max(0, (int) $c['current_balance']);
-                            $jobs = (int) $c['total_jobs'];
-                            ?>
-                            <tr>
-                                <td class="ps-3">
-                                    <a href="<?= url("/customers/{$c['id']}") ?>" class="fw-bold text-dark text-decoration-none fs-6">
-                                        <?= e($c['name']) ?> <i class="bi bi-chevron-right small text-muted"></i>
-                                    </a>
-                                    <?php if (!empty($c['is_internal'])): ?>
-                                        <span class="badge bg-secondary-subtle text-secondary border ms-1" style="font-size: 0.68rem;">Internal</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php if (!empty($c['phone'])): ?>
-                                        <a href="tel:<?= e($c['phone']) ?>" class="text-decoration-none text-dark fw-semibold">
-                                            <i class="bi bi-telephone text-success me-1"></i><?= e($c['phone']) ?>
-                                        </a>
-                                    <?php else: ?>
-                                        <span class="text-muted">—</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <span class="badge bg-light text-muted border"><?= e($c['location'] ?? '—') ?></span>
-                                </td>
-                                <td class="text-end fw-semibold text-dark">
-                                    <?= number_format($jobs) ?>
-                                </td>
-                                <td class="text-end fw-semibold text-dark">
-                                    <?= number_format($invoiced) ?> <small class="text-muted">MWK</small>
-                                </td>
-                                <td class="text-end text-success fw-semibold">
-                                    <?= number_format($paid) ?> <small class="text-muted">MWK</small>
-                                </td>
-                                <td class="text-end pe-3">
-                                    <span class="fw-bold <?= $bal > 0 ? 'text-danger' : 'text-muted' ?>">
-                                        <?= number_format($bal) ?> <small>MWK</small>
-                                    </span>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+        <!-- Z-Fold Controls -->
+        <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-white">
+            <div class="d-flex align-items-center gap-2">
+                <span class="fw-bold text-dark fs-6"><i class="bi bi-people me-1 text-primary"></i>Hatchery Customer Accounts</span>
+                <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                    <?= count($customers) ?> Clients
+                </span>
+            </div>
+            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold shadow-sm" data-zfold-toggle-all="#customerDirectoryContainer">
+                <i class="bi bi-chevron-bar-expand me-1"></i>Unfold All
+            </button>
         </div>
 
-        <!-- Mobile Card View (< 768px) -->
-        <div class="d-md-none p-3">
+        <!-- Z-Fold Customer Directory Cards -->
+        <div class="p-3 zfold-container" id="customerDirectoryContainer">
             <?php if (empty($customers)): ?>
-                <div class="text-center py-4 text-muted">No customers found.</div>
+                <div class="p-5 text-center text-muted">
+                    <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
+                    <h6 class="fw-bold text-dark">No Customers Found</h6>
+                    <p class="small text-muted mb-0">No client accounts match your search parameters.</p>
+                </div>
             <?php else: ?>
-                <div class="d-flex flex-column gap-3">
-                    <?php foreach ($customers as $c): ?>
-                        <?php
-                        $invoiced = (int) $c['total_invoiced'];
-                        $paid = (int) $c['total_paid'];
-                        $bal = max(0, (int) $c['current_balance']);
-                        ?>
-                        <div class="card border rounded-3 p-3 shadow-sm bg-white">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <a href="<?= url("/customers/{$c['id']}") ?>" class="fw-bold text-dark text-decoration-none fs-6">
-                                        <?= e($c['name']) ?> <i class="bi bi-chevron-right small text-muted"></i>
-                                    </a>
-                                    <small class="text-muted d-block"><?= e($c['location'] ?? 'Malawi') ?></small>
+                <?php foreach ($customers as $c): ?>
+                    <?php
+                    $invoiced = (int) $c['total_invoiced'];
+                    $paid = (int) $c['total_paid'];
+                    $bal = max(0, (int) $c['current_balance']);
+                    $jobs = (int) $c['total_jobs'];
+                    $isInternal = !empty($c['is_internal']);
+                    ?>
+                    <div class="zfold-card mb-2.5 <?= $bal > 0 ? 'border-start border-4 border-danger' : 'border-start border-4 border-success' ?>">
+                        <div class="zfold-header">
+                            <!-- Tier 1: Customer Name & Phone on Left <---> Balance Due & Chevron on Right -->
+                            <div class="zfold-tier-top">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="fw-bold text-dark fs-6">
+                                        <?= e($c['name']) ?>
+                                    </span>
+                                    <?php if ($isInternal): ?>
+                                        <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.65rem;">Farm Owner / Internal</span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($c['phone'])): ?>
+                                        <span class="badge bg-light text-dark border font-monospace" style="font-size: 0.72rem;">
+                                            <i class="bi bi-telephone text-success me-1"></i><?= e($c['phone']) ?>
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
-                                <?php if (!empty($c['is_internal'])): ?>
-                                    <span class="badge bg-secondary-subtle text-secondary border">Internal</span>
-                                <?php endif; ?>
+                                <div class="d-flex align-items-center gap-2">
+                                    <?php if ($bal > 0): ?>
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold fs-6 px-2.5 py-1">
+                                            <?= number_format($bal) ?> <small style="font-size: 0.65rem;">MWK DUE</small>
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold px-2.5 py-1" style="font-size: 0.75rem;">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Settled / Nil
+                                        </span>
+                                    <?php endif; ?>
+                                    <button type="button" class="zfold-toggle-btn" aria-label="Toggle customer details">
+                                        <i class="bi bi-chevron-down"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <?php if (!empty($c['phone'])): ?>
-                                <div class="mb-2">
-                                    <a href="tel:<?= e($c['phone']) ?>" class="btn btn-sm btn-outline-success w-100">
-                                        <i class="bi bi-telephone me-1"></i><?= e($c['phone']) ?>
-                                    </a>
+
+                            <!-- Tier 2: Location & Batches on Left <---> Invoiced vs Paid on Right -->
+                            <div class="zfold-tier-bottom mt-1">
+                                <span class="text-muted small">
+                                    <i class="bi bi-geo-alt text-muted me-1"></i><?= e($c['location'] ?? 'Liwonde / Machinga') ?> &bull; <strong><?= number_format($jobs) ?></strong> incubation batches
+                                </span>
+                                <div class="d-flex align-items-center gap-2 small text-muted font-monospace">
+                                    <span>Invoiced: <strong class="text-dark"><?= number_format($invoiced) ?> MWK</strong></span>
+                                    <span>&bull;</span>
+                                    <span>Paid: <strong class="text-success"><?= number_format($paid) ?> MWK</strong></span>
                                 </div>
-                            <?php endif; ?>
-                            <div class="d-flex justify-content-between small text-muted pt-2 border-top">
-                                <span>Batches: <strong><?= number_format((int)$c['total_jobs']) ?></strong></span>
-                                <span>Balance: <strong class="<?= $bal > 0 ? 'text-danger' : 'text-success' ?>"><?= number_format($bal) ?> MWK</strong></span>
                             </div>
                         </div>
-                    <?php endforeach; ?>
-                </div>
+
+                        <!-- Z-Fold Body: Financial Standing & Quick Communications -->
+                        <div class="zfold-body">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-4">
+                                    <div class="p-3 bg-white rounded-3 border h-100">
+                                        <span class="text-muted small d-block mb-1 text-uppercase fw-semibold" style="font-size: 0.7rem;">Financial Ledger</span>
+                                        <div class="d-flex justify-content-between py-1 border-bottom small">
+                                            <span class="text-muted">Total Invoiced:</span>
+                                            <strong class="text-dark font-monospace"><?= number_format($invoiced) ?> MWK</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between py-1 border-bottom small">
+                                            <span class="text-muted">Total Receipts Paid:</span>
+                                            <strong class="text-success font-monospace"><?= number_format($paid) ?> MWK</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between pt-1 small">
+                                            <span class="fw-semibold text-dark">Current Balance Due:</span>
+                                            <strong class="font-monospace <?= $bal > 0 ? 'text-danger' : 'text-success' ?>">
+                                                <?= number_format($bal) ?> MWK
+                                            </strong>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <div class="p-3 bg-white rounded-3 border h-100">
+                                        <span class="text-muted small d-block mb-1 text-uppercase fw-semibold" style="font-size: 0.7rem;">Direct Communication</span>
+                                        <?php if (!empty($c['phone'])): ?>
+                                            <div class="d-flex flex-column gap-1.5 mt-2">
+                                                <a href="tel:<?= e($c['phone']) ?>" class="btn btn-sm btn-outline-success rounded-pill w-100 text-start px-3" style="font-size: 0.75rem;">
+                                                    <i class="bi bi-telephone-outbound me-1"></i>Voice Call (<?= e($c['phone']) ?>)
+                                                </a>
+                                                <a href="sms:<?= e($c['phone']) ?>" class="btn btn-sm btn-outline-primary rounded-pill w-100 text-start px-3" style="font-size: 0.75rem;">
+                                                    <i class="bi bi-chat-text me-1"></i>Direct SMS Message
+                                                </a>
+                                            </div>
+                                        <?php else: ?>
+                                            <p class="text-muted small font-monospace">No phone registered for SMS.</p>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <div class="p-3 bg-white rounded-3 border h-100 d-flex flex-column justify-content-between">
+                                        <div>
+                                            <span class="text-muted small d-block mb-1 text-uppercase fw-semibold" style="font-size: 0.7rem;">Client Record Actions</span>
+                                            <small class="text-muted d-block mb-2">View full historical batch intakes, candling logs, and payment receipts.</small>
+                                        </div>
+                                        <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                                            <a href="<?= url("/customers/{$c['id']}") ?>" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold" style="font-size: 0.75rem;">
+                                                Customer Profile & Batches &rarr;
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             <?php endif; ?>
         </div>
 
