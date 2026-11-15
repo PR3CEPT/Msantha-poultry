@@ -141,7 +141,7 @@ class Router
         }
 
         try {
-            $viewResponse = View::render('errors/404', ['title' => 'Page Not Found', 'path' => $request->uri()]);
+            $viewResponse = View::render('errors/404', ['title' => 'Page Not Found', 'path' => $request->uri()], null);
             $viewResponse->setStatusCode(404);
             return $viewResponse;
         } catch (\Throwable) {

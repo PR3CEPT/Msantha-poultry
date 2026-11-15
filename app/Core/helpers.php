@@ -2,13 +2,17 @@
 
 declare(strict_types=1);
 
+if (!defined('BASE_PATH')) {
+    define('BASE_PATH', dirname(__DIR__, 2));
+}
+
 use App\Core\Config;
 use App\Core\Csrf;
 
 if (!function_exists('e')) {
-    function e(?string $value): string
+    function e(mixed $value): string
     {
-        return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 }
 

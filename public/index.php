@@ -35,6 +35,11 @@ use App\Middleware\SecurityHeadersMiddleware;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+// Define Application Base Path
+if (!defined('BASE_PATH')) {
+    define('BASE_PATH', dirname(__DIR__));
+}
+
 // Load Configuration and Environment
 Config::load(dirname(__DIR__));
 
@@ -261,7 +266,11 @@ try {
             500
         );
     } else {
-        $response = View::render('errors/500', ['pageTitle' => 'Error 500']);
+        try {
+            $response = View::render('errors/500', ['pageTitle' => 'Error 500'], null);
+        } catch (\Throwable) {
+            $response = Response::html('<h1>500 System Error</h1><p>An unexpected error occurred.</p>', 500);
+        }
         $response->setStatusCode(500);
     }
 }

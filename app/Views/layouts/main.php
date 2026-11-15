@@ -20,7 +20,7 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- App CSS with cache-busting -->
-    <link rel="stylesheet" href="<?= asset('assets/css/app.css') ?>?v=<?= @filemtime(BASE_PATH . '/public/assets/css/app.css') ?: time() ?>">
+    <link rel="stylesheet" href="<?= asset('assets/css/app.css') ?>?v=<?= @filemtime((defined('BASE_PATH') ? BASE_PATH : dirname(__DIR__, 3)) . '/public/assets/css/app.css') ?: time() ?>">
     <script>
         window.APP_URL = <?= json_encode(rtrim(url('/'), '/')) ?>;
         window.CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
@@ -654,7 +654,7 @@
     <!-- Bootstrap 5.3 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- App Module JS with cache-busting -->
-    <script type="module" src="<?= asset('assets/js/app.js') ?>?v=<?= @filemtime(BASE_PATH . '/public/assets/js/app.js') ?: time() ?>"></script>
+    <script type="module" src="<?= asset('assets/js/app.js') ?>?v=<?= @filemtime((defined('BASE_PATH') ? BASE_PATH : dirname(__DIR__, 3)) . '/public/assets/js/app.js') ?: time() ?>"></script>
 </body>
 
 </html>

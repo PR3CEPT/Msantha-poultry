@@ -39,8 +39,13 @@ class View
         extract(array_merge($data, ['content' => $content]));
 
         ob_start();
-        include $layoutFile;
-        $html = (string) ob_get_clean();
+        try {
+            include $layoutFile;
+            $html = (string) ob_get_clean();
+        } catch (\Throwable $e) {
+            ob_end_clean();
+            throw $e;
+        }
 
         return Response::html($html);
     }
@@ -55,8 +60,13 @@ class View
         extract($data);
 
         ob_start();
-        include $viewFile;
-        return (string) ob_get_clean();
+        try {
+            include $viewFile;
+            return (string) ob_get_clean();
+        } catch (\Throwable $e) {
+            ob_end_clean();
+            throw $e;
+        }
     }
 
     private static function resolvePath(string $view): string
