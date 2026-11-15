@@ -19,6 +19,7 @@ class PayChanguService
     private PDO $pdo;
     private PayChanguHttpClientInterface $httpClient;
     private SmsService $smsService;
+    private string $publicKey;
     private string $secretKey;
     private string $webhookSecret;
     private string $apiBase;
@@ -35,6 +36,10 @@ class PayChanguService
         $this->httpClient = $httpClient ?? new CurlPayChanguHttpClient();
         $this->smsService = $smsService ?? new SmsService($this->pdo);
 
+        $this->publicKey = (string) Config::get('paychangu.public_key', $_ENV['PAYCHANGU_PUBLIC_KEY'] ?? 'PUB-2KRAb51ifq8JkLbljEGQOKQ7UH7eHMAb');
+        if (empty($this->publicKey)) {
+            $this->publicKey = 'PUB-2KRAb51ifq8JkLbljEGQOKQ7UH7eHMAb';
+        }
         $this->secretKey = (string) Config::get('paychangu.secret_key', $_ENV['PAYCHANGU_SECRET_KEY'] ?? 'SEC-BO5EWL1sgbO0PZUAkdj6T36NHyhAWF2x');
         if (empty($this->secretKey) || $this->secretKey === 'sec-test-msantha') {
             $this->secretKey = 'SEC-BO5EWL1sgbO0PZUAkdj6T36NHyhAWF2x';
@@ -54,6 +59,11 @@ class PayChanguService
     public function setHttpClient(PayChanguHttpClientInterface $client): void
     {
         $this->httpClient = $client;
+    }
+
+    public function getPublicKey(): string
+    {
+        return $this->publicKey;
     }
 
     public function getSecretKey(): string
@@ -131,6 +141,7 @@ class PayChanguService
 
         // Build API payload according to PayChangu docs
         $payload = [
+            'public_key' => $this->publicKey,
             'amount' => $amount,
             'currency' => 'MWK',
             'tx_ref' => $txRef,

@@ -21,11 +21,16 @@
     <!-- Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
                 <h1 class="h3 fw-bold mb-0 text-dark">PayChangu Online Payments</h1>
-                <span class="badge <?= $mode === 'live' ? 'bg-success' : 'bg-warning text-dark' ?> fs-6">
-                    <?= strtoupper($mode) ?> MODE
+                <span class="badge <?= $mode === 'live' ? 'bg-success' : 'bg-warning text-dark' ?> rounded-pill px-3 py-1.5 fw-semibold" style="font-size: 0.78rem;">
+                    <i class="bi bi-shield-check me-1"></i><?= strtoupper($mode) ?> MODE
                 </span>
+                <?php if (!empty($publicKey)): ?>
+                    <span class="badge bg-light text-muted border rounded-pill px-2.5 py-1 font-monospace" style="font-size: 0.72rem;" title="PayChangu Public Key">
+                        <i class="bi bi-key-fill text-warning me-1"></i><?= substr($publicKey, 0, 7) ?>...<?= substr($publicKey, -6) ?>
+                    </span>
+                <?php endif; ?>
             </div>
             <p class="text-muted small mb-0 mt-1">Real-time mobile money and debit card receipts processed via PayChangu Malawi gateway.</p>
         </div>

@@ -178,6 +178,7 @@ class PaymentController
         ];
 
         $mode = $this->paychangu->getMode();
+        $publicKey = $this->paychangu->getPublicKey();
 
         return View::render('admin/payments/index', [
             'pageTitle' => 'Online Payments (PayChangu)',
@@ -185,6 +186,7 @@ class PaymentController
             'payments' => $payments,
             'stats' => $stats,
             'mode' => $mode,
+            'publicKey' => $publicKey,
             'status' => $status,
             'search' => $search,
             'page' => $page,
