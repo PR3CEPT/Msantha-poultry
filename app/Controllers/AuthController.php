@@ -91,6 +91,8 @@ class AuthController
     public function sendResetCode(Request $request): Response
     {
         $identifier = trim((string) $request->input('identifier'));
+        $skipPhone = (string) $request->input('skip_phone', '0') === '1';
+
         if ($identifier === '') {
             $_SESSION['flash_error'] = 'Please enter your username or registered phone number.';
             return Response::redirect(url('/forgot-password'));
@@ -108,15 +110,27 @@ class AuthController
         $stmt->execute(['u' => $identifier, 'p' => $normalizedPhone]);
         $user = $stmt->fetch();
 
-        if (!$user || empty($user['phone'])) {
-            // Do not disclose whether user exists, but give generic message
-            $_SESSION['flash_error'] = 'If an active account exists with that identifier and phone, a reset code was sent.';
+        if (!$user) {
+            $_SESSION['flash_error'] = 'No account found matching that username or phone number.';
             return Response::redirect(url('/forgot-password'));
         }
 
         if ((int) $user['is_active'] !== 1) {
             $_SESSION['flash_error'] = 'Account is inactive. Please contact the owner.';
             return Response::redirect(url('/forgot-password'));
+        }
+
+        // Direct reset without phone requested or if account has no phone registered:
+        if ($skipPhone || empty($user['phone'])) {
+            $_SESSION['password_reset'] = [
+                'user_id' => (int) $user['id'],
+                'username' => $user['username'],
+                'phone' => $user['phone'] ?? '',
+                'verified' => true,
+                'expires_at' => time() + 1800,
+            ];
+            $_SESSION['flash_info'] = 'Account verified for ' . htmlspecialchars($user['full_name'] ?: $user['username']) . '. You can now create your new password.';
+            return Response::redirect(url('/reset-password'));
         }
 
         // Generate 6-digit random code

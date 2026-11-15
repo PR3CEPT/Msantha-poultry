@@ -120,3 +120,7 @@ if (!function_exists('icon')) {
     }
 }
 
+// Mailer & SMS Global Integrations
+require_once dirname(__DIR__) . '/helpers/mailer.php';
+
+

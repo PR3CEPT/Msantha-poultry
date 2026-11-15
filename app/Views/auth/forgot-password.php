@@ -67,7 +67,7 @@
             </div>
 
             <p class="text-muted small text-center mb-4">
-                Enter your username or registered Malawi mobile number. We will send a 6-digit security code via SMS to verify your identity.
+                Enter your username (e.g. <code>ik.chipeta</code>) or registered phone number. You can create a new password directly or request an SMS security code.
             </p>
 
             <?php if (!empty($flashError)): ?>
@@ -84,14 +84,19 @@
                     <label for="identifier" class="form-label fw-semibold text-dark small">Username or Phone Number</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light text-muted"><i class="bi bi-person-badge"></i></span>
-                        <input type="text" name="identifier" id="identifier" class="form-control" placeholder="e.g. 0999899620 or admin" required autofocus>
+                        <input type="text" name="identifier" id="identifier" class="form-control" placeholder="e.g. ik.chipeta or 0999899620" required autofocus>
                     </div>
-                    <div class="form-text small">Accepts 0999..., 0888..., or +265... format.</div>
+                    <div class="form-text small text-muted">Enter your account username to reset directly without needing a phone number.</div>
                 </div>
 
-                <button type="submit" class="btn btn-success w-100 py-2 fs-6 fw-bold shadow-sm rounded-3 mb-3">
-                    <i class="bi bi-send-fill me-2"></i>Send 6-Digit SMS Code
-                </button>
+                <div class="d-flex flex-column gap-2 mb-3">
+                    <button type="submit" name="skip_phone" value="1" class="btn btn-success w-100 py-2.5 fs-6 fw-bold shadow-sm rounded-3">
+                        <i class="bi bi-key-fill me-2"></i>Create New Password (No Phone Needed)
+                    </button>
+                    <button type="submit" name="skip_phone" value="0" class="btn btn-outline-secondary w-100 py-2 small fw-semibold rounded-3">
+                        <i class="bi bi-chat-dots me-2"></i>Send 6-Digit SMS Verification Code
+                    </button>
+                </div>
 
                 <div class="text-center">
                     <a href="<?= url('/login') ?>" class="text-decoration-none small text-muted">

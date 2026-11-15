@@ -16,12 +16,46 @@
             <!-- Year Selector Form -->
             <form method="GET" action="<?= url('/reports') ?>" class="d-flex gap-2 align-items-center">
                 <label class="small text-muted fw-semibold">Year:</label>
-                <select name="year" class="form-select form-select-sm" onchange="this.form.submit()">
+                <select name="year" class="form-select form-select-sm rounded-pill" onchange="this.form.submit()">
                     <?php for ($y = 2026; $y >= 2022; $y--): ?>
                         <option value="<?= $y ?>" <?= $year === $y ? 'selected' : '' ?>><?= $y ?></option>
                     <?php endfor; ?>
                 </select>
             </form>
+        </div>
+    </div>
+
+    <!-- Quick Timeframe Filter Bar (Daily, Weekly, Monthly, Annual) -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4">
+        <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="small fw-bold text-dark text-uppercase" style="font-size: 0.75rem;">
+                    <i class="bi bi-calendar-range text-primary me-1"></i>Quick Timeframe Presets:
+                </span>
+                <?php
+                $today = date('Y-m-d');
+                $weekAgo = date('Y-m-d', strtotime('-7 days'));
+                $monthStart = date('Y-m-01');
+                $monthEnd = date('Y-m-t');
+                $yearStart = "{$year}-01-01";
+                $yearEnd = "{$year}-12-31";
+                ?>
+                <a href="<?= url('/reports/sales-by-item?from=' . $today . '&to=' . $today) ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold">
+                    <i class="bi bi-clock me-1 text-success"></i>Daily (Today)
+                </a>
+                <a href="<?= url('/reports/sales-by-item?from=' . $weekAgo . '&to=' . $today) ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold">
+                    <i class="bi bi-calendar-week me-1 text-primary"></i>Weekly (Past 7 Days)
+                </a>
+                <a href="<?= url('/reports/sales-by-item?from=' . $monthStart . '&to=' . $monthEnd) ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold">
+                    <i class="bi bi-calendar-month me-1 text-info"></i>Monthly (This Month)
+                </a>
+                <a href="<?= url('/finance/profit-and-loss?year=' . $year) ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold">
+                    <i class="bi bi-calendar3 me-1 text-warning"></i>Annual (<?= $year ?>)
+                </a>
+            </div>
+            <div class="small text-muted font-monospace" style="font-size: 0.72rem;">
+                Customizable to day, week, month, or year
+            </div>
         </div>
     </div>
 

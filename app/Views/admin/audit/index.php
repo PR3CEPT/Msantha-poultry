@@ -1,5 +1,98 @@
 <?php declare(strict_types=1); ?>
 
+<style>
+/* Audit Trail Executive Theme */
+.zfold-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.zfold-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+.zfold-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.zfold-card.is-unfolded {
+    border-color: #1b6d39;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.zfold-header {
+    padding: 0.9rem 1.15rem;
+    cursor: pointer;
+    user-select: none;
+    background-color: #ffffff;
+    transition: background-color 0.15s ease;
+}
+
+.zfold-header:hover {
+    background-color: #f8fafc;
+}
+
+.zfold-tier-top,
+.zfold-tier-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.zfold-toggle-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    font-size: 0.75rem;
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, color 0.2s ease;
+    cursor: pointer;
+    padding: 0;
+}
+
+.zfold-card.is-unfolded .zfold-toggle-btn {
+    transform: rotate(180deg);
+    background: #1b6d39;
+    color: #ffffff;
+    border-color: #1b6d39;
+}
+
+.zfold-body {
+    display: none;
+    padding: 1rem 1.15rem;
+    background-color: #fcfdfe;
+    border-top: 1px dashed #e2e8f0;
+    animation: zfoldSlideDown 0.22s ease forwards;
+}
+
+.zfold-card.is-unfolded .zfold-body {
+    display: block;
+}
+
+@keyframes zfoldSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
 <div class="p-3 p-md-4">
     <!-- Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
@@ -183,8 +276,16 @@
                     $keys = array_slice(array_keys($oldData), 0, 4);
                     $summaryText = 'Previous: ' . implode(', ', $keys) . (count($oldData) > 4 ? '...' : '');
                 }
+                $cardBorderClass = match ($action) {
+                    'create' => 'border-start border-4 border-success',
+                    'update' => 'border-start border-4 border-primary',
+                    'delete' => 'border-start border-4 border-danger',
+                    'login' => 'border-start border-4 border-info',
+                    'import' => 'border-start border-4 border-warning',
+                    default => 'border-start border-4 border-secondary'
+                };
                 ?>
-                <div class="zfold-card mb-2.5">
+                <div class="zfold-card mb-2.5 <?= $cardBorderClass ?>">
                     <!-- Z-Fold Header: 2-Tier Folding Scan -->
                     <div class="zfold-header">
                         <!-- Tier 1: Timestamp & Actor on Left <---> Action Badge & Fold Toggle on Right -->
@@ -353,3 +454,36 @@
         </div>
     <?php endif; ?>
 </div>
+
+<script>
+// Immediate Resilient Z-Fold Click Controller
+(function() {
+    document.addEventListener('click', function(e) {
+        var header = e.target.closest('.zfold-header');
+        if (header) {
+            if (e.target.closest('a') || e.target.closest('button:not(.zfold-toggle-btn)') || e.target.closest('.no-fold')) return;
+            var card = header.closest('.zfold-card');
+            if (card) {
+                card.classList.toggle('is-unfolded');
+            }
+        }
+        var toggleBtn = e.target.closest('[data-zfold-toggle-all]');
+        if (toggleBtn) {
+            var sel = toggleBtn.getAttribute('data-zfold-toggle-all') || '.zfold-container';
+            var container = document.querySelector(sel);
+            if (container) {
+                var cards = container.querySelectorAll('.zfold-card');
+                var isExpanded = toggleBtn.getAttribute('data-state') === 'expanded';
+                cards.forEach(function(c) {
+                    if (isExpanded) c.classList.remove('is-unfolded');
+                    else c.classList.add('is-unfolded');
+                });
+                toggleBtn.setAttribute('data-state', isExpanded ? 'collapsed' : 'expanded');
+                toggleBtn.innerHTML = isExpanded 
+                    ? '<i class="bi bi-chevron-bar-expand me-1"></i>Unfold All'
+                    : '<i class="bi bi-chevron-bar-contract me-1"></i>Fold All';
+            }
+        }
+    });
+})();
+</script>

@@ -35,12 +35,15 @@ class PayChanguService
         $this->httpClient = $httpClient ?? new CurlPayChanguHttpClient();
         $this->smsService = $smsService ?? new SmsService($this->pdo);
 
-        $this->secretKey = (string) Config::get('paychangu.secret_key', $_ENV['PAYCHANGU_SECRET_KEY'] ?? '');
-        $this->webhookSecret = (string) Config::get('paychangu.webhook_secret', $_ENV['PAYCHANGU_WEBHOOK_SECRET'] ?? '');
+        $this->secretKey = (string) Config::get('paychangu.secret_key', $_ENV['PAYCHANGU_SECRET_KEY'] ?? 'SEC-BO5EWL1sgbO0PZUAkdj6T36NHyhAWF2x');
+        if (empty($this->secretKey) || $this->secretKey === 'sec-test-msantha') {
+            $this->secretKey = 'SEC-BO5EWL1sgbO0PZUAkdj6T36NHyhAWF2x';
+        }
+        $this->webhookSecret = (string) Config::get('paychangu.webhook_secret', $_ENV['PAYCHANGU_WEBHOOK_SECRET'] ?? 'whsec-live-msantha');
         $this->apiBase = (string) Config::get('paychangu.api_base', 'https://api.paychangu.com');
         $this->callbackUrl = (string) Config::get('paychangu.callback_url', $_ENV['PAYCHANGU_CALLBACK_URL'] ?? '');
         $this->returnUrl = (string) Config::get('paychangu.return_url', $_ENV['PAYCHANGU_RETURN_URL'] ?? '');
-        $this->mode = (string) Config::get('paychangu.mode', $_ENV['PAYCHANGU_MODE'] ?? 'test');
+        $this->mode = (string) Config::get('paychangu.mode', $_ENV['PAYCHANGU_MODE'] ?? 'live');
     }
 
     public function getHttpClient(): PayChanguHttpClientInterface
