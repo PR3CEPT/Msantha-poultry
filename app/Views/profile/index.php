@@ -66,9 +66,62 @@
                                 <?= csrf_field() ?>
 
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold text-dark small">Username</label>
-                                    <input type="text" class="form-control bg-light" value="<?= e($user['username']) ?>" disabled readonly>
-                                    <div class="form-text small">Your username is permanently set by farm administration.</div>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label fw-semibold text-dark small mb-0">Username</label>
+                                        <?php if (!empty($pendingUsernameRequest)): ?>
+                                            <span class="badge bg-warning-subtle text-dark border border-warning-subtle" style="font-size: 0.7rem;">
+                                                <i class="bi bi-hourglass-split me-1"></i>Change Pending: @<?= e($pendingUsernameRequest['requested_username']) ?>
+                                            </span>
+                                        <?php else: ?>
+                                            <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none fw-semibold" style="font-size: 0.75rem;" data-bs-toggle="collapse" data-bs-target="#requestUsernameChangeBox">
+                                                <i class="bi bi-pencil-square me-1"></i>Request Change from MD
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light text-muted">@</span>
+                                        <input type="text" class="form-control bg-light" value="<?= e($user['username']) ?>" disabled readonly>
+                                    </div>
+                                    <?php if (!empty($pendingUsernameRequest)): ?>
+                                        <div class="alert alert-warning py-2 px-3 mt-2 mb-0 small rounded-3">
+                                            <i class="bi bi-info-circle-fill me-1"></i>
+                                            You submitted a request to change your username to <strong>@<?= e($pendingUsernameRequest['requested_username']) ?></strong>.
+                                            <?php if (!empty($pendingUsernameRequest['reason'])): ?>
+                                                <br><span class="text-muted">Reason: "<?= e($pendingUsernameRequest['reason']) ?>"</span>
+                                            <?php endif; ?>
+                                            <br><span class="text-muted" style="font-size: 0.72rem;">Awaiting review and approval by Managing Director Mr I.K Chipeta.</span>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="collapse mt-2" id="requestUsernameChangeBox">
+                                            <div class="card card-body bg-light border-0 rounded-3 p-3">
+                                                <h6 class="fw-bold text-dark small mb-2"><i class="bi bi-send-check text-primary me-1"></i>Request Username Change from MD</h6>
+                                                <form method="POST" action="<?= url('/profile/request-username-change') ?>">
+                                                    <?= csrf_field() ?>
+                                                    <div class="mb-2">
+                                                        <label class="form-label small fw-semibold text-muted">Desired New Username <span class="text-danger">*</span></label>
+                                                        <div class="input-group input-group-sm">
+                                                            <span class="input-group-text">@</span>
+                                                            <input type="text" name="requested_username" class="form-control form-control-sm" required placeholder="e.g. isaac_chipeta" minlength="3" maxlength="30" pattern="^[a-zA-Z0-9._]+$">
+                                                        </div>
+                                                        <div class="form-text" style="font-size: 0.68rem;">3-30 letters, numbers, dots, or underscores.</div>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <label class="form-label small fw-semibold text-muted">Reason for Change</label>
+                                                        <textarea name="reason" class="form-control form-control-sm" rows="2" placeholder="Explain why you wish to update your farm username (e.g. typo correction)..."></textarea>
+                                                    </div>
+                                                    <div class="d-flex gap-2">
+                                                        <button type="submit" class="btn btn-sm btn-primary fw-semibold px-3">
+                                                            <i class="bi bi-check2 me-1"></i>Submit to Managing Director
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#requestUsernameChangeBox">
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="form-text small">Usernames can be changed upon request approved by the Managing Director.</div>
+                                    <?php endif; ?>
                                 </div>
 
                                 <div class="mb-3">
@@ -155,6 +208,36 @@
         <div class="tab-pane fade" id="tab-security" role="tabpanel">
             <div class="row g-4">
                 <div class="col-12 col-md-8 col-lg-6">
+                    <!-- My Current Password Card -->
+                    <div class="card border-0 shadow-sm rounded-4 bg-white mb-4">
+                        <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-eye-fill text-primary me-2"></i>My Current Password</h5>
+                            <span class="badge bg-light text-muted border">Private</span>
+                        </div>
+                        <div class="card-body p-4">
+                            <p class="text-muted small mb-2">You can view your active account password below at any time:</p>
+                            <div class="input-group">
+                                <input type="password" id="myViewPassword" class="form-control font-monospace" value="<?= e($userPasswordDisplay ?? '••••••••') ?>" readonly>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePass('myViewPassword', this)" title="Show/Hide Password">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-primary" type="button" onclick="copyPasswordToClipboard('myViewPassword', this)" title="Copy to Clipboard">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            </div>
+                            <?php if (empty($userPasswordDisplay)): ?>
+                                <div class="form-text small mt-2">
+                                    <i class="bi bi-info-circle me-1 text-primary"></i>Your password was set before the viewer vault was enabled. Updating your password in the form below will display it here instantly.
+                                </div>
+                            <?php else: ?>
+                                <div class="form-text small text-success mt-2">
+                                    <i class="bi bi-check-circle me-1"></i>Password retrieved and verified securely from your account vault.
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- Change Account Password Card -->
                     <div class="card border-0 shadow-sm rounded-4 bg-white">
                         <div class="card-header bg-white border-bottom py-3">
                             <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-key text-success me-2"></i>Change Account Password</h5>
@@ -286,6 +369,19 @@ function togglePass(inputId, btn) {
         icon.classList.remove('bi-eye-slash');
         icon.classList.add('bi-eye');
     }
+}
+
+function copyPasswordToClipboard(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input || !input.value) return;
+    navigator.clipboard.writeText(input.value).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check2 text-success"></i>';
+        setTimeout(() => { btn.innerHTML = orig; }, 1800);
+    }).catch(() => {
+        input.select();
+        document.execCommand('copy');
+    });
 }
 
 // Auto-switch to tab if hash is in URL (e.g. #security)

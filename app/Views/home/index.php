@@ -151,21 +151,21 @@
             <!-- Incubation Pipeline & Countdown Card -->
             <?php if (\App\Core\Auth::can('incubation', 'view')): ?>
             <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
-                <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
+                <div class="card-header bg-white border-bottom p-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <div class="d-flex align-items-center gap-2">
                         <div class="p-2 bg-info-subtle text-info rounded-3">
                             <i class="bi bi-hourglass-split fs-5"></i>
                         </div>
                         <div>
-                            <h5 class="fw-bold mb-0 text-dark">Hatchery Pipeline & Countdown</h5>
-                            <small class="text-muted">Active customer batches in setters & hatchers</small>
+                            <h5 class="fw-bold mb-0 text-dark fs-6 fs-md-5">Hatchery Pipeline & Countdown</h5>
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Active customer batches in setters & hatchers</small>
                         </div>
                     </div>
-                    <div class="d-flex gap-2">
-                        <a href="<?= url('/incubation/receive') ?>" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="<?= url('/incubation/receive') ?>" class="btn btn-outline-success btn-sm rounded-pill px-2.5 py-1" style="font-size: 0.78rem;">
                             <i class="bi bi-plus-circle me-1"></i>Receive Eggs
                         </a>
-                        <a href="<?= url('/incubation-jobs') ?>" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                        <a href="<?= url('/incubation-jobs') ?>" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5 py-1" style="font-size: 0.78rem;">
                             All Jobs
                         </a>
                     </div>
@@ -186,10 +186,10 @@
                                 <thead class="table-light text-muted small text-uppercase">
                                     <tr>
                                         <th class="ps-3">Customer & Breed</th>
-                                        <th>Eggs Set</th>
-                                        <th>Transfer Day (18)</th>
-                                        <th>Expected Hatch</th>
-                                        <th class="pe-3 text-end">Countdown</th>
+                                        <th class="text-nowrap">Eggs Set</th>
+                                        <th class="d-none d-md-table-cell">Transfer Day (18)</th>
+                                        <th class="d-none d-md-table-cell">Expected Hatch</th>
+                                        <th class="pe-3 text-end text-nowrap">Countdown</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -207,17 +207,22 @@
                                                         <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.65rem;">Owner • Internal</span>
                                                     <?php endif; ?>
                                                 </div>
-                                                <small class="badge bg-light text-dark border"><?= e($jb['breed_name'] ?? 'Chicken') ?></small>
+                                                <div class="d-flex align-items-center gap-2 flex-wrap mt-0.5">
+                                                    <small class="badge bg-light text-dark border"><?= e($jb['breed_name'] ?? 'Chicken') ?></small>
+                                                    <span class="d-inline d-md-none text-muted font-monospace" style="font-size: 0.72rem;">
+                                                        <i class="bi bi-calendar-event me-1 text-primary"></i>Hatch: <?= e($jb['expected_hatch_date'] ?? '—') ?>
+                                                    </span>
+                                                </div>
                                             </td>
-                                            <td class="fw-semibold text-dark"><?= number_format((int)$jb['eggs_incubated']) ?></td>
-                                            <td class="text-muted small font-monospace"><?= e($jb['date_transfer'] ?? '—') ?></td>
-                                            <td class="fw-bold text-dark small font-monospace"><?= e($jb['expected_hatch_date'] ?? '—') ?></td>
-                                            <td class="pe-3 text-end">
-                                                <span class="badge <?= $badgeColor ?> fw-bold px-2 py-1 rounded-pill">
+                                            <td class="fw-semibold text-dark text-nowrap"><?= number_format((int)$jb['eggs_incubated']) ?></td>
+                                            <td class="text-muted small font-monospace d-none d-md-table-cell"><?= e($jb['date_transfer'] ?? '—') ?></td>
+                                            <td class="fw-bold text-dark small font-monospace d-none d-md-table-cell"><?= e($jb['expected_hatch_date'] ?? '—') ?></td>
+                                            <td class="pe-3 text-end text-nowrap">
+                                                <span class="badge <?= $badgeColor ?> fw-bold px-2 py-1 rounded-pill" style="font-size: 0.75rem;">
                                                     <?php if ($daysLeft <= 0): ?>
                                                         <i class="bi bi-bell-fill me-1"></i>Hatch Day!
                                                     <?php else: ?>
-                                                        <i class="bi bi-clock me-1"></i>In <?= $daysLeft ?> days
+                                                        <i class="bi bi-clock me-1"></i>In <?= $daysLeft ?>d
                                                     <?php endif; ?>
                                                 </span>
                                             </td>

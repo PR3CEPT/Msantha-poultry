@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Core\Audit;
 use App\Core\Auth;
+use App\Core\Cipher;
 use App\Core\DB;
 use App\Core\Phone;
 use App\Core\Request;
@@ -50,12 +51,27 @@ class ProfileController
         $roleName = $roleInfo->fetchColumn() ?: ucfirst((string) ($user['role_code'] ?? 'user'));
         $roleData = ['name' => $roleName, 'description' => 'Staff access and role permissions'];
 
+        // Fetch any pending username change request
+        $pendingUsernameRequest = null;
+        try {
+            $reqStmt = $pdo->prepare("SELECT * FROM username_change_requests WHERE user_id = ? AND status = 'pending' ORDER BY id DESC LIMIT 1");
+            $reqStmt->execute([$user['id']]);
+            $pendingUsernameRequest = $reqStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        } catch (Throwable) {
+            $pendingUsernameRequest = null;
+        }
+
+        // Decrypt password for viewing in user profile
+        $userPasswordDisplay = Cipher::decrypt($user['password_display'] ?? null);
+
         return View::render('profile/index', [
             'pageTitle' => 'My Profile & Security',
             'activeNav' => 'profile',
             'user' => $user,
             'roleData' => $roleData,
             'auditLogs' => $auditLogs,
+            'pendingUsernameRequest' => $pendingUsernameRequest,
+            'userPasswordDisplay' => $userPasswordDisplay,
         ]);
     }
 
@@ -181,14 +197,16 @@ class ProfileController
             'time_cost' => 2,
             'threads' => 1,
         ]);
+        $cipherPass = Cipher::encrypt($newPassword);
 
         $update = $pdo->prepare("
             UPDATE users SET
                 password_hash = ?,
+                password_display = ?,
                 must_change_password = 0
             WHERE id = ?
         ");
-        $update->execute([$newHash, $user['id']]);
+        $update->execute([$newHash, $cipherPass, $user['id']]);
 
         Auth::reset();
 
@@ -198,5 +216,72 @@ class ProfileController
 
         $_SESSION['flash_success'] = 'Your password has been changed successfully.';
         return Response::redirect(url('/profile#security'));
+    }
+
+    /**
+     * Submit a username change request for Managing Director review.
+     * Route: POST /profile/request-username-change
+     */
+    public function requestUsernameChange(Request $request): Response
+    {
+        Auth::requireLogin();
+        $user = Auth::user();
+
+        $requestedUsername = trim((string) $request->input('requested_username'));
+        $reason = trim((string) $request->input('reason', ''));
+
+        if ($requestedUsername === '') {
+            $_SESSION['flash_error'] = 'Please enter your desired new username.';
+            return Response::redirect(url('/profile'));
+        }
+
+        if (!preg_match('/^[a-zA-Z0-9._]{3,30}$/', $requestedUsername)) {
+            $_SESSION['flash_error'] = 'Username must be between 3 and 30 characters and contain only letters, numbers, dots, and underscores.';
+            return Response::redirect(url('/profile'));
+        }
+
+        if (strtolower($requestedUsername) === strtolower((string)$user['username'])) {
+            $_SESSION['flash_error'] = 'The requested username is identical to your current username.';
+            return Response::redirect(url('/profile'));
+        }
+
+        $pdo = DB::pdo();
+
+        // Check if taken
+        $check = $pdo->prepare("SELECT id FROM users WHERE LOWER(username) = LOWER(?) AND id != ? LIMIT 1");
+        $check->execute([$requestedUsername, $user['id']]);
+        if ($check->fetch()) {
+            $_SESSION['flash_error'] = "The username '@{$requestedUsername}' is already taken by another account.";
+            return Response::redirect(url('/profile'));
+        }
+
+        // Check existing pending request
+        $existing = $pdo->prepare("SELECT id FROM username_change_requests WHERE user_id = ? AND status = 'pending' LIMIT 1");
+        $existing->execute([$user['id']]);
+        if ($existing->fetch()) {
+            $_SESSION['flash_error'] = 'You already have a pending username change request awaiting Managing Director approval.';
+            return Response::redirect(url('/profile'));
+        }
+
+        $stmt = $pdo->prepare("
+            INSERT INTO username_change_requests (user_id, current_username, requested_username, reason, status)
+            VALUES (?, ?, ?, ?, 'pending')
+        ");
+        $stmt->execute([
+            $user['id'],
+            $user['username'],
+            $requestedUsername,
+            $reason !== '' ? $reason : null,
+        ]);
+
+        Audit::log('username_change_requested', 'users', (int) $user['id'], [
+            'current_username' => $user['username'],
+        ], [
+            'requested_username' => $requestedUsername,
+            'reason' => $reason,
+        ]);
+
+        $_SESSION['flash_success'] = "Username change request for '@{$requestedUsername}' submitted to Managing Director for review.";
+        return Response::redirect(url('/profile'));
     }
 }

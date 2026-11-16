@@ -14,11 +14,78 @@
                     <input type="text" name="full_name" id="full_name" class="form-control" value="<?= e($user['full_name']) ?>" required autofocus>
                 </div>
 
-                <div class="mb-3">
-                    <label for="username" class="form-label fw-semibold small text-muted">Username</label>
-                    <input type="text" id="username" class="form-control bg-light" value="<?= e($user['username']) ?>" disabled>
-                    <small class="text-muted">Username cannot be changed</small>
-                </div>
+                <?php if ($isMD ?? false): ?>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label for="username" class="form-label fw-semibold small text-dark mb-0">
+                                Username <span class="badge bg-warning-subtle text-dark border border-warning-subtle ms-1" style="font-size: 0.65rem;">MD Editable</span>
+                            </label>
+                            <?php if (!empty($pendingRequest)): ?>
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle" style="font-size: 0.7rem;">
+                                    <i class="bi bi-bell-fill me-1"></i>Requested: @<?= e($pendingRequest['requested_username']) ?>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="input-group">
+                            <span class="input-group-text">@</span>
+                            <input type="text" name="username" id="username" class="form-control" value="<?= e($user['username']) ?>" minlength="3" maxlength="30" pattern="^[a-zA-Z0-9._]+$" required>
+                            <?php if (!empty($pendingRequest)): ?>
+                                <button class="btn btn-outline-success" type="button" onclick="document.getElementById('username').value='<?= e($pendingRequest['requested_username']) ?>'" title="Fill with requested username">
+                                    <i class="bi bi-arrow-down-left-circle me-1"></i>Apply Requested
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                        <?php if (!empty($pendingRequest)): ?>
+                            <div class="alert alert-warning py-2 px-3 mt-2 mb-0 small rounded-3">
+                                <strong><i class="bi bi-chat-quote-fill me-1"></i>User Change Request:</strong>
+                                User requested change to <strong>@<?= e($pendingRequest['requested_username']) ?></strong>.
+                                <?php if (!empty($pendingRequest['reason'])): ?>
+                                    <br><span class="text-muted">Reason given: "<?= e($pendingRequest['reason']) ?>"</span>
+                                <?php endif; ?>
+                                <br><small class="text-muted">Saving changes will update the username, approve the request, and record audit logs.</small>
+                            </div>
+                        <?php else: ?>
+                            <small class="text-muted">As Managing Director, you can change staff usernames upon user request.</small>
+                        <?php endif; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="mb-3">
+                        <label for="username" class="form-label fw-semibold small text-muted">Username</label>
+                        <input type="text" id="username" class="form-control bg-light" value="<?= e($user['username']) ?>" disabled>
+                        <small class="text-muted">Only the Managing Director (owner) can change usernames upon user request.</small>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($isMD ?? false): ?>
+                    <div class="mb-3 p-3 bg-light rounded-3 border">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label fw-bold small text-dark mb-0">
+                                <i class="bi bi-shield-lock-fill text-warning me-1"></i>Current Account Password (MD View Only)
+                            </label>
+                            <span class="badge bg-warning-subtle text-dark border border-warning-subtle" style="font-size: 0.65rem;">Managing Director Vault</span>
+                        </div>
+                        <div class="input-group mt-2">
+                            <input type="password" id="userPassView" class="form-control font-monospace bg-white" value="<?= e($userPasswordDisplay ?? '') ?>" placeholder="<?= empty($userPasswordDisplay) ? 'Pre-vault hash (Reset password below to make visible)' : '' ?>" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePass('userPassView', this)" title="Show/Hide Password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <?php if (!empty($userPasswordDisplay)): ?>
+                                <button class="btn btn-outline-primary" type="button" onclick="copyPasswordToClipboard('userPassView', this)" title="Copy Password">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                        <?php if (empty($userPasswordDisplay)): ?>
+                            <small class="text-muted d-block mt-1" style="font-size: 0.72rem;">
+                                <i class="bi bi-info-circle me-1"></i>This account was created prior to the vault system. Reset password below to reveal it here.
+                            </small>
+                        <?php else: ?>
+                            <small class="text-success d-block mt-1" style="font-size: 0.72rem;">
+                                <i class="bi bi-check-circle me-1"></i>Decrypted from executive security vault for Managing Director review.
+                            </small>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
 
                 <div class="mb-3">
                     <label for="role_id" class="form-label fw-semibold small text-muted">Role</label>
@@ -56,4 +123,29 @@
         </div>
     </div>
 </div>
+
+<script>
+function togglePass(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+}
+function copyPasswordToClipboard(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input || !input.value) return;
+    navigator.clipboard.writeText(input.value).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check2 text-success"></i>';
+        setTimeout(() => { btn.innerHTML = orig; }, 1800);
+    }).catch(() => { input.select(); document.execCommand('copy'); });
+}
+</script>
 

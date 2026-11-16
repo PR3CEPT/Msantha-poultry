@@ -1,5 +1,52 @@
 <?php declare(strict_types=1); ?>
 <div class="row g-3">
+
+    <?php if (!empty($pendingUsernameRequests)): ?>
+    <!-- MD: Pending Username Change Requests Banner -->
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-4 border-start border-4 border-warning">
+            <div class="card-body py-3 px-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi bi-person-gear text-warning fs-5"></i>
+                    <span class="fw-bold text-dark">Pending Username Change Requests</span>
+                    <span class="badge bg-warning text-dark ms-1"><?= count($pendingUsernameRequests) ?></span>
+                </div>
+                <div class="row g-2">
+                    <?php foreach ($pendingUsernameRequests as $req): ?>
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card border border-warning-subtle bg-warning-subtle rounded-3 p-2">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <div>
+                                    <span class="fw-semibold text-dark small"><?= e($req['full_name']) ?></span>
+                                    <code class="ms-1 small">@<?= e($req['current_username']) ?></code>
+                                    <i class="bi bi-arrow-right text-muted small mx-1"></i>
+                                    <code class="small text-success">@<?= e($req['requested_username']) ?></code>
+                                </div>
+                                <span class="badge bg-secondary ms-1" style="font-size:0.65rem;"><?= e(date('d M', strtotime($req['created_at']))) ?></span>
+                            </div>
+                            <?php if (!empty($req['reason'])): ?>
+                                <div class="text-muted small mb-2"><i class="bi bi-chat-quote me-1"></i><?= e($req['reason']) ?></div>
+                            <?php endif; ?>
+                            <div class="d-flex gap-1 mt-1">
+                                <a href="<?= url("/admin/users/{$req['user_id']}/edit") ?>" class="btn btn-sm btn-outline-primary py-0 px-2" title="Edit user to approve">
+                                    <i class="bi bi-pencil me-1"></i>Review &amp; Approve
+                                </a>
+                                <form method="POST" action="<?= url("/admin/users/username-request/{$req['id']}/reject") ?>" class="d-inline">
+                                    <?= csrf_field() ?>
+                                    <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" data-confirm="Reject this username change request?">
+                                        <i class="bi bi-x-lg me-1"></i>Reject
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- Header -->
     <div class="col-12 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
         <div>
@@ -52,7 +99,7 @@
                             <th scope="col">Role</th>
                             <th scope="col">Session</th>
                             <th scope="col">Status</th>
-                            <th scope="col">Password</th>
+                            <th scope="col"><?php if ($isMD ?? false): ?><i class="bi bi-shield-lock-fill text-warning me-1"></i>Password Vault<?php else: ?>Password<?php endif; ?></th>
                             <th scope="col" class="text-end">Actions</th>
                         </tr>
                     </thead>
@@ -102,10 +149,29 @@
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <?php if ((int) $u['must_change_password'] === 1): ?>
-                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Must Change</span>
+                                        <?php if ($isMD ?? false): ?>
+                                            <?php $uid = 'pw_' . $u['id']; ?>
+                                            <?php if (!empty($u['password_revealed'])): ?>
+                                                <div class="input-group input-group-sm" style="min-width:150px;max-width:200px;">
+                                                    <input type="password" id="<?= e($uid) ?>" class="form-control form-control-sm font-monospace border-warning-subtle bg-warning-subtle" value="<?= e($u['password_revealed']) ?>" readonly style="font-size:0.72rem;">
+                                                    <button class="btn btn-outline-secondary btn-sm px-2" type="button" onclick="togglePass('<?= e($uid) ?>', this)" title="Show/Hide">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-primary btn-sm px-2" type="button" onclick="copyPasswordToClipboard('<?= e($uid) ?>', this)" title="Copy">
+                                                        <i class="bi bi-clipboard"></i>
+                                                    </button>
+                                                </div>
+                                            <?php else: ?>
+                                                <span class="badge bg-light text-muted border" title="Pre-vault account; reset password in Edit to reveal">
+                                                    <i class="bi bi-lock text-muted me-1"></i>Pre-vault
+                                                </span>
+                                            <?php endif; ?>
                                         <?php else: ?>
-                                            <span class="badge bg-light text-muted border">Set</span>
+                                            <?php if ((int) $u['must_change_password'] === 1): ?>
+                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Must Change</span>
+                                            <?php else: ?>
+                                                <span class="badge bg-light text-muted border">Set</span>
+                                            <?php endif; ?>
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-end">
@@ -138,3 +204,29 @@
         </div>
     </div>
 </div>
+
+<script>
+function togglePass(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+}
+function copyPasswordToClipboard(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input || !input.value) return;
+    navigator.clipboard.writeText(input.value).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check2 text-success"></i>';
+        setTimeout(() => { btn.innerHTML = orig; }, 1800);
+    }).catch(() => { input.select(); document.execCommand('copy'); });
+}
+</script>
+

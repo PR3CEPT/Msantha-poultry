@@ -6,13 +6,16 @@ namespace App\Controllers\Admin;
 
 use App\Core\Audit;
 use App\Core\Auth;
+use App\Core\Cipher;
 use App\Core\DB;
 use App\Core\Phone;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Validator;
 use App\Core\View;
+use PDO;
 use RuntimeException;
+use Throwable;
 
 class UserController
 {
@@ -63,6 +66,27 @@ class UserController
         $stmt->execute($params);
         $users = $stmt->fetchAll();
 
+        $isMD = (Auth::role() === 'owner');
+        if ($isMD) {
+            foreach ($users as &$u) {
+                $u['password_revealed'] = Cipher::decrypt($u['password_display'] ?? null);
+            }
+            unset($u);
+        }
+
+        $pendingUsernameRequests = [];
+        try {
+            $pendingUsernameRequests = $pdo->query("
+                SELECT r.*, u.full_name, u.phone
+                FROM username_change_requests r
+                JOIN users u ON u.id = r.user_id
+                WHERE r.status = 'pending'
+                ORDER BY r.created_at DESC
+            ")->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Throwable) {
+            $pendingUsernameRequests = [];
+        }
+
         $rolesStmt = $pdo->query("SELECT * FROM roles ORDER BY id ASC");
         $roles = $rolesStmt->fetchAll();
 
@@ -73,6 +97,8 @@ class UserController
             'search' => $search,
             'roleFilter' => $roleFilter,
             'activeNav' => 'admin_users',
+            'isMD' => $isMD,
+            'pendingUsernameRequests' => $pendingUsernameRequests,
         ]);
     }
 
@@ -129,10 +155,11 @@ class UserController
         }
 
         $hash = password_hash((string) $request->input('password'), PASSWORD_ARGON2ID);
+        $cipherPass = Cipher::encrypt((string) $request->input('password'));
 
         $stmt = $pdo->prepare("
-            INSERT INTO users (role_id, full_name, phone, email, username, password_hash, is_active, must_change_password)
-            VALUES (?, ?, ?, ?, ?, ?, 1, 1)
+            INSERT INTO users (role_id, full_name, phone, email, username, password_hash, password_display, is_active, must_change_password)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 1, 1)
         ");
         $stmt->execute([
             $targetRole,
@@ -141,6 +168,7 @@ class UserController
             $email,
             $username,
             $hash,
+            $cipherPass,
         ]);
         $newId = (int) $pdo->lastInsertId();
 
@@ -176,11 +204,30 @@ class UserController
 
         $roles = $pdo->query("SELECT * FROM roles ORDER BY id ASC")->fetchAll();
 
+        $isMD = (Auth::role() === 'owner');
+        $userPasswordDisplay = $isMD ? Cipher::decrypt($user['password_display'] ?? null) : null;
+
+        $pendingRequest = null;
+        try {
+            $pStmt = $pdo->prepare("
+                SELECT * FROM username_change_requests
+                WHERE user_id = ? AND status = 'pending'
+                ORDER BY id DESC LIMIT 1
+            ");
+            $pStmt->execute([(int) $id]);
+            $pendingRequest = $pStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        } catch (Throwable) {
+            $pendingRequest = null;
+        }
+
         return View::render('admin/users/edit', [
             'pageTitle' => 'Edit User',
             'user' => $user,
             'roles' => $roles,
             'activeNav' => 'admin_users',
+            'isMD' => $isMD,
+            'userPasswordDisplay' => $userPasswordDisplay,
+            'pendingRequest' => $pendingRequest,
         ]);
     }
 
@@ -235,6 +282,41 @@ class UserController
         $email = trim((string) $request->input('email'));
         if ($email === '') $email = null;
 
+        $isMD = (Auth::role() === 'owner');
+        $newUsername = trim((string) $request->input('username', ''));
+
+        // Managing Director can change username upon request or administration
+        if ($isMD && $newUsername !== '' && $newUsername !== $oldUser['username']) {
+            if (!preg_match('/^[a-zA-Z0-9._]{3,30}$/', $newUsername)) {
+                $_SESSION['flash_error'] = 'Username must be between 3 and 30 characters and contain only letters, numbers, dots, and underscores.';
+                return Response::redirect(url("/admin/users/{$userId}/edit"));
+            }
+
+            $uCheck = $pdo->prepare("SELECT id FROM users WHERE LOWER(username) = LOWER(?) AND id != ? LIMIT 1");
+            $uCheck->execute([$newUsername, $userId]);
+            if ($uCheck->fetch()) {
+                $_SESSION['flash_error'] = "Username '{$newUsername}' is already taken.";
+                return Response::redirect(url("/admin/users/{$userId}/edit"));
+            }
+
+            $pdo->prepare("UPDATE users SET username = ? WHERE id = ?")->execute([$newUsername, $userId]);
+
+            // Mark any pending request as approved
+            $pdo->prepare("
+                UPDATE username_change_requests
+                SET status = 'approved', reviewed_by = ?, reviewed_at = NOW()
+                WHERE user_id = ? AND status = 'pending'
+            ")->execute([Auth::id(), $userId]);
+
+            Audit::log('username_changed', 'users', $userId, [
+                'old_username' => $oldUser['username'],
+            ], [
+                'new_username' => $newUsername,
+                'changed_by_md' => Auth::user()['username'] ?? 'owner',
+                'user_full_name' => $oldUser['full_name'],
+            ], Auth::id());
+        }
+
         $newPassword = (string) $request->input('password');
 
         if ($newPassword !== '') {
@@ -243,8 +325,9 @@ class UserController
                 return Response::redirect(url("/admin/users/{$userId}/edit"));
             }
             $hash = password_hash($newPassword, PASSWORD_ARGON2ID);
+            $cipherPass = Cipher::encrypt($newPassword);
             $stmt = $pdo->prepare("
-                UPDATE users SET role_id = ?, full_name = ?, phone = ?, email = ?, password_hash = ?
+                UPDATE users SET role_id = ?, full_name = ?, phone = ?, email = ?, password_hash = ?, password_display = ?
                 WHERE id = ?
             ");
             $stmt->execute([
@@ -253,6 +336,7 @@ class UserController
                 $phone,
                 $email,
                 $hash,
+                $cipherPass,
                 $userId,
             ]);
         } else {
@@ -356,6 +440,83 @@ class UserController
         Auth::forceLogoutUser($userId);
 
         $_SESSION['flash_success'] = "Active session for '{$user['username']}' was terminated.";
+        return Response::redirect(url('/admin/users'));
+    }
+
+    public function approveUsernameRequest(Request $request, int|string $id): Response
+    {
+        $this->checkAccess();
+        if (Auth::role() !== 'owner') {
+            $_SESSION['flash_error'] = 'Access Denied: Only the Managing Director (owner) can approve username change requests.';
+            return Response::redirect(url('/admin/users'));
+        }
+
+        $requestId = (int) $id;
+        $pdo = DB::pdo();
+        $stmt = $pdo->prepare("SELECT * FROM username_change_requests WHERE id = ? AND status = 'pending' LIMIT 1");
+        $stmt->execute([$requestId]);
+        $req = $stmt->fetch();
+
+        if (!$req) {
+            $_SESSION['flash_error'] = 'Pending username request not found.';
+            return Response::redirect(url('/admin/users'));
+        }
+
+        $userId = (int) $req['user_id'];
+        $newUsername = (string) $req['requested_username'];
+
+        // Validate uniqueness
+        $uCheck = $pdo->prepare("SELECT id FROM users WHERE LOWER(username) = LOWER(?) AND id != ? LIMIT 1");
+        $uCheck->execute([$newUsername, $userId]);
+        if ($uCheck->fetch()) {
+            $_SESSION['flash_error'] = "Cannot approve: username '{$newUsername}' is already taken.";
+            return Response::redirect(url('/admin/users'));
+        }
+
+        // Apply update
+        $pdo->prepare("UPDATE users SET username = ? WHERE id = ?")->execute([$newUsername, $userId]);
+        $pdo->prepare("UPDATE username_change_requests SET status = 'approved', reviewed_by = ?, reviewed_at = NOW() WHERE id = ?")->execute([Auth::id(), $requestId]);
+
+        Audit::log('username_change_approved', 'users', $userId, [
+            'old_username' => $req['current_username'],
+        ], [
+            'new_username' => $newUsername,
+            'reason' => $req['reason'],
+            'approved_by_md' => Auth::user()['username'] ?? 'owner',
+        ], Auth::id());
+
+        $_SESSION['flash_success'] = "Approved! User username successfully updated from @{$req['current_username']} to @{$newUsername}.";
+        return Response::redirect(url('/admin/users'));
+    }
+
+    public function rejectUsernameRequest(Request $request, int|string $id): Response
+    {
+        $this->checkAccess();
+        if (Auth::role() !== 'owner') {
+            $_SESSION['flash_error'] = 'Access Denied: Only the Managing Director (owner) can review username change requests.';
+            return Response::redirect(url('/admin/users'));
+        }
+
+        $requestId = (int) $id;
+        $pdo = DB::pdo();
+        $stmt = $pdo->prepare("SELECT * FROM username_change_requests WHERE id = ? AND status = 'pending' LIMIT 1");
+        $stmt->execute([$requestId]);
+        $req = $stmt->fetch();
+
+        if (!$req) {
+            $_SESSION['flash_error'] = 'Pending username request not found.';
+            return Response::redirect(url('/admin/users'));
+        }
+
+        $pdo->prepare("UPDATE username_change_requests SET status = 'rejected', reviewed_by = ?, reviewed_at = NOW() WHERE id = ?")->execute([Auth::id(), $requestId]);
+
+        Audit::log('username_change_rejected', 'users', (int) $req['user_id'], null, [
+            'requested_username' => $req['requested_username'],
+            'reason' => $req['reason'],
+            'rejected_by_md' => Auth::user()['username'] ?? 'owner',
+        ], Auth::id());
+
+        $_SESSION['flash_info'] = "Username change request for @{$req['requested_username']} was rejected.";
         return Response::redirect(url('/admin/users'));
     }
 }

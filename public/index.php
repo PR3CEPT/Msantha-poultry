@@ -124,6 +124,7 @@ $router->post('/change-password', [AuthController::class, 'changePassword']);
 $router->get('/profile', [ProfileController::class, 'index']);
 $router->post('/profile', [ProfileController::class, 'update']);
 $router->post('/profile/password', [ProfileController::class, 'changePassword']);
+$router->post('/profile/request-username-change', [ProfileController::class, 'requestUsernameChange']);
 
 // --- Admin Routes (Owner & Isaac with users.change_roles) ---
 $router->get('/admin/users', [UserController::class, 'index']);
@@ -133,6 +134,8 @@ $router->get('/admin/users/{id}/edit', [UserController::class, 'edit']);
 $router->post('/admin/users/{id}', [UserController::class, 'update']);
 $router->post('/admin/users/{id}/toggle-active', [UserController::class, 'toggleActive']);
 $router->post('/admin/users/{id}/force-logout', [UserController::class, 'forceLogout']);
+$router->post('/admin/users/username-request/{id}/approve', [UserController::class, 'approveUsernameRequest']);
+$router->post('/admin/users/username-request/{id}/reject', [UserController::class, 'rejectUsernameRequest']);
 
 // --- Admin Audit Routes (Owner & Manager) ---
 $router->get('/admin/audit', [AuditController::class, 'index']);
