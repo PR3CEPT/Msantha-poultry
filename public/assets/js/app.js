@@ -504,3 +504,14 @@ window.dismissNotification = async function(event, key) {
         console.error('Failed to dismiss notification', e);
     }
 };
+
+window.dismissMobileAlert = function(key) {
+    const el = document.getElementById('mobileAlertPopup');
+    if (el) el.remove();
+    if (key) {
+        sessionStorage.setItem('dismissed_alert_' + key, '1');
+        if (typeof window.dismissNotification === 'function') {
+            window.dismissNotification(null, key);
+        }
+    }
+};

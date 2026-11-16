@@ -654,10 +654,18 @@
     <div id="toastContainer" class="toast-container"></div>
 
     <!-- Mobile Alert Pop-up Toast (< 768px) -->
-    <?php if (!empty($systemAlerts)): ?>
-        <?php $topAlert = $systemAlerts[0]; ?>
+    <?php
+    $urgentUnreadAlerts = array_values(array_filter($systemAlerts ?? [], fn($a) => !empty($a['is_urgent']) && empty($a['is_seen'])));
+    ?>
+    <?php if (!empty($urgentUnreadAlerts)): ?>
+        <?php $topAlert = $urgentUnreadAlerts[0]; ?>
         <div id="mobileAlertPopup" class="position-fixed d-md-none"
             style="bottom: 74px; left: 12px; right: 12px; z-index: 1070;">
+            <script>
+                if (sessionStorage.getItem('dismissed_alert_<?= e($topAlert['key']) ?>') === '1') {
+                    document.currentScript.parentElement.style.display = 'none';
+                }
+            </script>
             <div
                 class="card border-0 shadow-lg rounded-3 text-white <?= $topAlert['type'] === 'danger' ? 'bg-danger' : 'bg-dark' ?> p-2.5">
                 <div class="d-flex align-items-center justify-content-between gap-2">
@@ -674,11 +682,23 @@
                         <a href="<?= e($topAlert['link']) ?>" class="btn btn-sm btn-light text-dark fw-bold py-0.5 px-2"
                             style="font-size: 0.7rem;">Open</a>
                         <button type="button" class="btn-close btn-close-white" style="font-size: 0.65rem;"
-                            onclick="document.getElementById('mobileAlertPopup').remove()" aria-label="Close"></button>
+                            onclick="dismissMobileAlert('<?= e($topAlert['key']) ?>')" aria-label="Close"></button>
                     </div>
                 </div>
             </div>
         </div>
+        <script>
+            window.dismissMobileAlert = function(key) {
+                const el = document.getElementById('mobileAlertPopup');
+                if (el) el.remove();
+                if (key) {
+                    sessionStorage.setItem('dismissed_alert_' + key, '1');
+                    if (typeof window.dismissNotification === 'function') {
+                        window.dismissNotification(null, key);
+                    }
+                }
+            };
+        </script>
     <?php endif; ?>
 
     <!-- Bootstrap 5.3 JS -->
