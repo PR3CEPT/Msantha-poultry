@@ -24,6 +24,7 @@ class HealthController
         } catch (Throwable $e) {
             $dbOk = false;
             $dbError = $e->getMessage();
+            error_log('[HealthCheck] DB connection error: ' . $dbError);
         }
 
         $payload = [

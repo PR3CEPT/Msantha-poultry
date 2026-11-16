@@ -13,6 +13,12 @@ $isSsl = !empty($_ENV['DB_SSL']) || (isset($_ENV['DB_HOST']) && str_contains((st
 if ($isSsl) {
     if (!empty($_ENV['DB_SSL_CA']) && file_exists((string) $_ENV['DB_SSL_CA'])) {
         $options[PDO::MYSQL_ATTR_SSL_CA] = (string) $_ENV['DB_SSL_CA'];
+    } elseif (file_exists('/etc/ssl/certs/ca-certificates.crt')) {
+        $options[PDO::MYSQL_ATTR_SSL_CA] = '/etc/ssl/certs/ca-certificates.crt';
+    } elseif (file_exists('/etc/ssl/cert.pem')) {
+        $options[PDO::MYSQL_ATTR_SSL_CA] = '/etc/ssl/cert.pem';
+    } elseif (file_exists('C:/xampp/apache/bin/curl-ca-bundle.crt')) {
+        $options[PDO::MYSQL_ATTR_SSL_CA] = 'C:/xampp/apache/bin/curl-ca-bundle.crt';
     } elseif (defined('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')) {
         $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
     }
