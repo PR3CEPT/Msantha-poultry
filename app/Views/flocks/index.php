@@ -198,7 +198,10 @@
                             <tr>
                                 <th class="ps-3 py-2.5">Breed</th>
                                 <th class="py-2.5">Species</th>
-                                <th class="text-center py-2.5">Active Batches</th>
+                                <th class="text-center py-2.5">
+                                    Active Batches
+                                    <i class="bi bi-info-circle ms-1 text-muted" title="Active batches (with live birds) / Total registered batches" style="font-size: 0.72rem;"></i>
+                                </th>
                                 <th class="text-end py-2.5">Initial Stock</th>
                                 <th class="text-end py-2.5">Total Sold</th>
                                 <th class="text-end py-2.5">Total Loss</th>
@@ -215,8 +218,9 @@
                                         <span class="badge bg-light text-dark border"><?= e($bs['species_name']) ?></span>
                                     </td>
                                     <td class="text-center font-monospace">
-                                        <span class="badge <?= (int)$bs['active_batches'] > 0 ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-light text-muted border' ?>">
-                                            <?= number_format((int)$bs['active_batches']) ?> / <?= number_format((int)$bs['total_batches']) ?>
+                                        <span class="badge <?= (int)$bs['active_batches'] > 0 ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-light text-muted border' ?>" title="<?= (int)$bs['active_batches'] ?> active with live birds out of <?= (int)$bs['total_batches'] ?> total batches recorded">
+                                            <?= number_format((int)$bs['active_batches']) ?> <span class="fw-normal text-muted">/ <?= number_format((int)$bs['total_batches']) ?></span>
+                                            <span class="d-block text-muted" style="font-size: 0.65rem; font-weight: normal;">active / total</span>
                                         </span>
                                     </td>
                                     <td class="text-end font-monospace text-muted small">
@@ -268,11 +272,20 @@
         </div>
 
         <div class="card border-0 shadow-sm rounded-4 bg-white mb-4 overflow-hidden">
-            <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
-                <span class="fw-bold text-dark fs-6"><i class="bi bi-grid-3x3-gap me-1 text-success"></i>Flock Batch Directory</span>
-                <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
-                    Showing <?= count($flocks) ?> of <?= number_format($totalRows ?? count($flocks)) ?> Batches
-                </span>
+            <div class="card-header bg-white border-bottom p-3">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                    <div>
+                        <span class="fw-bold text-dark fs-6"><i class="bi bi-grid-3x3-gap me-1 text-success"></i>Flock Batch Directory</span>
+                        <div class="text-muted small mt-0.5" style="font-size: 0.74rem;">
+                            <i class="bi bi-info-circle text-primary me-1"></i><strong>Batch Code Format:</strong> E.g. <code class="text-dark">MIKOLONGWE 8 (6)</code> = Breed <em>Mikolongwe</em>, Intake <em>Batch 8</em>, House/Pen <em>(6)</em>.
+                        </div>
+                    </div>
+                    <div>
+                        <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                            Showing <?= count($flocks) ?> of <?= number_format($totalRows ?? count($flocks)) ?> Batches
+                        </span>
+                    </div>
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -312,6 +325,11 @@
                                         <a href="<?= url("/flocks/{$f['flock_id']}") ?>" class="fw-bold text-dark text-decoration-none font-monospace fs-6">
                                             <?= e($f['batch_code']) ?>
                                         </a>
+                                        <?php if (preg_match('/^(.*?)\s+(\d+)\s*\((.*?)\)$/', $f['batch_code'], $m)): ?>
+                                            <small class="text-muted d-block" style="font-size: 0.7rem;">
+                                                <i class="bi bi-door-closed me-0.5"></i>Pen <?= e($m[3]) ?> &bull; Batch <?= e($m[2]) ?>
+                                            </small>
+                                        <?php endif; ?>
                                     </td>
                                     <td>
                                         <span class="badge bg-light text-dark border"><?= e($f['breed_name']) ?></span>

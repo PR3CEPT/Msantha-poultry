@@ -9,6 +9,11 @@
                     <i class="bi bi-arrow-left"></i>
                 </a>
                 <h1 class="h3 fw-bold mb-0 text-dark"><?= e($flock['batch_code']) ?></h1>
+                <?php if (preg_match('/^(.*?)\s+(\d+)\s*\((.*?)\)$/', $flock['batch_code'], $m)): ?>
+                    <span class="badge bg-light text-dark border font-monospace" title="Intake Batch <?= e($m[2]) ?>, Pen Partition <?= e($m[3]) ?>">
+                        <i class="bi bi-door-closed text-primary me-1"></i>Pen <?= e($m[3]) ?> &bull; Batch <?= e($m[2]) ?>
+                    </span>
+                <?php endif; ?>
                 <span class="badge <?= (int)$flock['current_stock'] > 0 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-light text-secondary border' ?> fs-6">
                     <?= (int)$flock['current_stock'] > 0 ? 'Active Batch' : 'Closed Batch' ?>
                 </span>
