@@ -298,10 +298,16 @@
                         </div>
                         <div
                             class="p-2 text-center bg-light border-top d-flex justify-content-between align-items-center px-3">
-                            <a href="<?= url('/admin/sms') ?>" class="text-muted small text-decoration-none"
-                                style="font-size: 0.72rem;">SMS Queue &rarr;</a>
-                            <a href="<?= url('/reports') ?>" class="text-success small fw-semibold text-decoration-none"
-                                style="font-size: 0.72rem;">Operational Reports &rarr;</a>
+                            <?php if (\App\Core\Auth::can('sms', 'view')): ?>
+                                <a href="<?= url('/admin/sms') ?>" class="text-muted small text-decoration-none"
+                                    style="font-size: 0.72rem;">SMS Queue &rarr;</a>
+                            <?php else: ?>
+                                <span></span>
+                            <?php endif; ?>
+                            <?php if (\App\Core\Auth::can('reports', 'view')): ?>
+                                <a href="<?= url('/reports') ?>" class="text-success small fw-semibold text-decoration-none"
+                                    style="font-size: 0.72rem;">Operational Reports &rarr;</a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

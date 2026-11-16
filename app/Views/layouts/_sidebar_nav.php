@@ -70,14 +70,16 @@ $currentRole = \App\Core\Auth::role();
             <span class="nav-icon-wrap"><?= icon('cash', 18) ?></span>
             <span>Cash Books (6 Units)</span>
         </a>
-        <a class="nav-link <?= ($activeNav ?? '') === 'finance_pnl' ? 'active' : '' ?>" href="<?= url('/finance/pnl') ?>">
-            <span class="nav-icon-wrap"><i class="bi bi-graph-up-arrow text-primary"></i></span>
-            <span>Monthly P&L Statements</span>
-        </a>
-        <a class="nav-link <?= ($activeNav ?? '') === 'finance_reconcile' ? 'active' : '' ?>" href="<?= url('/finance/reconciliation') ?>">
-            <span class="nav-icon-wrap"><i class="bi bi-check2-all text-info"></i></span>
-            <span>Month Reconciliation</span>
-        </a>
+        <?php if (in_array($currentRole, ['owner', 'manager', 'accountant'], true)): ?>
+            <a class="nav-link <?= ($activeNav ?? '') === 'finance_pnl' ? 'active' : '' ?>" href="<?= url('/finance/pnl') ?>">
+                <span class="nav-icon-wrap"><i class="bi bi-graph-up-arrow text-primary"></i></span>
+                <span>Monthly P&L Statements</span>
+            </a>
+            <a class="nav-link <?= ($activeNav ?? '') === 'finance_reconcile' ? 'active' : '' ?>" href="<?= url('/finance/reconciliation') ?>">
+                <span class="nav-icon-wrap"><i class="bi bi-check2-all text-info"></i></span>
+                <span>Month Reconciliation</span>
+            </a>
+        <?php endif; ?>
     <?php endif; ?>
 
     <!-- Reports -->
@@ -105,11 +107,13 @@ $currentRole = \App\Core\Auth::role();
     <!-- Administration -->
     <?php if (in_array($currentRole, ['owner', 'manager'], true)): ?>
         <div class="sidebar-section-title">Administration</div>
-        <?php if ($currentRole === 'owner'): ?>
+        <?php if ($currentRole === 'owner' || \App\Core\Auth::can('admin_users', 'view')): ?>
             <a class="nav-link <?= ($activeNav ?? '') === 'admin_users' ? 'active' : '' ?>" href="<?= url('/admin/users') ?>">
                 <span class="nav-icon-wrap"><i class="bi bi-shield-person text-success"></i></span>
                 <span>Staff Accounts</span>
             </a>
+        <?php endif; ?>
+        <?php if ($currentRole === 'owner'): ?>
             <a class="nav-link <?= ($activeNav ?? '') === 'admin_backups' ? 'active' : '' ?>" href="<?= url('/admin/backups') ?>">
                 <span class="nav-icon-wrap"><?= icon('backup', 18) ?></span>
                 <span>Database Backups</span>

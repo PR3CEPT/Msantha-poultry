@@ -101,7 +101,7 @@
                     $isInternal = !empty($c['is_internal']);
                     ?>
                     <div class="zfold-card mb-2.5 <?= $bal > 0 ? 'border-start border-4 border-danger' : 'border-start border-4 border-success' ?>">
-                        <div class="zfold-header" onclick="if (!event.target.closest('a, button, input, select, .no-fold')) this.closest('.zfold-card').classList.toggle('is-unfolded');">
+                        <div class="zfold-header">
                             <!-- Tier 1: Customer Name & Phone on Left <---> Balance Due & Chevron on Right -->
                             <div class="zfold-tier-top">
                                 <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -132,7 +132,7 @@
                                             <i class="bi bi-check-circle-fill me-1"></i>Settled / Nil
                                         </span>
                                     <?php endif; ?>
-                                    <button type="button" class="zfold-toggle-btn" aria-label="Toggle customer details" onclick="event.stopPropagation(); this.closest('.zfold-card').classList.toggle('is-unfolded');">
+                                    <button type="button" class="zfold-toggle-btn" aria-label="Toggle customer details">
                                         <i class="bi bi-chevron-down"></i>
                                     </button>
                                 </div>

@@ -60,6 +60,7 @@
     </div>
 
     <!-- Manager Custom Date Range Report Generator -->
+    <?php if (\App\Core\Auth::can('reports', 'view')): ?>
     <div class="card border-0 shadow-sm rounded-4 p-3.5 bg-white mb-4 border-top border-4 border-success">
         <div class="d-flex align-items-center justify-content-between mb-2">
             <h5 class="fw-bold text-dark mb-0 fs-6">
@@ -98,6 +99,7 @@
             </div>
         </form>
     </div>
+    <?php endif; ?>
 
     <script>
     function updateReportAction(route) {
@@ -269,4 +271,14 @@
         </div>
     </div>
 </div>
+
+<script>
+function updateReportAction(val) {
+    var form = document.getElementById('customReportForm');
+    if (form) {
+        var base = <?= json_encode(rtrim(url('/'), '/')) ?>;
+        form.action = base + val;
+    }
+}
+</script>
 

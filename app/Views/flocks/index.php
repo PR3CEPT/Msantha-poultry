@@ -13,12 +13,14 @@
             <p class="text-muted small mb-0 mt-1">Track bird counts, daily dynamics, authoritative mortality events, and egg prices across 28 batches.</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
+            <?php if (\App\Core\Auth::can('flocks', 'create')): ?>
             <a href="<?= url('/flocks/quick-entry') ?>" class="btn btn-primary fw-bold">
                 <i class="bi bi-pencil-square me-1"></i>Quick Daily Entry
             </a>
             <a href="<?= url('/flocks/create') ?>" class="btn btn-success fw-bold">
                 <i class="bi bi-plus-circle me-1"></i>New Batch
             </a>
+            <?php endif; ?>
             <a href="<?= url('/flocks?tab=batches') ?>" class="btn <?= ($tab ?? 'batches') === 'batches' ? 'btn-outline-dark active' : 'btn-outline-secondary' ?>">
                 <i class="bi bi-grid-3x3-gap me-1"></i>Batches
             </a>
@@ -315,9 +317,11 @@
                                             <small class="text-muted d-block mb-2">Record daily mortality, egg yields, or view full batch lifecycle history.</small>
                                         </div>
                                         <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+                                            <?php if (\App\Core\Auth::can('flocks', 'create')): ?>
                                             <a href="<?= url('/flocks/quick-entry') ?>" class="btn btn-outline-primary btn-sm rounded-pill px-3" style="font-size: 0.75rem;">
                                                 <i class="bi bi-pencil-square me-1"></i>Quick Entry
                                             </a>
+                                            <?php endif; ?>
                                             <a href="<?= url("/flocks/{$f['flock_id']}") ?>" class="btn btn-success btn-sm rounded-pill px-3 fw-bold" style="font-size: 0.75rem;">
                                                 Batch Profile &rarr;
                                             </a>

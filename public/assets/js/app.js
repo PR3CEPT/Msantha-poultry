@@ -386,47 +386,61 @@ export class App {
     }
 }
 
-// Auto-initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
+// Auto-initialize when DOM is ready or immediately if already loaded
+function bootstrapApp() {
     App.init();
+}
 
-    // Global Folding Z-Fold Interactive Controller
-    document.addEventListener('click', (e) => {
-        // 1. Z-fold card header click -> toggle fold
-        if (e._zfoldHandled) return;
-        const header = e.target.closest('.zfold-header');
-        if (header) {
-            // Don't toggle if user clicked a link, button or .no-fold element
-            if (e.target.closest('a') || e.target.closest('button:not(.zfold-toggle-btn)') || e.target.closest('.no-fold')) {
-                return;
-            }
-            e._zfoldHandled = true;
-            const card = header.closest('.zfold-card');
-            if (card) {
-                card.classList.toggle('is-unfolded');
-            }
-        }
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootstrapApp);
+} else {
+    bootstrapApp();
+}
 
-        // 2. Expand all / Collapse all button
-        const toggleAllBtn = e.target.closest('[data-zfold-toggle-all]');
-        if (toggleAllBtn) {
-            e._zfoldHandled = true;
-            const containerSelector = toggleAllBtn.dataset.zfoldToggleAll || '.zfold-container';
-            const container = document.querySelector(containerSelector);
-            if (container) {
-                const cards = container.querySelectorAll('.zfold-card');
-                const shouldExpand = toggleAllBtn.dataset.state !== 'expanded';
-                cards.forEach(c => {
-                    if (shouldExpand) c.classList.add('is-unfolded');
-                    else c.classList.remove('is-unfolded');
-                });
-                toggleAllBtn.dataset.state = shouldExpand ? 'expanded' : 'collapsed';
-                toggleAllBtn.innerHTML = shouldExpand 
-                    ? '<i class="bi bi-chevron-bar-contract me-1"></i>Fold All' 
-                    : '<i class="bi bi-chevron-bar-expand me-1"></i>Unfold All';
-            }
+// Global Folding Z-Fold Interactive Controller (attached directly to document immediately)
+document.addEventListener('click', (e) => {
+    // 1. Z-fold card header click or toggle button -> toggle fold
+    const header = e.target.closest('.zfold-header');
+    if (header) {
+        // Don't toggle if user clicked an anchor, input, select, textarea, button (unless zfold-toggle-btn), or .no-fold
+        if (e.target.closest('a') || e.target.closest('input') || e.target.closest('select') || e.target.closest('textarea') || e.target.closest('button:not(.zfold-toggle-btn)') || e.target.closest('.no-fold')) {
+            return;
         }
-    });
+        const card = header.closest('.zfold-card');
+        if (card) {
+            card.classList.toggle('is-unfolded');
+        }
+        return;
+    }
+
+    // Also support clicking directly on a zfold-toggle-btn if outside header
+    const toggleBtn = e.target.closest('.zfold-toggle-btn');
+    if (toggleBtn) {
+        const card = toggleBtn.closest('.zfold-card');
+        if (card) {
+            card.classList.toggle('is-unfolded');
+        }
+        return;
+    }
+
+    // 2. Expand all / Collapse all button
+    const toggleAllBtn = e.target.closest('[data-zfold-toggle-all]');
+    if (toggleAllBtn) {
+        const containerSelector = toggleAllBtn.dataset.zfoldToggleAll || '.zfold-container';
+        const container = document.querySelector(containerSelector);
+        if (container) {
+            const cards = container.querySelectorAll('.zfold-card');
+            const shouldExpand = toggleAllBtn.dataset.state !== 'expanded';
+            cards.forEach(c => {
+                if (shouldExpand) c.classList.add('is-unfolded');
+                else c.classList.remove('is-unfolded');
+            });
+            toggleAllBtn.dataset.state = shouldExpand ? 'expanded' : 'collapsed';
+            toggleAllBtn.innerHTML = shouldExpand 
+                ? '<i class="bi bi-chevron-bar-contract me-1"></i>Fold All' 
+                : '<i class="bi bi-chevron-bar-expand me-1"></i>Unfold All';
+        }
+    }
 });
 
 // Global Notification Action Handlers

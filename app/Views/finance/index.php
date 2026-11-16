@@ -406,7 +406,7 @@
                 ?>
                 <div class="zfold-card mb-2.5 <?= $cardBorderClass ?>">
                     <!-- Z-Fold Header: 2-Tier Folding Scan -->
-                    <div class="zfold-header" onclick="if (!event.target.closest('a, button, input, select, .no-fold')) this.closest('.zfold-card').classList.toggle('is-unfolded');">
+                    <div class="zfold-header">
                         <!-- Tier 1: Date & Unit on Left <---> Amount in MWK & Chevron on Right -->
                         <div class="zfold-tier-top">
                             <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -442,7 +442,7 @@
                                 <?php else: ?>
                                     <span class="badge bg-light text-dark border fw-bold fs-6 px-2.5 py-1">0 MWK</span>
                                 <?php endif; ?>
-                                <button type="button" class="zfold-toggle-btn" aria-label="Toggle transaction breakdown" onclick="event.stopPropagation(); this.closest('.zfold-card').classList.toggle('is-unfolded');">
+                                <button type="button" class="zfold-toggle-btn" aria-label="Toggle transaction breakdown">
                                     <i class="bi bi-chevron-down"></i>
                                 </button>
                             </div>
@@ -759,28 +759,3 @@
         </div>
     </div>
 <?php endif; ?>
-
-<script>
-    // Global Unfold All / Fold All Controller
-    (function () {
-        document.addEventListener('click', function (e) {
-            var toggleBtn = e.target.closest('[data-zfold-toggle-all]');
-            if (toggleBtn) {
-                var sel = toggleBtn.getAttribute('data-zfold-toggle-all') || '.zfold-container';
-                var container = document.querySelector(sel);
-                if (container) {
-                    var cards = container.querySelectorAll('.zfold-card');
-                    var isExpanded = toggleBtn.getAttribute('data-state') === 'expanded';
-                    cards.forEach(function (c) {
-                        if (isExpanded) c.classList.remove('is-unfolded');
-                        else c.classList.add('is-unfolded');
-                    });
-                    toggleBtn.setAttribute('data-state', isExpanded ? 'collapsed' : 'expanded');
-                    toggleBtn.innerHTML = isExpanded
-                        ? '<i class="bi bi-chevron-bar-expand me-1"></i>Unfold All'
-                        : '<i class="bi bi-chevron-bar-contract me-1"></i>Fold All';
-                }
-            }
-        });
-    })();
-</script>

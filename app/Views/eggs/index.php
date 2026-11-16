@@ -13,9 +13,11 @@
             <p class="text-muted small mb-0 mt-1">Daily egg harvest tracking, tray conversions (30 eggs/tray), breakage monitoring, and incubation allocation.</p>
         </div>
         <div class="d-flex gap-2">
+            <?php if (\App\Core\Auth::can('eggs', 'create')): ?>
             <a href="<?= url('/eggs/create') ?>" class="btn btn-warning fw-bold text-dark">
                 <i class="bi bi-plus-circle me-1"></i>Record Collection
             </a>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -187,9 +189,11 @@
                                             <p class="small text-muted mb-2 font-monospace">Daily egg recording for flock <?= e($r['batch_code'] ?? 'General') ?>.</p>
                                         </div>
                                         <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                                            <?php if (\App\Core\Auth::can('eggs', 'create')): ?>
                                             <a href="<?= url('/eggs/create') ?>" class="btn btn-outline-warning btn-sm rounded-pill px-3 text-dark fw-bold" style="font-size: 0.75rem;">
                                                 <i class="bi bi-plus-circle me-1"></i>New Entry
                                             </a>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>

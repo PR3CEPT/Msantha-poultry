@@ -11,9 +11,11 @@
             <p class="text-muted small mb-0 mt-1">Live birds, table eggs, fertilised eggs, manure, and debtor credit receivables.</p>
         </div>
         <div class="d-flex gap-2">
+            <?php if (\App\Core\Auth::can('sales', 'create')): ?>
             <a href="<?= url('/sales/create') ?>" class="btn btn-success fw-bold">
                 <i class="bi bi-cart-plus me-1"></i>Record New Sale
             </a>
+            <?php endif; ?>
         </div>
     </div>
 
