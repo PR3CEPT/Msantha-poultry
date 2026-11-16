@@ -83,7 +83,27 @@ class EggController
             $params[] = "%{$search}%";
         }
 
-        $sql .= " ORDER BY e.prod_date DESC, e.id DESC LIMIT 200";
+        $page = max(1, (int) $request->query('page', 1));
+        $perPage = 25;
+        $offset = ($page - 1) * $perPage;
+
+        $countSql = "
+            SELECT COUNT(*)
+            FROM egg_production_daily e
+            LEFT JOIN breeds b ON b.id = e.breed_id
+            LEFT JOIN flocks f ON f.id = e.flock_id
+            WHERE 1=1
+        ";
+        if ($startDate !== '') $countSql .= " AND e.prod_date >= ?";
+        if ($endDate !== '') $countSql .= " AND e.prod_date <= ?";
+        if ($search !== '') $countSql .= " AND (b.name LIKE ? OR f.batch_code LIKE ? OR e.remarks LIKE ?)";
+
+        $countStmt = $pdo->prepare($countSql);
+        $countStmt->execute($params);
+        $totalRows = (int) $countStmt->fetchColumn();
+        $totalPages = max(1, (int) ceil($totalRows / $perPage));
+
+        $sql .= " ORDER BY e.prod_date DESC, e.id DESC LIMIT {$perPage} OFFSET {$offset}";
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -100,6 +120,10 @@ class EggController
             'search' => $search,
             'startDate' => $startDate,
             'endDate' => $endDate,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'totalRows' => $totalRows,
+            'perPage' => $perPage,
             'flashSuccess' => $flashSuccess,
             'flashError' => $flashError,
         ]);

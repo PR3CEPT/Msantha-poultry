@@ -40,9 +40,9 @@
         </div>
     </div>
 
-    <!-- Users List: Desktop Table (d-none d-lg-block) -->
-    <div class="col-12 d-none d-lg-block">
-        <div class="card border-0 shadow-sm">
+    <!-- Users List: Responsive Unified Table -->
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
@@ -135,62 +135,6 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-
-    <!-- Users List: Mobile Cards (d-lg-none) -->
-    <div class="col-12 d-lg-none">
-        <div class="d-flex flex-column gap-2">
-            <?php if (empty($users)): ?>
-                <div class="card border-0 shadow-sm p-4 text-center text-muted">
-                    No users found matching your search.
-                </div>
-            <?php else: ?>
-                <?php foreach ($users as $u): ?>
-                    <?php $hasActiveSession = !empty($u['active_session_time']) && (strtotime($u['active_session_time']) >= (time() - 900)); ?>
-                    <div class="card border-0 shadow-sm p-3">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                                <h5 class="h6 fw-bold mb-0 text-dark"><?= e($u['full_name']) ?></h5>
-                                <small class="text-muted">@<?= e($u['username']) ?></small>
-                            </div>
-                            <div class="d-flex gap-1">
-                                <?php if ($hasActiveSession): ?>
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle">Online</span>
-                                <?php endif; ?>
-                                <span class="badge <?= (int) $u['is_active'] === 1 ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle' ?>">
-                                    <?= (int) $u['is_active'] === 1 ? 'Active' : 'Inactive' ?>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="small text-muted mb-3">
-                            <div><i class="bi bi-shield me-1"></i>Role: <strong><?= e($u['role_name']) ?></strong></div>
-                            <?php if (!empty($u['email'])): ?>
-                                <div><i class="bi bi-envelope me-1 text-primary"></i><?= e($u['email']) ?></div>
-                            <?php endif; ?>
-                            <?php if (!empty($u['phone'])): ?>
-                                <div><i class="bi bi-telephone me-1 text-success"></i><?= e($u['phone']) ?></div>
-                            <?php endif; ?>
-                            <?php if ((int)$u['must_change_password'] === 1): ?>
-                                <div><i class="bi bi-key me-1 text-warning"></i>Must change password at next login</div>
-                            <?php endif; ?>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <a href="<?= url("/admin/users/{$u['id']}/edit") ?>" class="btn btn-sm btn-outline-secondary flex-fill">
-                                <i class="bi bi-pencil me-1"></i>Edit
-                            </a>
-                            <?php if ($hasActiveSession && $u['id'] != \App\Core\Auth::id()): ?>
-                                <form method="POST" action="<?= url("/admin/users/{$u['id']}/force-logout") ?>" class="flex-fill">
-                                    <?= csrf_field() ?>
-                                    <button type="submit" class="btn btn-sm w-100 btn-outline-warning" data-confirm="Terminate active session?">
-                                        <i class="bi bi-box-arrow-right me-1"></i>Force Logout
-                                    </button>
-                                </form>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
         </div>
     </div>
 </div>

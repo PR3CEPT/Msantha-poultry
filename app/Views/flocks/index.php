@@ -63,7 +63,7 @@
     </div>
 
     <?php if (($tab ?? 'batches') === 'events'): ?>
-        <!-- EVENTS TAB (Z-Fold) -->
+        <!-- EVENTS TAB (Clean Table with Pagination) -->
         <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4">
             <form method="GET" action="<?= url('/flocks') ?>" class="row g-2 align-items-center">
                 <input type="hidden" name="tab" value="events">
@@ -82,104 +82,106 @@
             </form>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="d-flex align-items-center gap-2">
+        <div class="card border-0 shadow-sm rounded-4 bg-white mb-4 overflow-hidden">
+            <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
                 <span class="fw-bold text-dark fs-6"><i class="bi bi-heart-pulse me-1 text-danger"></i>Mortality & Dynamics Event Log</span>
                 <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
-                    <?= count($events) ?> Events
+                    Showing <?= count($events) ?> of <?= number_format($totalRows ?? count($events)) ?> Events
                 </span>
             </div>
-            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold shadow-sm" data-zfold-toggle-all="#flockEventsContainer">
-                <i class="bi bi-chevron-bar-expand me-1"></i>Unfold All
-            </button>
-        </div>
 
-        <div class="zfold-container mb-4" id="flockEventsContainer">
-            <?php if (empty($events)): ?>
-                <div class="card border-0 shadow-sm rounded-4 p-5 text-center text-muted bg-white">
-                    <i class="bi bi-heart-pulse display-6 d-block mb-2 text-muted"></i>
-                    <h6 class="fw-bold text-dark">No Flock Events Recorded</h6>
-                    <p class="small text-muted mb-0">No mortality or offload entries found matching criteria.</p>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-muted small text-uppercase font-monospace" style="font-size: 0.72rem;">
+                        <tr>
+                            <th class="ps-3 py-3" style="width: 120px;">Date</th>
+                            <th class="py-3">Batch Code</th>
+                            <th class="py-3">Breed</th>
+                            <th class="py-3" style="width: 130px;">Event Type</th>
+                            <th class="text-end py-3" style="width: 130px;">Quantity</th>
+                            <th class="py-3">Remarks / Cause</th>
+                            <th class="text-end pe-3 py-3" style="width: 110px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($events)): ?>
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="bi bi-heart-pulse fs-2 d-block mb-2 text-secondary"></i>
+                                    No flock events recorded matching the filter criteria.
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($events as $e): ?>
+                                <?php
+                                $isDeath = ($e['event_type'] === 'death');
+                                $isSale = ($e['event_type'] === 'sale');
+                                $qty = (int) $e['quantity'];
+                                ?>
+                                <tr>
+                                    <td class="ps-3 font-monospace small text-dark fw-semibold">
+                                        <?= date('d-M-Y', strtotime($e['event_date'])) ?>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-dark font-monospace"><?= e($e['batch_code']) ?></span>
+                                    </td>
+                                    <td class="small text-muted">
+                                        <?= e($e['breed_name']) ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($isDeath): ?>
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Mortality (Death)</span>
+                                        <?php elseif ($isSale): ?>
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle">Offloaded / Sold</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary-subtle text-secondary border"><?= strtoupper(e($e['event_type'])) ?></span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-end font-monospace fw-bold fs-6 <?= $isDeath ? 'text-danger' : ($isSale ? 'text-success' : 'text-dark') ?>">
+                                        <?= $isDeath ? '-' : ($isSale ? '+' : '') ?><?= number_format($qty) ?>
+                                    </td>
+                                    <td class="small text-muted text-truncate" style="max-width: 200px;">
+                                        <?= e($e['remarks'] ?: 'Normal flock cycle') ?>
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <a href="<?= url("/flocks/{$e['flock_id']}") ?>" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-0.5" style="font-size: 0.72rem;">
+                                            Batch &rarr;
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Events Pagination -->
+            <?php if (!empty($totalPages) && $totalPages > 1): ?>
+                <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center p-3">
+                    <span class="text-muted small">
+                        Showing <?= count($events) ?> of <?= number_format($totalRows) ?> records (Page <?= $page ?> of <?= $totalPages ?>)
+                    </span>
+                    <nav aria-label="Flock events navigation">
+                        <ul class="pagination pagination-sm mb-0">
+                            <?php if ($page > 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="<?= url('/flocks?tab=events&page=' . ($page - 1) . '&q=' . urlencode($search)) ?>">Previous</a>
+                                </li>
+                            <?php endif; ?>
+                            <li class="page-item active"><span class="page-link"><?= $page ?> / <?= $totalPages ?></span></li>
+                            <?php if ($page < $totalPages): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="<?= url('/flocks?tab=events&page=' . ($page + 1) . '&q=' . urlencode($search)) ?>">Next</a>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
                 </div>
-            <?php else: ?>
-                <?php foreach ($events as $e): ?>
-                    <?php
-                    $isDeath = ($e['event_type'] === 'death');
-                    $isSale = ($e['event_type'] === 'sale');
-                    $qty = (int) $e['quantity'];
-                    ?>
-                    <div class="zfold-card mb-2.5 <?= $isDeath ? 'border-start border-4 border-danger' : ($isSale ? 'border-start border-4 border-success' : '') ?>">
-                        <div class="zfold-header">
-                            <div class="zfold-tier-top">
-                                <div class="d-flex align-items-center gap-2 flex-wrap">
-                                    <span class="fw-bold font-monospace text-dark small" style="font-size: 0.82rem;">
-                                        <i class="bi bi-calendar3 me-1 text-muted"></i><?= date('d-M-Y', strtotime($e['event_date'])) ?>
-                                    </span>
-                                    <span class="badge bg-light text-dark border fw-bold" style="font-size: 0.72rem;">
-                                        <?= e($e['batch_code']) ?>
-                                    </span>
-                                    <span class="text-muted small"><?= e($e['breed_name']) ?></span>
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <?php if ($isDeath): ?>
-                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold fs-6 px-2.5 py-1">
-                                            -<?= number_format($qty) ?> Deaths
-                                        </span>
-                                    <?php elseif ($isSale): ?>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold fs-6 px-2.5 py-1">
-                                            +<?= number_format($qty) ?> Sold
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="badge bg-secondary-subtle text-secondary fw-bold fs-6 px-2.5 py-1">
-                                            <?= number_format($qty) ?> <?= strtoupper(e($e['event_type'])) ?>
-                                        </span>
-                                    <?php endif; ?>
-                                    <button type="button" class="zfold-toggle-btn" aria-label="Toggle event details">
-                                        <i class="bi bi-chevron-down"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="zfold-tier-bottom mt-1">
-                                <span class="text-muted small text-truncate" style="max-width: 70%;">
-                                    <?= !empty($e['remarks']) ? e($e['remarks']) : 'No specific remarks entered' ?>
-                                </span>
-                                <span class="badge bg-light text-secondary border font-monospace" style="font-size: 0.68rem;">
-                                    Event ID #<?= e((string)$e['id']) ?>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="zfold-body">
-                            <div class="row g-3">
-                                <div class="col-12 col-md-6">
-                                    <div class="p-3 bg-white rounded-3 border h-100">
-                                        <strong class="d-block small text-dark mb-1">Flock Context</strong>
-                                        <div class="small text-muted mb-1">Batch Code: <strong class="text-dark"><?= e($e['batch_code']) ?></strong></div>
-                                        <div class="small text-muted mb-1">Breed & Species: <span class="badge bg-light text-dark border"><?= e($e['breed_name']) ?></span></div>
-                                        <div class="small text-muted">Event Date: <?= date('d-F-Y', strtotime($e['event_date'])) ?></div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-6">
-                                    <div class="p-3 bg-white rounded-3 border h-100 d-flex flex-column justify-content-between">
-                                        <div>
-                                            <strong class="d-block small text-dark mb-1">Remarks & Cause</strong>
-                                            <p class="small text-muted mb-2 font-monospace"><?= e($e['remarks'] ?? 'Normal flock event cycle.') ?></p>
-                                        </div>
-                                        <div class="d-flex justify-content-end gap-2 pt-2 border-top">
-                                            <a href="<?= url("/flocks/{$e['flock_id']}") ?>" class="btn btn-outline-primary btn-sm rounded-pill px-3" style="font-size: 0.75rem;">
-                                                View Batch Lifecycle &rarr;
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
             <?php endif; ?>
         </div>
 
     <?php else: ?>
-        <!-- BATCHES TAB (Z-Fold) -->
+        <!-- BATCHES TAB (Clean Table with Pagination) -->
         <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4">
             <form method="GET" action="<?= url('/flocks') ?>" class="row g-2 align-items-center">
                 <input type="hidden" name="tab" value="batches">
@@ -205,133 +207,118 @@
             </form>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="d-flex align-items-center gap-2">
+        <div class="card border-0 shadow-sm rounded-4 bg-white mb-4 overflow-hidden">
+            <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
                 <span class="fw-bold text-dark fs-6"><i class="bi bi-grid-3x3-gap me-1 text-success"></i>Flock Batch Directory</span>
                 <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
-                    <?= count($flocks) ?> Batches Tracked
+                    Showing <?= count($flocks) ?> of <?= number_format($totalRows ?? count($flocks)) ?> Batches
                 </span>
             </div>
-            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold shadow-sm" data-zfold-toggle-all="#flockBatchesContainer">
-                <i class="bi bi-chevron-bar-expand me-1"></i>Unfold All
-            </button>
-        </div>
 
-        <div class="zfold-container mb-4" id="flockBatchesContainer">
-            <?php if (empty($flocks)): ?>
-                <div class="card border-0 shadow-sm rounded-4 p-5 text-center text-muted bg-white">
-                    <i class="bi bi-inbox display-6 d-block mb-2 text-secondary"></i>
-                    <h6 class="fw-bold text-dark">No Flock Batches Found</h6>
-                    <p class="small text-muted mb-0">No records match the filter criteria.</p>
-                </div>
-            <?php else: ?>
-                <?php foreach ($flocks as $f): ?>
-                    <?php
-                    $stock = (int) $f['current_stock'];
-                    $initial = (int) $f['starting_count'];
-                    $deaths = (int) $f['deaths_todate'];
-                    $mortalityRate = $initial > 0 ? round(($deaths / $initial) * 100, 1) : 0;
-                    $isActive = ($stock > 0);
-                    ?>
-                    <div class="zfold-card mb-2.5 <?= $isActive ? 'border-start border-4 border-success' : 'border-start border-4 border-secondary' ?>">
-                        <div class="zfold-header">
-                            <!-- Tier 1: Batch Code & Breed on Left <---> Stock Count & Chevron on Right -->
-                            <div class="zfold-tier-top">
-                                <div class="d-flex align-items-center gap-2 flex-wrap">
-                                    <span class="fw-bold text-dark fs-6">
-                                        <?= e($f['batch_code']) ?>
-                                    </span>
-                                    <span class="badge bg-light text-dark border" style="font-size: 0.72rem;">
-                                        <?= e($f['breed_name']) ?>
-                                    </span>
-                                    <?php if ($isActive): ?>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.65rem;">
-                                            <i class="bi bi-check-circle-fill me-1"></i>Active
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-muted small text-uppercase font-monospace" style="font-size: 0.72rem;">
+                        <tr>
+                            <th class="ps-3 py-3">Batch Code</th>
+                            <th class="py-3">Breed / Species</th>
+                            <th class="py-3" style="width: 120px;">Intake Date</th>
+                            <th class="text-end py-3" style="width: 110px;">Initial Stock</th>
+                            <th class="text-end py-3" style="width: 120px;">Deaths (Loss)</th>
+                            <th class="text-end py-3" style="width: 140px;">Live Stock</th>
+                            <th class="py-3" style="width: 100px;">Status</th>
+                            <th class="text-end pe-3 py-3" style="width: 130px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($flocks)): ?>
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
+                                    No flock batches found matching the filter criteria.
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($flocks as $f): ?>
+                                <?php
+                                $stock = (int) $f['current_stock'];
+                                $initial = (int) $f['starting_count'];
+                                $deaths = (int) $f['deaths_todate'];
+                                $mortalityRate = $initial > 0 ? round(($deaths / $initial) * 100, 1) : 0;
+                                $isActive = ($stock > 0);
+                                ?>
+                                <tr>
+                                    <td class="ps-3">
+                                        <a href="<?= url("/flocks/{$f['flock_id']}") ?>" class="fw-bold text-dark text-decoration-none font-monospace fs-6">
+                                            <?= e($f['batch_code']) ?>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border"><?= e($f['breed_name']) ?></span>
+                                    </td>
+                                    <td class="font-monospace small text-muted">
+                                        <?= !empty($f['start_date']) ? date('d-M-Y', strtotime($f['start_date'])) : '—' ?>
+                                    </td>
+                                    <td class="text-end font-monospace text-muted small">
+                                        <?= number_format($initial) ?>
+                                    </td>
+                                    <td class="text-end font-monospace">
+                                        <span class="<?= $mortalityRate >= 5.0 ? 'text-danger fw-bold' : 'text-muted' ?>">
+                                            <?= number_format($deaths) ?> <small>(<?= $mortalityRate ?>%)</small>
                                         </span>
-                                    <?php else: ?>
-                                        <span class="badge bg-light text-secondary border" style="font-size: 0.65rem;">
-                                            Depleted
+                                    </td>
+                                    <td class="text-end font-monospace">
+                                        <span class="fw-bold fs-6 <?= $isActive ? 'text-success' : 'text-secondary' ?>">
+                                            <?= number_format($stock) ?> <small class="fw-normal text-muted" style="font-size: 0.72rem;">birds</small>
                                         </span>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="fs-6 fw-bold <?= $isActive ? 'text-success' : 'text-secondary' ?> font-monospace">
-                                        <?= number_format($stock) ?> <small class="text-muted fw-normal" style="font-size: 0.72rem;">Birds</small>
-                                    </span>
-                                    <button type="button" class="zfold-toggle-btn" aria-label="Toggle batch breakdown">
-                                        <i class="bi bi-chevron-down"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Tier 2: Intake Date on Left <---> Mortality % & Tray Price on Right -->
-                            <div class="zfold-tier-bottom mt-1">
-                                <span class="text-muted small">
-                                    Intake: <strong class="text-dark font-monospace"><?= !empty($f['start_date']) ? date('d-M-Y', strtotime($f['start_date'])) : '—' ?></strong>
-                                </span>
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="badge <?= $mortalityRate >= 5.0 ? 'bg-danger-subtle text-danger border border-danger-subtle' : 'bg-light text-muted border' ?>" style="font-size: 0.7rem;">
-                                        Mortality: <?= $mortalityRate ?>% (<?= number_format($deaths) ?> deaths)
-                                    </span>
-                                    <?php if (!empty($f['egg_tray_price'])): ?>
-                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle" style="font-size: 0.7rem;">
-                                            Tray: <?= number_format((int)$f['egg_tray_price']) ?> MWK
-                                        </span>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Z-Fold Body: Detailed Metrics & Actions -->
-                        <div class="zfold-body">
-                            <div class="row g-3">
-                                <div class="col-12 col-md-4">
-                                    <div class="p-3 bg-white rounded-3 border h-100">
-                                        <span class="text-muted small d-block mb-1 text-uppercase fw-semibold" style="font-size: 0.7rem;">Flock Dynamic Counts</span>
-                                        <div class="d-flex justify-content-between py-1 border-bottom small">
-                                            <span class="text-muted">Initial Stocked:</span>
-                                            <span class="fw-semibold text-dark font-monospace"><?= number_format($initial) ?> birds</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between py-1 border-bottom small">
-                                            <span class="text-muted">Total Mortality Deaths:</span>
-                                            <span class="fw-semibold text-danger font-monospace">-<?= number_format($deaths) ?> birds</span>
-                                        </div>
-                                        <div class="d-flex justify-content-between pt-1 small">
-                                            <span class="fw-semibold text-dark">Current Live Stock:</span>
-                                            <span class="fw-bold <?= $isActive ? 'text-success' : 'text-secondary' ?> font-monospace"><?= number_format($stock) ?> birds</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-4">
-                                    <div class="p-3 bg-white rounded-3 border h-100">
-                                        <span class="text-muted small d-block mb-1 text-uppercase fw-semibold" style="font-size: 0.7rem;">Production & Economics</span>
-                                        <div class="small mb-1">Mortality Rate: <strong class="<?= $mortalityRate >= 5.0 ? 'text-danger' : 'text-success' ?>"><?= $mortalityRate ?>%</strong></div>
-                                        <div class="small mb-1">Egg Tray Price: <strong class="text-dark"><?= !empty($f['egg_tray_price']) ? number_format((int)$f['egg_tray_price']) . ' MWK' : 'Not set' ?></strong></div>
-                                        <div class="small text-muted font-monospace">Batch Reference #<?= e((string)$f['flock_id']) ?></div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-4">
-                                    <div class="p-3 bg-white rounded-3 border h-100 d-flex flex-column justify-content-between">
-                                        <div>
-                                            <span class="text-muted small d-block mb-1 text-uppercase fw-semibold" style="font-size: 0.7rem;">Quick Operations</span>
-                                            <small class="text-muted d-block mb-2">Record daily mortality, egg yields, or view full batch lifecycle history.</small>
-                                        </div>
-                                        <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+                                    </td>
+                                    <td>
+                                        <?php if ($isActive): ?>
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-light text-secondary border">Depleted</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <div class="d-inline-flex gap-1">
                                             <?php if (\App\Core\Auth::can('flocks', 'create')): ?>
-                                            <a href="<?= url('/flocks/quick-entry') ?>" class="btn btn-outline-primary btn-sm rounded-pill px-3" style="font-size: 0.75rem;">
-                                                <i class="bi bi-pencil-square me-1"></i>Quick Entry
-                                            </a>
+                                                <a href="<?= url('/flocks/quick-entry?flock_id=' . $f['flock_id']) ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-0.5" style="font-size: 0.72rem;" title="Daily Log">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </a>
                                             <?php endif; ?>
-                                            <a href="<?= url("/flocks/{$f['flock_id']}") ?>" class="btn btn-success btn-sm rounded-pill px-3 fw-bold" style="font-size: 0.75rem;">
-                                                Batch Profile &rarr;
+                                            <a href="<?= url("/flocks/{$f['flock_id']}") ?>" class="btn btn-sm btn-success rounded-pill px-2.5 py-0.5 fw-semibold" style="font-size: 0.72rem;">
+                                                View &rarr;
                                             </a>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Batches Pagination -->
+            <?php if (!empty($totalPages) && $totalPages > 1): ?>
+                <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center p-3">
+                    <span class="text-muted small">
+                        Showing <?= count($flocks) ?> of <?= number_format($totalRows) ?> batches (Page <?= $page ?> of <?= $totalPages ?>)
+                    </span>
+                    <nav aria-label="Flock batches navigation">
+                        <ul class="pagination pagination-sm mb-0">
+                            <?php if ($page > 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="<?= url('/flocks?tab=batches&page=' . ($page - 1) . '&q=' . urlencode($search) . '&status=' . urlencode($statusFilter ?? 'all')) ?>">Previous</a>
+                                </li>
+                            <?php endif; ?>
+                            <li class="page-item active"><span class="page-link"><?= $page ?> / <?= $totalPages ?></span></li>
+                            <?php if ($page < $totalPages): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="<?= url('/flocks?tab=batches&page=' . ($page + 1) . '&q=' . urlencode($search) . '&status=' . urlencode($statusFilter ?? 'all')) ?>">Next</a>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
+                </div>
             <?php endif; ?>
         </div>
     <?php endif; ?>

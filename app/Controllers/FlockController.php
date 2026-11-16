@@ -58,6 +58,10 @@ class FlockController
         }
 
         if ($tab === 'events') {
+            $page = max(1, (int) $request->query('page', 1));
+            $perPage = 25;
+            $offset = ($page - 1) * $perPage;
+
             // Authoritative events list
             $sql = "
                 SELECT e.*, f.batch_code, f.breed_name
@@ -74,7 +78,14 @@ class FlockController
                 $params[] = "%{$search}%";
             }
 
-            $sql .= " ORDER BY e.event_date DESC, e.id DESC LIMIT 150";
+            $countSql = "SELECT COUNT(*) FROM flock_events e JOIN flocks f ON f.id = e.flock_id WHERE 1=1";
+            if ($search !== '') $countSql .= " AND (f.batch_code LIKE ? OR f.breed_name LIKE ? OR e.remarks LIKE ?)";
+            $countStmt = $pdo->prepare($countSql);
+            $countStmt->execute($params);
+            $totalRows = (int) $countStmt->fetchColumn();
+            $totalPages = max(1, (int) ceil($totalRows / $perPage));
+
+            $sql .= " ORDER BY e.event_date DESC, e.id DESC LIMIT {$perPage} OFFSET {$offset}";
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
             $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -86,10 +97,18 @@ class FlockController
                 'stats' => $stats,
                 'events' => $events,
                 'search' => $search,
+                'page' => $page,
+                'totalPages' => $totalPages,
+                'totalRows' => $totalRows,
+                'perPage' => $perPage,
             ]);
         }
 
         // Default: Flocks list
+        $page = max(1, (int) $request->query('page', 1));
+        $perPage = 25;
+        $offset = ($page - 1) * $perPage;
+
         $sql = "
             SELECT v.*, b.egg_tray_price
             FROM v_flock_status v
@@ -110,7 +129,17 @@ class FlockController
             $sql .= " AND v.current_stock <= 0";
         }
 
-        $sql .= " ORDER BY v.current_stock DESC, v.flock_id DESC";
+        $countSql = "SELECT COUNT(*) FROM v_flock_status v LEFT JOIN breeds b ON b.id = v.breed_id WHERE 1=1";
+        if ($search !== '') $countSql .= " AND (v.batch_code LIKE ? OR v.breed_name LIKE ?)";
+        if ($statusFilter === 'active') $countSql .= " AND v.current_stock > 0";
+        elseif ($statusFilter === 'closed') $countSql .= " AND v.current_stock <= 0";
+
+        $countStmt = $pdo->prepare($countSql);
+        $countStmt->execute($params);
+        $totalRows = (int) $countStmt->fetchColumn();
+        $totalPages = max(1, (int) ceil($totalRows / $perPage));
+
+        $sql .= " ORDER BY v.current_stock DESC, v.flock_id DESC LIMIT {$perPage} OFFSET {$offset}";
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $flocks = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -127,6 +156,10 @@ class FlockController
             'flocks' => $flocks,
             'search' => $search,
             'statusFilter' => $statusFilter,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'totalRows' => $totalRows,
+            'perPage' => $perPage,
             'flashSuccess' => $flashSuccess,
             'flashError' => $flashError,
         ]);

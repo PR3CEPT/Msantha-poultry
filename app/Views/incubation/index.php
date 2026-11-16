@@ -216,201 +216,112 @@
             </form>
         </div>
 
-        <!-- Z-Fold Controls -->
-        <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-white">
-            <div class="d-flex align-items-center gap-2">
-                <span class="fw-bold text-dark fs-6"><i class="bi bi-boxes me-1 text-success"></i>Incubation Hatchery
-                    Batches</span>
-                <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
-                    <?= count($jobs) ?> Batches Loaded
-                </span>
-            </div>
-            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold shadow-sm"
-                data-zfold-toggle-all="#incubationBatchesContainer">
-                <i class="bi bi-chevron-bar-expand me-1"></i>Unfold All
-            </button>
-        </div>
-
-        <!-- Z-Fold Incubation Batch Cards -->
-        <div class="p-3 zfold-container" id="incubationBatchesContainer">
-            <?php if (empty($jobs)): ?>
-                <div class="p-5 text-center text-muted">
-                    <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
-                    <h6 class="fw-bold text-dark">No Incubation Batches Found</h6>
-                    <p class="small text-muted mb-0">No records match the filter criteria.</p>
-                </div>
-            <?php else: ?>
-                <?php foreach ($jobs as $j): ?>
-                    <?php
-                    $eggs = (int) $j['eggs_incubated'];
-                    $hatched = (int) $j['hatched'];
-                    $hatchPct = !empty($j['hatch_percent']) ? (float) $j['hatch_percent'] : ($eggs > 0 ? round(($hatched / $eggs) * 100, 1) : 0);
-                    $cost = (int) $j['cost'];
-                    $paid = (int) $j['total_paid'];
-                    $isOwnerBatch = !empty($j['customer_is_internal']) || stripos((string) ($j['customer_name'] ?? ''), 'msantha') !== false;
-                    $bal = $isOwnerBatch ? 0 : (int) $j['balance'];
-                    $jobStatus = strtolower((string) $j['status']);
-                    $statusBadge = match ($jobStatus) {
-                        'incubating' => 'bg-primary-subtle text-primary border border-primary-subtle',
-                        'hatching' => 'bg-warning-subtle text-warning-emphasis border border-warning-subtle',
-                        'completed' => 'bg-success-subtle text-success border border-success-subtle',
-                        'cancelled' => 'bg-danger-subtle text-danger border border-danger-subtle',
-                        default => 'bg-light text-secondary border'
-                    };
-                    ?>
-                    <div
-                        class="zfold-card mb-2.5 <?= $isOwnerBatch ? 'border-start border-4 border-success' : ($bal > 0 ? 'border-start border-4 border-warning' : '') ?>">
-                        <div class="zfold-header">
-                            <!-- Tier 1: Intake Date & Customer Name on Left <---> Status, Hatch % & Chevron on Right -->
-                            <div class="zfold-tier-top">
-                                <div class="d-flex align-items-center gap-2 flex-wrap">
-                                    <span class="fw-bold font-monospace text-dark small" style="font-size: 0.82rem;">
-                                        <i
-                                            class="bi bi-calendar3 me-1 text-muted"></i><?= !empty($j['date_received']) ? date('d-M-Y', strtotime($j['date_received'])) : '—' ?>
-                                    </span>
-                                    <span class="fw-bold text-dark fs-6">
-                                        <?= e($j['customer_name'] ?? 'Walk-In Customer') ?>
-                                    </span>
+        <!-- Incubation Batches Table -->
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Batch #</th>
+                        <th>Intake Date</th>
+                        <th>Customer</th>
+                        <th>Breed</th>
+                        <th class="text-end">Eggs Set</th>
+                        <th class="text-end">Hatched</th>
+                        <th class="text-center">Hatch %</th>
+                        <th>Hatch Date</th>
+                        <th class="text-end">Balance Due</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end pe-3">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($jobs)): ?>
+                        <tr>
+                            <td colspan="11" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
+                                <span class="fw-bold text-dark d-block">No Incubation Batches Found</span>
+                                <span class="small">No records match the filter criteria.</span>
+                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($jobs as $j): ?>
+                            <?php
+                            $eggs = (int) $j['eggs_incubated'];
+                            $hatched = (int) $j['hatched'];
+                            $hatchPct = !empty($j['hatch_percent']) ? (float) $j['hatch_percent'] : ($eggs > 0 ? round(($hatched / $eggs) * 100, 1) : 0);
+                            $isOwnerBatch = !empty($j['customer_is_internal']) || stripos((string) ($j['customer_name'] ?? ''), 'msantha') !== false;
+                            $bal = $isOwnerBatch ? 0 : (int) $j['balance'];
+                            $jobStatus = strtolower((string) $j['status']);
+                            $statusBadge = match ($jobStatus) {
+                                'incubating' => 'bg-primary-subtle text-primary border border-primary-subtle',
+                                'hatching' => 'bg-warning-subtle text-warning-emphasis border border-warning-subtle',
+                                'completed' => 'bg-success-subtle text-success border border-success-subtle',
+                                'cancelled' => 'bg-danger-subtle text-danger border border-danger-subtle',
+                                default => 'bg-light text-secondary border'
+                            };
+                            ?>
+                            <tr>
+                                <td class="ps-3 font-monospace fw-bold text-dark">
+                                    #<?= e((string) $j['id']) ?>
+                                </td>
+                                <td class="text-nowrap small text-muted font-monospace">
+                                    <?= !empty($j['date_received']) ? date('d-M-Y', strtotime($j['date_received'])) : '—' ?>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark"><?= e($j['customer_name'] ?? 'Walk-In Customer') ?></div>
                                     <?php if ($isOwnerBatch): ?>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle"
-                                            style="font-size: 0.65rem;">
-                                            <i class="bi bi-patch-check-fill me-1"></i>Owner / Complimentary
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.65rem;">
+                                            Owner / Complimentary
                                         </span>
+                                    <?php elseif (!empty($j['customer_phone'])): ?>
+                                        <span class="text-muted small font-monospace"><?= e($j['customer_phone']) ?></span>
                                     <?php endif; ?>
-                                    <?php if (!empty($j['customer_phone'])): ?>
-                                        <span class="badge bg-light text-muted border font-monospace" style="font-size: 0.68rem;">
-                                            <?= e($j['customer_phone']) ?>
-                                        </span>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="badge <?= $statusBadge ?> fw-bold px-2 py-1" style="font-size: 0.72rem;">
-                                        <?= strtoupper($jobStatus) ?>
-                                    </span>
+                                </td>
+                                <td class="small text-muted">
+                                    <?= e($j['breed_name'] ?? 'Local/Mixed') ?>
+                                </td>
+                                <td class="text-end font-monospace fw-semibold text-dark">
+                                    <?= number_format($eggs) ?>
+                                </td>
+                                <td class="text-end font-monospace fw-semibold text-success">
+                                    <?= number_format($hatched) ?>
+                                </td>
+                                <td class="text-center">
                                     <?php if ($hatchPct > 0): ?>
-                                        <span
-                                            class="badge <?= $hatchPct >= 65 ? 'bg-success text-white' : 'bg-warning text-dark' ?> fw-bold px-2 py-1"
-                                            style="font-size: 0.72rem;">
-                                            <?= $hatchPct ?>% Hatch
-                                        </span>
-                                    <?php endif; ?>
-                                    <button type="button" class="zfold-toggle-btn" aria-label="Toggle batch breakdown">
-                                        <i class="bi bi-chevron-down"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Tier 2: Eggs Set & Hatched on Left <---> Balance Due on Right -->
-                            <div class="zfold-tier-bottom mt-1">
-                                <div class="d-flex align-items-center gap-2 text-muted small">
-                                    <span>Set: <strong class="text-dark font-monospace"><?= number_format($eggs) ?>
-                                            eggs</strong></span>
-                                    <span>&bull;</span>
-                                    <span>Hatched: <strong class="text-success font-monospace"><?= number_format($hatched) ?>
-                                            chicks</strong></span>
-                                    <?php if (!empty($j['expected_hatch_date'])): ?>
-                                        <span>&bull;</span>
-                                        <span>Due: <strong
-                                                class="text-dark font-monospace"><?= date('d-M', strtotime($j['expected_hatch_date'])) ?></strong></span>
-                                    <?php endif; ?>
-                                </div>
-                                <div>
-                                    <?php if ($isOwnerBatch): ?>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold"
-                                            style="font-size: 0.72rem;">
-                                            0 MWK (Owner)
-                                        </span>
-                                    <?php elseif ($bal > 0): ?>
-                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold"
-                                            style="font-size: 0.72rem;">
-                                            <?= number_format($bal) ?> MWK DUE
+                                        <span class="badge <?= $hatchPct >= 65 ? 'bg-success text-white' : 'bg-warning text-dark' ?> fw-bold">
+                                            <?= $hatchPct ?>%
                                         </span>
                                     <?php else: ?>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold"
-                                            style="font-size: 0.72rem;">
-                                            Paid in Full
-                                        </span>
+                                        <span class="text-muted small">—</span>
                                     <?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Z-Fold Body: Detailed Hatchery Lifecycle & Actions -->
-                        <div class="zfold-body">
-                            <div class="row g-3">
-                                <div class="col-12 col-md-4">
-                                    <div class="p-3 bg-white rounded-3 border h-100">
-                                        <span class="text-muted small d-block mb-1 text-uppercase fw-semibold"
-                                            style="font-size: 0.7rem;">Hatchery Timeline</span>
-                                        <div class="d-flex justify-content-between py-1 border-bottom small">
-                                            <span class="text-muted">Intake Date:</span>
-                                            <span
-                                                class="fw-semibold text-dark font-monospace"><?= !empty($j['date_received']) ? date('d-M-Y', strtotime($j['date_received'])) : '—' ?></span>
-                                        </div>
-                                        <div class="d-flex justify-content-between py-1 border-bottom small">
-                                            <span class="text-muted">Day 18 Transfer:</span>
-                                            <span
-                                                class="fw-semibold text-warning-emphasis font-monospace"><?= !empty($j['date_transfer']) ? date('d-M-Y', strtotime($j['date_transfer'])) : 'Auto' ?></span>
-                                        </div>
-                                        <div class="d-flex justify-content-between pt-1 small">
-                                            <span class="text-muted">Hatch Day:</span>
-                                            <span
-                                                class="fw-bold text-success font-monospace"><?= !empty($j['date_hatched']) ? date('d-M-Y', strtotime($j['date_hatched'])) : (!empty($j['expected_hatch_date']) ? date('d-M-Y', strtotime($j['expected_hatch_date'])) : 'Pending') ?></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-4">
-                                    <div class="p-3 bg-white rounded-3 border h-100">
-                                        <span class="text-muted small d-block mb-1 text-uppercase fw-semibold"
-                                            style="font-size: 0.7rem;">Financial Settlement</span>
-                                        <?php if ($isOwnerBatch): ?>
-                                            <div
-                                                class="p-2 bg-success-subtle text-success rounded-3 small fw-semibold text-center mt-2">
-                                                <i class="bi bi-check-circle-fill me-1"></i>Owner Hatch: Complimentary zero-balance.
-                                            </div>
-                                        <?php else: ?>
-                                            <div class="d-flex justify-content-between py-1 border-bottom small">
-                                                <span class="text-muted">Total Batch Cost:</span>
-                                                <span class="fw-semibold text-dark font-monospace"><?= number_format($cost) ?>
-                                                    MWK</span>
-                                            </div>
-                                            <div class="d-flex justify-content-between py-1 border-bottom small">
-                                                <span class="text-muted">Payments Made:</span>
-                                                <span class="fw-semibold text-success font-monospace"><?= number_format($paid) ?>
-                                                    MWK</span>
-                                            </div>
-                                            <div class="d-flex justify-content-between pt-1 small">
-                                                <span class="fw-semibold text-dark">Balance Due:</span>
-                                                <strong class="font-monospace <?= $bal > 0 ? 'text-danger' : 'text-success' ?>">
-                                                    <?= number_format($bal) ?> MWK
-                                                </strong>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-4">
-                                    <div class="p-3 bg-white rounded-3 border h-100 d-flex flex-column justify-content-between">
-                                        <div>
-                                            <span class="text-muted small d-block mb-1 text-uppercase fw-semibold"
-                                                style="font-size: 0.7rem;">Batch Operations</span>
-                                            <small class="text-muted d-block mb-2 font-monospace">Job Reference
-                                                #<?= e((string) $j['id']) ?> &bull;
-                                                <?= e($j['breed_name'] ?? 'Local/Mixed') ?></small>
-                                        </div>
-                                        <div class="d-flex flex-wrap gap-2 pt-2 border-top">
-                                            <a href="<?= url("/incubation-jobs/{$j['id']}") ?>"
-                                                class="btn btn-primary btn-sm rounded-pill px-3 fw-bold"
-                                                style="font-size: 0.75rem;">
-                                                <i class="bi bi-eye me-1"></i>View Lifecycle &rarr;
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
+                                </td>
+                                <td class="text-nowrap small text-muted font-monospace">
+                                    <?= !empty($j['date_hatched']) ? date('d-M-Y', strtotime($j['date_hatched'])) : (!empty($j['expected_hatch_date']) ? date('d-M-Y', strtotime($j['expected_hatch_date'])) : 'Pending') ?>
+                                </td>
+                                <td class="text-end font-monospace">
+                                    <?php if ($isOwnerBatch): ?>
+                                        <span class="text-success small fw-semibold">0 (Owner)</span>
+                                    <?php elseif ($bal > 0): ?>
+                                        <span class="text-danger fw-bold"><?= number_format($bal) ?> MWK</span>
+                                    <?php else: ?>
+                                        <span class="text-success small fw-semibold">Paid</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge <?= $statusBadge ?> fw-semibold px-2 py-1">
+                                        <?= strtoupper($jobStatus) ?>
+                                    </span>
+                                </td>
+                                <td class="text-end pe-3 text-nowrap">
+                                    <a href="<?= url("/incubation-jobs/{$j['id']}") ?>" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-1" title="View Batch Details">
+                                        <i class="bi bi-eye me-1"></i>View
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
 
         <!-- Pagination -->
