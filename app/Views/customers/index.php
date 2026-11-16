@@ -105,9 +105,9 @@
                             <?php
                             $invoiced = (int) $c['total_invoiced'];
                             $paid = (int) $c['total_paid'];
-                            $bal = max(0, (int) $c['current_balance']);
+                            $isInternal = !empty($c['is_internal']) || stripos((string)$c['name'], 'msantha') !== false;
+                            $bal = $isInternal ? 0 : max(0, (int) $c['current_balance']);
                             $jobs = (int) $c['total_jobs'];
-                            $isInternal = !empty($c['is_internal']);
                             ?>
                             <tr>
                                 <td class="ps-3">
@@ -144,7 +144,11 @@
                                     <?= number_format($paid) ?> MWK
                                 </td>
                                 <td class="text-end font-monospace">
-                                    <?php if ($bal > 0): ?>
+                                    <?php if ($isInternal): ?>
+                                        <span class="badge bg-secondary-subtle text-secondary border font-sans-serif">
+                                            Owner (N/A)
+                                        </span>
+                                    <?php elseif ($bal > 0): ?>
                                         <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold fs-6">
                                             <?= number_format($bal) ?> MWK
                                         </span>

@@ -41,9 +41,10 @@ class CustomerController
 
         $spendingRow = $pdo->query("
             SELECT 
-                COALESCE(SUM(cost), 0) AS total_spent,
-                COALESCE(SUM(CAST(cost AS SIGNED) - CAST(amount_paid AS SIGNED)), 0) AS total_balance
-            FROM incubation_jobs
+                COALESCE(SUM(j.cost), 0) AS total_spent,
+                COALESCE(SUM(CASE WHEN c.is_internal = 1 OR LOWER(c.name) LIKE '%msantha%' THEN 0 ELSE GREATEST(0, CAST(j.cost AS SIGNED) - CAST(j.amount_paid AS SIGNED)) END), 0) AS total_balance
+            FROM incubation_jobs j
+            JOIN customers c ON c.id = j.customer_id
         ")->fetch(PDO::FETCH_ASSOC);
 
         if ($spendingRow) {
@@ -74,12 +75,15 @@ class CustomerController
                 COUNT(j.id) AS total_jobs,
                 COALESCE(SUM(j.cost), 0) AS total_invoiced,
                 COALESCE(SUM(j.amount_paid), 0) AS total_paid,
-                COALESCE(SUM(CAST(j.cost AS SIGNED) - CAST(j.amount_paid AS SIGNED)), 0) AS current_balance
+                CASE 
+                    WHEN c.is_internal = 1 OR LOWER(c.name) LIKE '%msantha%' THEN 0 
+                    ELSE GREATEST(0, COALESCE(SUM(CAST(j.cost AS SIGNED) - CAST(j.amount_paid AS SIGNED)), 0))
+                END AS current_balance
             FROM customers c
             LEFT JOIN incubation_jobs j ON j.customer_id = c.id
             {$whereSql}
             GROUP BY c.id
-            ORDER BY total_invoiced DESC, c.id DESC
+            ORDER BY c.is_internal DESC, total_invoiced DESC, c.id DESC
             LIMIT {$perPage} OFFSET {$offset}
         ";
         $stmt = $pdo->prepare($sql);
@@ -141,7 +145,8 @@ class CustomerController
         // Customer aggregate stats
         $totalCost = array_sum(array_column($jobs, 'cost'));
         $totalPaid = array_sum(array_column($jobs, 'total_paid'));
-        $balance = $totalCost - $totalPaid;
+        $isInternal = (!empty($customer['is_internal']) || stripos((string)$customer['name'], 'msantha') !== false);
+        $balance = $isInternal ? 0 : max(0, $totalCost - $totalPaid);
         $eggsSet = array_sum(array_column($jobs, 'eggs_incubated'));
         $chicks = array_sum(array_column($jobs, 'hatched'));
         $avgHatch = $eggsSet > 0 ? round(($chicks / $eggsSet) * 100, 1) : 0;
@@ -160,7 +165,7 @@ class CustomerController
 
         $totalSales = array_sum(array_column($sales, 'total'));
         $totalSalesPaid = array_sum(array_column($sales, 'paid'));
-        $salesBalance = max(0, $totalSales - $totalSalesPaid);
+        $salesBalance = $isInternal ? 0 : max(0, $totalSales - $totalSalesPaid);
 
         $legacyNames = [];
         if (!empty($customer['legacy_names'])) {

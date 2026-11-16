@@ -74,12 +74,13 @@
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 <?= $balance > 0 ? 'border-danger' : 'border-success' ?>">
+            <?php $isInternalCustomer = !empty($customer['is_internal']) || stripos((string)$customer['name'], 'msantha') !== false; ?>
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 <?= $isInternalCustomer ? 'border-secondary' : ($balance > 0 ? 'border-danger' : 'border-success') ?>">
                 <span class="text-muted small fw-semibold text-uppercase">Current Balance</span>
-                <div class="fs-3 fw-bold <?= $balance > 0 ? 'text-danger' : 'text-success' ?> mt-1 font-monospace">
-                    <?= number_format($balance) ?> <small class="fs-6 text-muted">MWK</small>
+                <div class="fs-3 fw-bold <?= $isInternalCustomer ? 'text-secondary' : ($balance > 0 ? 'text-danger' : 'text-success') ?> mt-1 font-monospace">
+                    <?= $isInternalCustomer ? '0' : number_format($balance) ?> <small class="fs-6 text-muted font-sans-serif">MWK</small>
                 </div>
-                <small class="text-muted"><?= $balance > 0 ? 'Outstanding balance due' : 'Fully settled / Nil' ?></small>
+                <small class="text-muted"><?= $isInternalCustomer ? 'Farm Owner (No Debt)' : ($balance > 0 ? 'Outstanding balance due' : 'Fully settled / Nil') ?></small>
             </div>
         </div>
     </div>
@@ -229,7 +230,8 @@
                                     $hatchPct = !empty($j['hatch_percent']) ? (float)$j['hatch_percent'] : ($eggs > 0 ? round(($hatched / $eggs) * 100, 1) : 0);
                                     $cost = (int) $j['cost'];
                                     $paid = (int) $j['total_paid'];
-                                    $bal = (int) $j['balance'];
+                                    $isOwner = !empty($customer['is_internal']) || stripos((string)$customer['name'], 'msantha') !== false;
+                                    $bal = $isOwner ? 0 : (int) $j['balance'];
                                     ?>
                                     <tr>
                                         <td class="ps-3">
@@ -246,7 +248,7 @@
                                         </td>
                                         <td class="text-end fw-semibold text-dark"><?= number_format($cost) ?></td>
                                         <td class="text-end text-success fw-semibold"><?= number_format($paid) ?></td>
-                                        <td class="text-end fw-bold <?= $bal > 0 ? 'text-danger' : 'text-muted' ?>"><?= number_format($bal) ?></td>
+                                        <td class="text-end fw-bold <?= $isOwner ? 'text-muted' : ($bal > 0 ? 'text-danger' : 'text-muted') ?>"><?= $isOwner ? '—' : number_format($bal) ?></td>
                                         <td class="text-center font-sans-serif">
                                             <span class="badge bg-light text-dark border"><?= ucfirst(e($j['status'])) ?></span>
                                         </td>
@@ -316,7 +318,7 @@
                                     <?php
                                     $sTot = (int) $s['total'];
                                     $sPaid = (int) $s['paid'];
-                                    $sBal = max(0, $sTot - $sPaid);
+                                    $sBal = $isOwner ? 0 : max(0, $sTot - $sPaid);
                                     ?>
                                     <tr>
                                         <td class="ps-3 fw-semibold text-dark"><?= date('d-M-Y', strtotime($s['sale_date'])) ?></td>
@@ -324,7 +326,9 @@
                                         <td class="text-end text-muted"><?= number_format((int)$s['items_count']) ?></td>
                                         <td class="text-end fw-bold text-dark"><?= number_format($sTot) ?> MWK</td>
                                         <td class="text-end text-success fw-semibold"><?= number_format($sPaid) ?> MWK</td>
-                                        <td class="text-end fw-bold <?= $sBal > 0 ? 'text-danger' : 'text-muted' ?>"><?= number_format($sBal) ?> MWK</td>
+                                        <td class="text-end fw-bold <?= $isOwner ? 'text-muted' : ($sBal > 0 ? 'text-danger' : 'text-muted') ?>">
+                                            <?= $isOwner ? '—' : number_format($sBal) . ' MWK' ?>
+                                        </td>
                                         <td class="text-end pe-3 font-sans-serif">
                                             <a href="<?= url("/sales/{$s['id']}/receipt") ?>" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill px-2 py-0.5" style="font-size: 0.7rem;">
                                                 Receipt
