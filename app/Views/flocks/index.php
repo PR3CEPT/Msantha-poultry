@@ -181,6 +181,66 @@
         </div>
 
     <?php else: ?>
+        <!-- BREED POPULATION SUMMARY (Across All Batches) -->
+        <?php if (!empty($breedStats)): ?>
+            <div class="card border-0 shadow-sm rounded-4 bg-white mb-4 overflow-hidden">
+                <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-dark fs-6">
+                        <i class="bi bi-pie-chart-fill text-success me-1"></i>Total Bird Population by Breed & Species
+                    </span>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                        <?= count($breedStats) ?> Breeds Tracked
+                    </span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-muted small text-uppercase font-monospace" style="font-size: 0.72rem;">
+                            <tr>
+                                <th class="ps-3 py-2.5">Breed</th>
+                                <th class="py-2.5">Species</th>
+                                <th class="text-center py-2.5">Active Batches</th>
+                                <th class="text-end py-2.5">Initial Stock</th>
+                                <th class="text-end py-2.5">Total Sold</th>
+                                <th class="text-end py-2.5">Total Loss</th>
+                                <th class="text-end pe-3 py-2.5">Total Current Live Birds</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($breedStats as $bs): ?>
+                                <tr>
+                                    <td class="ps-3 fw-bold text-dark">
+                                        <?= e($bs['breed_name']) ?>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border"><?= e($bs['species_name']) ?></span>
+                                    </td>
+                                    <td class="text-center font-monospace">
+                                        <span class="badge <?= (int)$bs['active_batches'] > 0 ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-light text-muted border' ?>">
+                                            <?= number_format((int)$bs['active_batches']) ?> / <?= number_format((int)$bs['total_batches']) ?>
+                                        </span>
+                                    </td>
+                                    <td class="text-end font-monospace text-muted small">
+                                        <?= number_format((int)$bs['total_initial']) ?>
+                                    </td>
+                                    <td class="text-end font-monospace text-info fw-semibold">
+                                        <?= number_format((int)$bs['total_sold']) ?>
+                                    </td>
+                                    <td class="text-end font-monospace text-danger small">
+                                        <?= number_format((int)$bs['total_deaths']) ?>
+                                    </td>
+                                    <td class="text-end pe-3 font-monospace">
+                                        <span class="fw-bold fs-6 <?= (int)$bs['total_current_birds'] > 0 ? 'text-success' : 'text-secondary' ?>">
+                                            <?= number_format((int)$bs['total_current_birds']) ?> <small class="fw-normal text-muted" style="font-size: 0.72rem;">birds</small>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <!-- BATCHES TAB (Clean Table with Pagination) -->
         <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4">
             <form method="GET" action="<?= url('/flocks') ?>" class="row g-2 align-items-center">
@@ -221,18 +281,19 @@
                         <tr>
                             <th class="ps-3 py-3">Batch Code</th>
                             <th class="py-3">Breed / Species</th>
-                            <th class="py-3" style="width: 120px;">Intake Date</th>
-                            <th class="text-end py-3" style="width: 110px;">Initial Stock</th>
-                            <th class="text-end py-3" style="width: 120px;">Deaths (Loss)</th>
-                            <th class="text-end py-3" style="width: 140px;">Live Stock</th>
-                            <th class="py-3" style="width: 100px;">Status</th>
-                            <th class="text-end pe-3 py-3" style="width: 130px;">Action</th>
+                            <th class="py-3" style="width: 110px;">Age</th>
+                            <th class="py-3" style="width: 115px;">Intake Date</th>
+                            <th class="text-end py-3" style="width: 105px;">Initial Stock</th>
+                            <th class="text-end py-3" style="width: 115px;">Deaths (Loss)</th>
+                            <th class="text-end py-3" style="width: 130px;">Live Stock</th>
+                            <th class="py-3" style="width: 95px;">Status</th>
+                            <th class="text-end pe-3 py-3" style="width: 145px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($flocks)): ?>
                             <tr>
-                                <td colspan="8" class="text-center py-5 text-muted">
+                                <td colspan="9" class="text-center py-5 text-muted">
                                     <i class="bi bi-inbox fs-2 d-block mb-2 text-secondary"></i>
                                     No flock batches found matching the filter criteria.
                                 </td>
@@ -254,6 +315,10 @@
                                     </td>
                                     <td>
                                         <span class="badge bg-light text-dark border"><?= e($f['breed_name']) ?></span>
+                                    </td>
+                                    <td class="font-monospace">
+                                        <span class="fw-bold text-dark"><?= (int)$f['age_weeks'] ?> wks</span>
+                                        <small class="text-muted d-block" style="font-size: 0.7rem;"><?= (int)$f['age_days'] ?> days</small>
                                     </td>
                                     <td class="font-monospace small text-muted">
                                         <?= !empty($f['start_date']) ? date('d-M-Y', strtotime($f['start_date'])) : '—' ?>
@@ -280,9 +345,14 @@
                                     </td>
                                     <td class="text-end pe-3">
                                         <div class="d-inline-flex gap-1">
+                                            <?php if (\App\Core\Auth::can('flocks', 'edit')): ?>
+                                                <a href="<?= url("/flocks/{$f['flock_id']}/edit") ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-0.5" style="font-size: 0.72rem;" title="Edit Batch Details">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            <?php endif; ?>
                                             <?php if (\App\Core\Auth::can('flocks', 'create')): ?>
                                                 <a href="<?= url('/flocks/quick-entry?flock_id=' . $f['flock_id']) ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-0.5" style="font-size: 0.72rem;" title="Daily Log">
-                                                    <i class="bi bi-pencil-square"></i>
+                                                    <i class="bi bi-plus-circle"></i>
                                                 </a>
                                             <?php endif; ?>
                                             <a href="<?= url("/flocks/{$f['flock_id']}") ?>" class="btn btn-sm btn-success rounded-pill px-2.5 py-0.5 fw-semibold" style="font-size: 0.72rem;">

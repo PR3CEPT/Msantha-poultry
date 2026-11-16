@@ -20,6 +20,11 @@
             </p>
         </div>
         <div class="d-flex flex-wrap gap-2">
+            <?php if (\App\Core\Auth::can('flocks', 'edit')): ?>
+                <a href="<?= url("/flocks/{$flock['flock_id']}/edit") ?>" class="btn btn-outline-secondary fw-semibold">
+                    <i class="bi bi-pencil me-1"></i>Edit Batch Details
+                </a>
+            <?php endif; ?>
             <a href="<?= url("/flocks/quick-entry?flock_id={$flock['flock_id']}") ?>" class="btn btn-primary fw-bold">
                 <i class="bi bi-pencil-square me-1"></i>Quick Daily Entry
             </a>

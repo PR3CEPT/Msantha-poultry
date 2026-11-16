@@ -69,10 +69,10 @@
                             </div>
 
                             <div id="itemsContainer">
-                                <div class="item-row row g-2 mb-2 p-2 bg-white rounded-2 border">
-                                    <div class="col-md-4">
-                                        <label class="form-label small text-muted">Item Type</label>
-                                        <select name="item_type[]" class="form-select form-select-sm" required>
+                                <div class="item-row row g-2 mb-2 p-2 bg-white rounded-2 border align-items-end">
+                                    <div class="col-md-3">
+                                        <label class="form-label small text-muted">Item Type <span class="text-danger">*</span></label>
+                                        <select name="item_type[]" class="form-select form-select-sm item-type-select" required>
                                             <option value="live_birds">Live Birds</option>
                                             <option value="table_eggs">Table Eggs (Trays/Loose)</option>
                                             <option value="fertilised_eggs">Fertilised Eggs</option>
@@ -83,20 +83,31 @@
                                         </select>
                                     </div>
                                     <div class="col-md-3">
+                                        <label class="form-label small text-muted">Flock Batch (for Live Birds)</label>
+                                        <select name="flock_id[]" class="form-select form-select-sm flock-select">
+                                            <option value="">-- Deduct from Batch --</option>
+                                            <?php foreach ($flocks as $f): ?>
+                                                <option value="<?= $f['flock_id'] ?>" data-stock="<?= $f['current_stock'] ?>">
+                                                    <?= e($f['batch_code']) ?> (<?= e($f['breed_name']) ?> &bull; <?= number_format((int)$f['current_stock']) ?> avail)
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
                                         <label class="form-label small text-muted">Breed (Optional)</label>
                                         <select name="breed_id[]" class="form-select form-select-sm">
-                                            <option value="">-- Any / Mixed --</option>
+                                            <option value="">-- Any Breed --</option>
                                             <?php foreach ($breeds as $b): ?>
                                                 <option value="<?= $b['id'] ?>"><?= e($b['name']) ?></option>
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
                                     <div class="col-md-2">
-                                        <label class="form-label small text-muted">Quantity</label>
+                                        <label class="form-label small text-muted">Qty <span class="text-danger">*</span></label>
                                         <input type="number" name="quantity[]" class="form-control form-control-sm qty-input" min="1" value="1" required>
                                     </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label small text-muted">Unit Price (MWK)</label>
+                                    <div class="col-md-2">
+                                        <label class="form-label small text-muted">Unit Price (MWK) <span class="text-danger">*</span></label>
                                         <input type="number" name="unit_price[]" class="form-control form-control-sm price-input" min="0" value="8500" required>
                                     </div>
                                 </div>

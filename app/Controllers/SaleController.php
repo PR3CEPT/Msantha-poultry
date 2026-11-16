@@ -120,7 +120,7 @@ class SaleController
 
         $customers = $pdo->query("SELECT id, name, phone FROM customers ORDER BY name ASC LIMIT 200")->fetchAll(PDO::FETCH_ASSOC);
         $breeds = $pdo->query("SELECT * FROM breeds ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
-        $flocks = $pdo->query("SELECT flock_id, batch_code, breed_name FROM v_flock_status WHERE current_stock > 0 ORDER BY batch_code ASC")->fetchAll(PDO::FETCH_ASSOC);
+        $flocks = $pdo->query("SELECT flock_id, batch_code, breed_name, current_stock FROM v_flock_status WHERE current_stock > 0 ORDER BY batch_code ASC")->fetchAll(PDO::FETCH_ASSOC);
 
         return View::render('sales/create', [
             'pageTitle' => 'Record Commercial Sale',
@@ -143,6 +143,7 @@ class SaleController
         $quantities = (array) $request->input('quantity', []);
         $unitPrices = (array) $request->input('unit_price', []);
         $breedIds = (array) $request->input('breed_id', []);
+        $flockIds = (array) $request->input('flock_id', []);
 
         if (empty($itemTypes)) {
             $_SESSION['flash_error'] = "At least one sale line item is required.";
@@ -157,10 +158,29 @@ class SaleController
             $unitPrice = max(0, (int) ($unitPrices[$i] ?? 0));
             $lineAmt = $qty * $unitPrice;
             $bId = (int) ($breedIds[$i] ?? 0) ?: null;
+            $fId = (int) ($flockIds[$i] ?? 0) ?: null;
+
+            // Stock validation for live birds
+            if ($type === 'live_birds' && $fId) {
+                $stockStmt = $pdo->prepare("SELECT current_stock, batch_code FROM v_flock_status WHERE flock_id = ?");
+                $stockStmt->execute([$fId]);
+                $flockInfo = $stockStmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$flockInfo) {
+                    $_SESSION['flash_error'] = "Selected flock batch does not exist.";
+                    return Response::redirect(url('/sales/create'));
+                }
+
+                if ((int) $flockInfo['current_stock'] < $qty) {
+                    $_SESSION['flash_error'] = "Cannot sell {$qty} birds from batch '{$flockInfo['batch_code']}': only {$flockInfo['current_stock']} birds available in stock.";
+                    return Response::redirect(url('/sales/create'));
+                }
+            }
 
             $items[] = [
                 'item_type' => $type,
                 'breed_id' => $bId,
+                'flock_id' => $fId,
                 'quantity' => $qty,
                 'unit_price' => $unitPrice,
                 'amount' => $lineAmt,
@@ -182,18 +202,39 @@ class SaleController
             $saleId = (int) $pdo->lastInsertId();
 
             $itemStmt = $pdo->prepare("
-                INSERT INTO sale_items (sale_id, item_type, breed_id, quantity, unit_price, amount)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO sale_items (sale_id, item_type, breed_id, flock_id, quantity, unit_price, amount)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             ");
+
+            $eventStmt = $pdo->prepare("
+                INSERT INTO flock_events (flock_id, event_date, event_type, quantity, unit_price, amount, customer_id, remarks, created_by, created_at)
+                VALUES (?, ?, 'sale', ?, ?, ?, ?, ?, ?, NOW())
+            ");
+
             foreach ($items as $item) {
                 $itemStmt->execute([
                     $saleId,
                     $item['item_type'],
                     $item['breed_id'],
+                    $item['flock_id'],
                     $item['quantity'],
                     $item['unit_price'],
                     $item['amount'],
                 ]);
+
+                // If live birds sold from a specific flock, record authoritative deduction event
+                if ($item['item_type'] === 'live_birds' && !empty($item['flock_id'])) {
+                    $eventStmt->execute([
+                        $item['flock_id'],
+                        $saleDate,
+                        $item['quantity'],
+                        $item['unit_price'],
+                        $item['amount'],
+                        $customerId,
+                        "Commercial Sale #{$saleId}",
+                        Auth::id(),
+                    ]);
+                }
             }
 
             $pdo->commit();
@@ -206,7 +247,7 @@ class SaleController
                 'is_credit' => $isCredit,
             ]);
 
-            $_SESSION['flash_success'] = "Sale #{$saleId} recorded for " . number_format($total) . " MWK (" . ($isCredit ? "Debtor Credit Sale" : "Settled") . ").";
+            $_SESSION['flash_success'] = "Sale #{$saleId} recorded for " . number_format($total) . " MWK (" . ($isCredit ? "Debtor Credit Sale" : "Settled") . "). Batch stock deducted accordingly.";
             return Response::redirect(url("/sales/{$saleId}/receipt"));
         } catch (Throwable $e) {
             $pdo->rollBack();
@@ -235,9 +276,10 @@ class SaleController
         }
 
         $itemsStmt = $pdo->prepare("
-            SELECT si.*, b.name AS breed_name
+            SELECT si.*, b.name AS breed_name, f.batch_code
             FROM sale_items si
             LEFT JOIN breeds b ON b.id = si.breed_id
+            LEFT JOIN flocks f ON f.id = si.flock_id
             WHERE si.sale_id = ?
         ");
         $itemsStmt->execute([$id]);

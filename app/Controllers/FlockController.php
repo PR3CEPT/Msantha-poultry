@@ -57,6 +57,26 @@ class FlockController
             $stats['total_sold'] = (int) $stockRow['total_sold'];
         }
 
+        // Aggregate population across batches by breed
+        $breedStats = $pdo->query("
+            SELECT 
+                b.id AS breed_id,
+                b.name AS breed_name,
+                s.name AS species_name,
+                COUNT(v.flock_id) AS total_batches,
+                COALESCE(SUM(CASE WHEN v.current_stock > 0 THEN 1 ELSE 0 END), 0) AS active_batches,
+                COALESCE(SUM(v.start_count), 0) AS total_initial,
+                COALESCE(SUM(v.deaths_todate), 0) AS total_deaths,
+                COALESCE(SUM(v.sold_count), 0) AS total_sold,
+                COALESCE(SUM(v.current_stock), 0) AS total_current_birds
+            FROM breeds b
+            JOIN species s ON s.id = b.species_id
+            LEFT JOIN v_flock_status v ON v.breed_id = b.id
+            GROUP BY b.id, b.name, s.name
+            HAVING total_batches > 0 OR total_current_birds > 0
+            ORDER BY total_current_birds DESC, b.name ASC
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
         if ($tab === 'events') {
             $page = max(1, (int) $request->query('page', 1));
             $perPage = 25;
@@ -95,6 +115,7 @@ class FlockController
                 'activeNav' => 'flocks',
                 'tab' => 'events',
                 'stats' => $stats,
+                'breedStats' => $breedStats,
                 'events' => $events,
                 'search' => $search,
                 'page' => $page,
@@ -153,6 +174,7 @@ class FlockController
             'activeNav' => 'flocks',
             'tab' => 'batches',
             'stats' => $stats,
+            'breedStats' => $breedStats,
             'flocks' => $flocks,
             'search' => $search,
             'statusFilter' => $statusFilter,
@@ -397,8 +419,9 @@ class FlockController
         return Response::redirect(url("/flocks/price-ladder?breed_id={$breedId}"));
     }
 
-    public function close(Request $request, int $id): Response
+    public function close(Request $request, int|string $id): Response
     {
+        $id = (int) $id;
         Auth::requireRole(['owner', 'manager']);
         $flockService = new FlockService();
 
@@ -412,5 +435,84 @@ class FlockController
         }
 
         return Response::redirect(url("/flocks/{$id}"));
+    }
+
+    public function edit(Request $request, int|string $id): Response
+    {
+        $id = (int) $id;
+        Auth::requirePermission('flocks', 'edit');
+        $pdo = DB::pdo();
+
+        $stmt = $pdo->prepare("SELECT * FROM flocks WHERE id = ?");
+        $stmt->execute([$id]);
+        $flock = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$flock) {
+            $_SESSION['flash_error'] = "Flock batch #{$id} not found.";
+            return Response::redirect(url('/flocks'));
+        }
+
+        $breeds = $pdo->query("SELECT * FROM breeds ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+        $flashSuccess = $_SESSION['flash_success'] ?? null;
+        $flashError = $_SESSION['flash_error'] ?? null;
+        unset($_SESSION['flash_success'], $_SESSION['flash_error']);
+
+        return View::render('flocks/edit', [
+            'pageTitle' => "Edit Batch: {$flock['batch_code']}",
+            'activeNav' => 'flocks',
+            'flock' => $flock,
+            'breeds' => $breeds,
+            'flashSuccess' => $flashSuccess,
+            'flashError' => $flashError,
+        ]);
+    }
+
+    public function update(Request $request, int|string $id): Response
+    {
+        $id = (int) $id;
+        Auth::requirePermission('flocks', 'edit');
+        $pdo = DB::pdo();
+
+        $batchCode = trim((string) $request->input('batch_code', ''));
+        $breedId = (int) $request->input('breed_id', 1);
+        $startDate = (string) $request->input('start_date', date('Y-m-d'));
+        $startCount = max(1, (int) $request->input('start_count', 0));
+        $purpose = (string) $request->input('purpose', 'mixed');
+        $source = (string) $request->input('source', 'hatched_own');
+        $status = (string) $request->input('status', 'active');
+        $notes = trim((string) $request->input('notes', ''));
+
+        if ($batchCode === '') {
+            $_SESSION['flash_error'] = "Batch code is required.";
+            return Response::redirect(url("/flocks/{$id}/edit"));
+        }
+
+        try {
+            $oldStmt = $pdo->prepare("SELECT * FROM flocks WHERE id = ?");
+            $oldStmt->execute([$id]);
+            $oldFlock = $oldStmt->fetch(PDO::FETCH_ASSOC);
+
+            $stmt = $pdo->prepare("
+                UPDATE flocks 
+                SET batch_code = ?, breed_id = ?, start_date = ?, start_count = ?, purpose = ?, source = ?, status = ?, notes = ?
+                WHERE id = ?
+            ");
+            $stmt->execute([$batchCode, $breedId, $startDate, $startCount, $purpose, $source, $status, $notes ?: null, $id]);
+
+            Audit::log('update', 'flocks', $id, $oldFlock, [
+                'batch_code' => $batchCode,
+                'breed_id' => $breedId,
+                'start_count' => $startCount,
+                'start_date' => $startDate,
+                'status' => $status,
+            ]);
+
+            $_SESSION['flash_success'] = "Flock batch '{$batchCode}' updated successfully.";
+            return Response::redirect(url("/flocks/{$id}"));
+        } catch (Throwable $e) {
+            $_SESSION['flash_error'] = "Failed to update flock: " . $e->getMessage();
+            return Response::redirect(url("/flocks/{$id}/edit"));
+        }
     }
 }

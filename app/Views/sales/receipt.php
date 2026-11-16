@@ -61,7 +61,14 @@
             <tbody>
                 <?php foreach ($items as $item): ?>
                     <tr>
-                        <td class="fw-semibold"><?= ucwords(str_replace('_', ' ', $item['item_type'])) ?></td>
+                        <td>
+                            <div class="fw-semibold text-dark"><?= ucwords(str_replace('_', ' ', $item['item_type'])) ?></div>
+                            <?php if (!empty($item['batch_code'])): ?>
+                                <span class="badge bg-light text-dark border font-monospace" style="font-size: 0.72rem;">
+                                    <i class="bi bi-boxes me-1 text-success"></i>Batch: <?= e($item['batch_code']) ?>
+                                </span>
+                            <?php endif; ?>
+                        </td>
                         <td><?= e($item['breed_name'] ?? 'General') ?></td>
                         <td class="text-end"><?= number_format((int)$item['quantity']) ?></td>
                         <td class="text-end"><?= number_format((int)$item['unit_price']) ?> MWK</td>

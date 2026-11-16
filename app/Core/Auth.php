@@ -370,12 +370,24 @@ class Auth
             return true;
         }
 
+        // Support 'edit' and 'update' as interchangeable synonyms
+        $actions = [$action];
+        if ($action === 'edit') {
+            $actions[] = 'update';
+        } elseif ($action === 'update') {
+            $actions[] = 'edit';
+        }
+
         // Check custom user permissions from permissions config
         $username = self::username();
         if ($username !== null) {
             $userPerms = Config::get("permissions.user_permissions.{$username}", []);
-            if (isset($userPerms[$module]) && in_array($action, $userPerms[$module], true)) {
-                return true;
+            if (isset($userPerms[$module])) {
+                foreach ($actions as $act) {
+                    if (in_array($act, $userPerms[$module], true)) {
+                        return true;
+                    }
+                }
             }
         }
 
@@ -383,21 +395,33 @@ class Auth
         $user = self::user();
         if (!empty($user['custom_permissions'])) {
             $dbPerms = json_decode((string) $user['custom_permissions'], true);
-            if (is_array($dbPerms) && in_array("{$module}.{$action}", $dbPerms, true)) {
-                return true;
-            }
-            if (is_array($dbPerms) && $module === 'admin_users' && in_array('users.change_roles', $dbPerms, true)) {
-                return true;
+            if (is_array($dbPerms)) {
+                foreach ($actions as $act) {
+                    if (in_array("{$module}.{$act}", $dbPerms, true)) {
+                        return true;
+                    }
+                }
+                if ($module === 'admin_users' && in_array('users.change_roles', $dbPerms, true)) {
+                    return true;
+                }
             }
         }
 
         $permissions = Config::get('permissions.roles.' . $role, []);
-        if (isset($permissions['*']) && in_array($action, $permissions['*'], true)) {
-            return true;
+        if (isset($permissions['*'])) {
+            foreach ($actions as $act) {
+                if (in_array($act, $permissions['*'], true)) {
+                    return true;
+                }
+            }
         }
 
-        if (isset($permissions[$module]) && in_array($action, $permissions[$module], true)) {
-            return true;
+        if (isset($permissions[$module])) {
+            foreach ($actions as $act) {
+                if (in_array($act, $permissions[$module], true)) {
+                    return true;
+                }
+            }
         }
 
         return false;

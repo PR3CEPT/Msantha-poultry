@@ -185,6 +185,8 @@ $router->post('/flocks/quick-entry', [FlockController::class, 'saveQuickEntry'])
 $router->get('/flocks/price-ladder', [FlockController::class, 'priceLadder']);
 $router->post('/flocks/price-ladder', [FlockController::class, 'savePriceLadder']);
 $router->get('/flocks/{id}', [FlockController::class, 'show']);
+$router->get('/flocks/{id}/edit', [FlockController::class, 'edit']);
+$router->post('/flocks/{id}', [FlockController::class, 'update']);
 $router->post('/flocks/{id}/close', [FlockController::class, 'close']);
 
 // Egg Production Routes
