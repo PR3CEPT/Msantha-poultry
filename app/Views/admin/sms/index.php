@@ -50,30 +50,30 @@
     <!-- KPI Summary Row -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-4">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-warning">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-warning">
                 <span class="text-muted small fw-semibold text-uppercase">Queued / Sending</span>
-                <div class="fs-4 fw-bold text-warning mt-1"><?= number_format($stats['queued']) ?></div>
+                <div class="fs-4 fw-bold text-warning mt-1 font-monospace"><?= number_format($stats['queued']) ?></div>
                 <small class="text-muted">Awaiting cron dispatch</small>
             </div>
         </div>
         <div class="col-6 col-md-4">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-success">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-success">
                 <span class="text-muted small fw-semibold text-uppercase">Delivered / Sent</span>
-                <div class="fs-4 fw-bold text-success mt-1"><?= number_format($stats['sent']) ?></div>
+                <div class="fs-4 fw-bold text-success mt-1 font-monospace"><?= number_format($stats['sent']) ?></div>
                 <small class="text-muted">Successfully transmitted</small>
             </div>
         </div>
         <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-danger">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-danger">
                 <span class="text-muted small fw-semibold text-uppercase">Failed Deliveries</span>
-                <div class="fs-4 fw-bold text-danger mt-1"><?= number_format($stats['failed']) ?></div>
+                <div class="fs-4 fw-bold text-danger mt-1 font-monospace"><?= number_format($stats['failed']) ?></div>
                 <small class="text-muted">Retried 3x or invalid number</small>
             </div>
         </div>
     </div>
 
     <!-- Filters -->
-    <div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-white">
         <div class="card-header bg-white border-bottom p-3">
             <form method="GET" action="<?= url('/admin/sms') ?>" class="row g-2 align-items-center">
                 <div class="col-md-5">
@@ -100,18 +100,25 @@
             </form>
         </div>
 
+        <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold text-dark mb-0 fs-6"><i class="bi bi-chat-dots me-2 text-primary"></i>SMS Dispatch Log & Outbox</h5>
+            <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                Showing <?= count($outbox) ?> of <?= number_format($totalRows) ?> Messages
+            </span>
+        </div>
+
         <!-- Outbox Table -->
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="table-light text-muted small text-uppercase">
+                <thead class="table-light text-muted small text-uppercase font-monospace" style="font-size: 0.72rem;">
                     <tr>
-                        <th class="ps-3">ID / Time</th>
-                        <th>Recipient</th>
-                        <th>Template / Type</th>
-                        <th>Message Body</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-center">Attempts</th>
-                        <th class="text-end pe-3">Actions</th>
+                        <th class="ps-3 py-3">ID / Time</th>
+                        <th class="py-3">Recipient</th>
+                        <th class="py-3">Template / Type</th>
+                        <th class="py-3">Message Body</th>
+                        <th class="text-center py-3">Status</th>
+                        <th class="text-center py-3">Attempts</th>
+                        <th class="text-end pe-3 py-3">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -121,11 +128,11 @@
                         <?php foreach ($outbox as $item): ?>
                             <tr>
                                 <td class="ps-3">
-                                    <div class="fw-bold text-dark">#<?= $item['id'] ?></div>
-                                    <small class="text-muted"><?= date('d-M H:i', strtotime($item['created_at'])) ?></small>
+                                    <div class="fw-bold text-dark font-monospace">#<?= $item['id'] ?></div>
+                                    <small class="text-muted font-monospace"><?= date('d-M H:i', strtotime($item['created_at'])) ?></small>
                                 </td>
                                 <td>
-                                    <div class="fw-semibold text-primary"><?= e($item['to_phone']) ?></div>
+                                    <div class="fw-semibold text-primary font-monospace"><?= e($item['to_phone']) ?></div>
                                     <?php if (!empty($item['customer_name'])): ?>
                                         <small class="text-muted"><?= e($item['customer_name']) ?></small>
                                     <?php endif; ?>
@@ -150,7 +157,7 @@
                                     ?>
                                     <span class="badge <?= $badge ?> text-uppercase"><?= e($item['status']) ?></span>
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center font-monospace">
                                     <span class="badge bg-light text-secondary border"><?= $item['attempts'] ?> / 3</span>
                                 </td>
                                 <td class="text-end pe-3">
@@ -174,18 +181,24 @@
         </div>
 
         <!-- Pagination -->
-        <?php if ($totalPages > 1): ?>
-            <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center py-2">
-                <span class="text-muted small">Showing <?= count($outbox) ?> of <?= number_format($totalRows) ?> SMS</span>
-                <nav>
+        <?php if (!empty($totalPages) && $totalPages > 1): ?>
+            <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center p-3">
+                <span class="text-muted small">Showing page <?= $page ?> of <?= $totalPages ?> (<?= number_format($totalRows) ?> total SMS)</span>
+                <nav aria-label="SMS outbox navigation">
                     <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                            <a class="page-link" href="<?= url('/admin/sms?page=' . ($page - 1) . '&status=' . urlencode($status) . '&q=' . urlencode($search)) ?>">Previous</a>
+                        <?php if ($page > 1): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="<?= url('/admin/sms?page=' . ($page - 1) . '&status=' . urlencode($status) . '&q=' . urlencode($search)) ?>">Previous</a>
+                            </li>
+                        <?php endif; ?>
+                        <li class="page-item active">
+                            <span class="page-link"><?= $page ?></span>
                         </li>
-                        <li class="page-item disabled"><span class="page-link">Page <?= $page ?> of <?= $totalPages ?></span></li>
-                        <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
-                            <a class="page-link" href="<?= url('/admin/sms?page=' . ($page + 1) . '&status=' . urlencode($status) . '&q=' . urlencode($search)) ?>">Next</a>
-                        </li>
+                        <?php if ($page < $totalPages): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="<?= url('/admin/sms?page=' . ($page + 1) . '&status=' . urlencode($status) . '&q=' . urlencode($search)) ?>">Next</a>
+                            </li>
+                        <?php endif; ?>
                     </ul>
                 </nav>
             </div>

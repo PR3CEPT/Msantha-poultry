@@ -67,12 +67,22 @@ class ReportController
             return $this->exportMortalityCsv($flocks);
         }
 
+        $page = max(1, (int) $request->query('page', 1));
+        $perPage = 25;
+        $totalRows = count($flocks);
+        $totalPages = max(1, (int) ceil($totalRows / $perPage));
+        $paginatedFlocks = array_slice($flocks, ($page - 1) * $perPage, $perPage);
+
         return View::render('reports/mortality', [
             'pageTitle' => 'Flock Mortality % Analysis',
             'activeNav' => 'reports',
-            'flocks' => $flocks,
+            'flocks' => $paginatedFlocks,
             'from' => $from,
             'to' => $to,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'totalRows' => $totalRows,
+            'perPage' => $perPage,
         ]);
     }
 
@@ -144,10 +154,36 @@ class ReportController
             return $this->exportDebtorsCsv($debtors);
         }
 
+        $page = max(1, (int) $request->query('page', 1));
+        $perPage = 25;
+        $totalRows = count($debtors);
+        $totalPages = max(1, (int) ceil($totalRows / $perPage));
+        $paginatedDebtors = array_slice($debtors, ($page - 1) * $perPage, $perPage);
+
+        $totals = [
+            'tot30' => 0,
+            'tot60' => 0,
+            'tot90' => 0,
+            'totOver' => 0,
+            'grandTot' => 0,
+        ];
+        foreach ($debtors as $d) {
+            $totals['tot30'] += $d['current_30'];
+            $totals['tot60'] += $d['aged_31_60'];
+            $totals['tot90'] += $d['aged_61_90'];
+            $totals['totOver'] += $d['aged_over_90'];
+            $totals['grandTot'] += $d['total_due'];
+        }
+
         return View::render('reports/aged_debtors', [
             'pageTitle' => 'Aged Debtors & Outstanding Receivables',
             'activeNav' => 'reports',
-            'debtors' => $debtors,
+            'debtors' => $paginatedDebtors,
+            'totals' => $totals,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'totalRows' => $totalRows,
+            'perPage' => $perPage,
         ]);
     }
 

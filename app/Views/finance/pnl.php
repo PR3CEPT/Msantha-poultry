@@ -33,24 +33,24 @@
             $isProfit = $card['net'] >= 0;
             ?>
             <div class="col-12 col-sm-6 col-lg-4">
-                <div class="card border-0 shadow-sm rounded-3 h-100 p-3 bg-white border-top border-4 <?= $isProfit ? 'border-success' : 'border-danger' ?>">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white border-top border-4 <?= $isProfit ? 'border-success' : 'border-danger' ?>">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <h6 class="fw-bold text-dark mb-0"><?= e($card['name']) ?></h6>
                         <span class="badge bg-light text-secondary border"><?= e($card['code']) ?></span>
                     </div>
-                    <div class="row g-2 my-2 text-center">
+                    <div class="row g-2 my-2 text-center font-monospace">
                         <div class="col-6">
-                            <small class="text-muted text-uppercase d-block" style="font-size: 0.7rem;">Inflows</small>
+                            <small class="text-muted text-uppercase d-block" style="font-size: 0.7rem; font-family: inherit;">Inflows</small>
                             <span class="fw-bold text-success">+<?= number_format($card['receipts']) ?></span>
                         </div>
                         <div class="col-6">
-                            <small class="text-muted text-uppercase d-block" style="font-size: 0.7rem;">Outflows</small>
+                            <small class="text-muted text-uppercase d-block" style="font-size: 0.7rem; font-family: inherit;">Outflows</small>
                             <span class="fw-bold text-danger">-<?= number_format($card['expenses']) ?></span>
                         </div>
                     </div>
                     <div class="border-top pt-2 mt-2 d-flex justify-content-between align-items-center">
                         <span class="text-muted small">Net Profit / Loss:</span>
-                        <span class="fw-bold <?= $isProfit ? 'text-success' : 'text-danger' ?>">
+                        <span class="fw-bold font-monospace <?= $isProfit ? 'text-success' : 'text-danger' ?>">
                             <?= $isProfit ? '+' : '' ?><?= number_format($card['net']) ?> MWK
                         </span>
                     </div>
@@ -60,31 +60,31 @@
     </div>
 
     <!-- POULTRY Incubation Allocation Breakdown -->
-    <div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden bg-white">
         <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
-            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-pie-chart me-2 text-success"></i>Incubation Receipts Allocation (POULTRY 25/15/30/20/10)</h5>
-            <span class="badge bg-success-subtle text-success border border-success-subtle">Statutory Cost Split</span>
+            <h5 class="fw-bold text-dark mb-0 fs-6"><i class="bi bi-pie-chart me-2 text-success"></i>Incubation Receipts Allocation (POULTRY 25/15/30/20/10)</h5>
+            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">Statutory Cost Split</span>
         </div>
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light text-muted small text-uppercase">
+            <table class="table table-hover align-middle mb-0 font-monospace">
+                <thead class="table-light text-muted small text-uppercase" style="font-size: 0.72rem;">
                     <tr>
-                        <th class="ps-3">Month</th>
-                        <th class="text-end">Electricity (25%)</th>
-                        <th class="text-end">Water (15%)</th>
-                        <th class="text-end">Labour (30%)</th>
-                        <th class="text-end">Telephone (20%)</th>
-                        <th class="text-end">Profit (10%)</th>
-                        <th class="text-end pe-3">Total Allocated</th>
+                        <th class="ps-3 py-3" style="font-family: inherit;">Month</th>
+                        <th class="text-end py-3">Electricity (25%)</th>
+                        <th class="text-end py-3">Water (15%)</th>
+                        <th class="text-end py-3">Labour (30%)</th>
+                        <th class="text-end py-3">Telephone (20%)</th>
+                        <th class="text-end py-3">Profit (10%)</th>
+                        <th class="text-end pe-3 py-3">Total Allocated</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($pnl['incubation_allocations'])): ?>
-                        <tr><td colspan="7" class="text-center py-4 text-muted">No incubation allocations recorded for <?= $year ?>.</td></tr>
+                        <tr><td colspan="7" class="text-center py-4 text-muted font-sans-serif">No incubation allocations recorded for <?= $year ?>.</td></tr>
                     <?php else: ?>
                         <?php foreach ($pnl['incubation_allocations'] as $month => $alloc): ?>
                             <tr>
-                                <td class="ps-3 fw-bold text-primary"><?= e($month) ?></td>
+                                <td class="ps-3 fw-bold text-primary font-monospace"><?= e($month) ?></td>
                                 <td class="text-end text-dark"><?= number_format((int)$alloc['electricity']) ?> MWK</td>
                                 <td class="text-end text-dark"><?= number_format((int)$alloc['water']) ?> MWK</td>
                                 <td class="text-end text-dark"><?= number_format((int)$alloc['labour']) ?> MWK</td>
@@ -100,24 +100,27 @@
     </div>
 
     <!-- Monthly Multi-Unit Summary Matrix -->
-    <div class="card border-0 shadow-sm rounded-3">
-        <div class="card-header bg-white border-bottom p-3">
-            <h5 class="fw-bold text-dark mb-0"><i class="bi bi-calendar3 me-2 text-secondary"></i>Monthly Revenue & Expenditure Log</h5>
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">
+        <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold text-dark mb-0 fs-6"><i class="bi bi-calendar3 me-2 text-secondary"></i>Monthly Revenue & Expenditure Log</h5>
+            <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                Showing <?= count($pnl['monthly_rows']) ?> of <?= number_format($totalRows ?? count($pnl['monthly_rows'])) ?> Records
+            </span>
         </div>
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light text-muted small text-uppercase">
+            <table class="table table-hover align-middle mb-0 font-monospace">
+                <thead class="table-light text-muted small text-uppercase" style="font-size: 0.72rem;">
                     <tr>
-                        <th class="ps-3">Month</th>
-                        <th>Business Unit</th>
-                        <th class="text-end">Receipts</th>
-                        <th class="text-end">Expenditures</th>
-                        <th class="text-end pe-3">Net Operating Income</th>
+                        <th class="ps-3 py-3" style="font-family: inherit;">Month</th>
+                        <th class="py-3" style="font-family: inherit;">Business Unit</th>
+                        <th class="text-end py-3">Receipts</th>
+                        <th class="text-end py-3">Expenditures</th>
+                        <th class="text-end pe-3 py-3">Net Operating Income</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($pnl['monthly_rows'])): ?>
-                        <tr><td colspan="5" class="text-center py-4 text-muted">No monthly transaction data available.</td></tr>
+                        <tr><td colspan="5" class="text-center py-4 text-muted font-sans-serif">No monthly transaction data available.</td></tr>
                     <?php else: ?>
                         <?php foreach ($pnl['monthly_rows'] as $row): ?>
                             <?php
@@ -126,7 +129,7 @@
                             $net = $rec - $exp;
                             ?>
                             <tr>
-                                <td class="ps-3 fw-bold text-dark"><?= e($row['month_key']) ?></td>
+                                <td class="ps-3 fw-bold text-dark font-monospace"><?= e($row['month_key']) ?></td>
                                 <td><span class="badge bg-light text-dark border"><?= e($row['unit_name']) ?></span></td>
                                 <td class="text-end text-success fw-semibold"><?= $rec > 0 ? '+' . number_format($rec) . ' MWK' : '—' ?></td>
                                 <td class="text-end text-danger fw-semibold"><?= $exp > 0 ? '-' . number_format($exp) . ' MWK' : '—' ?></td>
@@ -139,6 +142,31 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination -->
+        <?php if (!empty($totalPages) && $totalPages > 1): ?>
+            <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center p-3">
+                <span class="text-muted small">
+                    Showing page <?= $page ?> of <?= $totalPages ?> (<?= number_format($totalRows) ?> total logs)
+                </span>
+                <nav aria-label="Monthly log navigation">
+                    <ul class="pagination pagination-sm mb-0">
+                        <?php if ($page > 1): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="<?= url('/finance/profit-and-loss?year=' . $year . '&page=' . ($page - 1)) ?>">Previous</a>
+                            </li>
+                        <?php endif; ?>
+                        <li class="page-item active">
+                            <span class="page-link"><?= $page ?></span>
+                        </li>
+                        <?php if ($page < $totalPages): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="<?= url('/finance/profit-and-loss?year=' . $year . '&page=' . ($page + 1)) ?>">Next</a>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
+                </nav>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
-

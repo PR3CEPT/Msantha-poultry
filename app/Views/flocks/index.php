@@ -138,7 +138,7 @@
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-end font-monospace fw-bold fs-6 <?= $isDeath ? 'text-danger' : ($isSale ? 'text-success' : 'text-dark') ?>">
-                                        <?= $isDeath ? '-' : ($isSale ? '+' : '') ?><?= number_format($qty) ?>
+                                        <?= ($isDeath || $isSale) ? '-' : '+' ?><?= number_format($qty) ?>
                                     </td>
                                     <td class="small text-muted text-truncate" style="max-width: 200px;">
                                         <?= e($e['remarks'] ?: 'Normal flock cycle') ?>

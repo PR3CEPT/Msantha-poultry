@@ -21,25 +21,33 @@ class FeedDrugController
         $pdo = DB::pdo();
 
         $tab = $request->query('tab', 'feed');
+        $page = max(1, (int) $request->query('page', 1));
+        $perPage = 25;
+        $offset = ($page - 1) * $perPage;
 
         // Fetch feed types
         $feedTypes = $pdo->query("SELECT * FROM feed_types ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 
-        // Fetch recent feed purchases
-        $feedPurchases = $pdo->query("
-            SELECT fp.*, ft.name AS feed_type_name
-            FROM feed_purchases fp
-            JOIN feed_types ft ON ft.id = fp.feed_type_id
-            ORDER BY fp.purchase_date DESC, fp.id DESC
-            LIMIT 100
-        ")->fetchAll(PDO::FETCH_ASSOC);
-
-        // Fetch recent drug purchases
-        $drugPurchases = $pdo->query("
-            SELECT * FROM drug_purchases
-            ORDER BY purchase_date DESC, id DESC
-            LIMIT 100
-        ")->fetchAll(PDO::FETCH_ASSOC);
+        if ($tab === 'drugs') {
+            $totalRows = (int) $pdo->query("SELECT COUNT(*) FROM drug_purchases")->fetchColumn();
+            $drugPurchases = $pdo->query("
+                SELECT * FROM drug_purchases
+                ORDER BY purchase_date DESC, id DESC
+                LIMIT $perPage OFFSET $offset
+            ")->fetchAll(PDO::FETCH_ASSOC);
+            $feedPurchases = [];
+        } else {
+            $totalRows = (int) $pdo->query("SELECT COUNT(*) FROM feed_purchases")->fetchColumn();
+            $feedPurchases = $pdo->query("
+                SELECT fp.*, ft.name AS feed_type_name
+                FROM feed_purchases fp
+                JOIN feed_types ft ON ft.id = fp.feed_type_id
+                ORDER BY fp.purchase_date DESC, fp.id DESC
+                LIMIT $perPage OFFSET $offset
+            ")->fetchAll(PDO::FETCH_ASSOC);
+            $drugPurchases = [];
+        }
+        $totalPages = max(1, (int) ceil($totalRows / $perPage));
 
         // Overall statistics
         $stats = [
@@ -85,6 +93,10 @@ class FeedDrugController
             'totalEggs' => $totalEggs,
             'flashSuccess' => $flashSuccess,
             'flashError' => $flashError,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'totalRows' => $totalRows,
+            'perPage' => $perPage,
         ]);
     }
 

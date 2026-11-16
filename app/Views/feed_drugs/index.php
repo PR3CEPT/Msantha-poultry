@@ -37,30 +37,30 @@
     <!-- KPI Summary Row & Feed Cost Per Bird / Egg Report -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-success">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-success">
                 <span class="text-muted small fw-semibold text-uppercase">Total Feed Spend</span>
-                <div class="fs-3 fw-bold text-success mt-1"><?= number_format($stats['total_feed_cost']) ?> <small class="fs-6 text-muted">MWK</small></div>
-                <small class="text-muted"><?= number_format($stats['total_feed_kg'], 1) ?> kg purchased</small>
+                <div class="fs-3 fw-bold text-success mt-1 font-monospace"><?= number_format($stats['total_feed_cost']) ?> <small class="fs-6 text-muted">MWK</small></div>
+                <small class="text-muted font-monospace"><?= number_format($stats['total_feed_kg'], 1) ?> kg purchased</small>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-primary">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-primary">
                 <span class="text-muted small fw-semibold text-uppercase">Total Drugs Spend</span>
-                <div class="fs-3 fw-bold text-primary mt-1"><?= number_format($stats['total_drug_cost']) ?> <small class="fs-6 text-muted">MWK</small></div>
+                <div class="fs-3 fw-bold text-primary mt-1 font-monospace"><?= number_format($stats['total_drug_cost']) ?> <small class="fs-6 text-muted">MWK</small></div>
                 <small class="text-muted">Vaccines & treatments</small>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-info">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-info">
                 <span class="text-muted small fw-semibold text-uppercase">Feed Cost / Bird</span>
-                <div class="fs-3 fw-bold text-dark mt-1"><?= number_format($stats['cost_per_bird']) ?> <small class="fs-6 text-muted">MWK</small></div>
+                <div class="fs-3 fw-bold text-dark mt-1 font-monospace"><?= number_format($stats['cost_per_bird']) ?> <small class="fs-6 text-muted">MWK</small></div>
                 <small class="text-muted">Over <?= number_format($totalBirdsStocked) ?> stocked birds</small>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-warning">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-warning">
                 <span class="text-muted small fw-semibold text-uppercase">Feed Cost / Egg</span>
-                <div class="fs-3 fw-bold text-warning-emphasis mt-1"><?= number_format($stats['cost_per_egg']) ?> <small class="fs-6 text-muted">MWK</small></div>
+                <div class="fs-3 fw-bold text-warning-emphasis mt-1 font-monospace"><?= number_format($stats['cost_per_egg']) ?> <small class="fs-6 text-muted">MWK</small></div>
                 <small class="text-muted">Over <?= number_format($totalEggs) ?> collected eggs</small>
             </div>
         </div>
@@ -84,16 +84,19 @@
 
     <?php if (($tab ?? 'feed') === 'drugs'): ?>
         <!-- Drugs Table -->
-        <div class="card border-0 shadow-sm rounded-3 bg-white">
-            <div class="card-header bg-white border-bottom p-3">
-                <h5 class="fw-bold mb-0 text-dark fs-6">Medication & Vaccine Acquisition Log</h5>
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">
+            <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark fs-6"><i class="bi bi-capsule me-2 text-primary"></i>Medication & Vaccine Acquisition Log</h5>
+                <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                    Showing <?= count($drugPurchases) ?> of <?= number_format($totalRows ?? count($drugPurchases)) ?> Purchases
+                </span>
             </div>
             <div class="table-responsive">
-                <table class="table-modern align-middle mb-0">
-                    <thead>
+                <table class="table table-hover align-middle mb-0 font-monospace">
+                    <thead class="table-light text-muted small text-uppercase" style="font-size: 0.72rem;">
                         <tr>
-                            <th class="ps-3 py-3" style="width: 140px;">Purchase Date</th>
-                            <th class="py-3">Drug / Vaccine Item</th>
+                            <th class="ps-3 py-3" style="width: 140px; font-family: inherit;">Purchase Date</th>
+                            <th class="py-3" style="font-family: inherit;">Drug / Vaccine Item</th>
                             <th class="text-end py-3" style="width: 130px;">Doses</th>
                             <th class="text-end pe-3 py-3" style="width: 160px;">Cost (MWK)</th>
                         </tr>
@@ -101,13 +104,13 @@
                     <tbody>
                         <?php if (empty($drugPurchases)): ?>
                             <tr>
-                                <td colspan="4" class="text-center py-5 text-muted">No drug purchases recorded yet.</td>
+                                <td colspan="4" class="text-center py-5 text-muted font-sans-serif">No drug purchases recorded yet.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($drugPurchases as $dp): ?>
                                 <tr>
-                                    <td class="ps-3 fw-semibold"><?= date('d-M-Y', strtotime($dp['purchase_date'])) ?></td>
-                                    <td class="fw-bold text-dark"><?= e($dp['item']) ?></td>
+                                    <td class="ps-3 fw-semibold font-monospace"><?= date('d-M-Y', strtotime($dp['purchase_date'])) ?></td>
+                                    <td class="fw-bold text-dark font-sans-serif"><?= e($dp['item']) ?></td>
                                     <td class="text-end text-muted"><?= $dp['doses'] ? number_format((int)$dp['doses']) : '—' ?></td>
                                     <td class="text-end pe-3 fw-bold text-primary"><?= number_format((int)$dp['cost']) ?> MWK</td>
                                 </tr>
@@ -116,30 +119,57 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
+            <?php if (!empty($totalPages) && $totalPages > 1): ?>
+                <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center p-3">
+                    <span class="text-muted small">Showing page <?= $page ?> of <?= $totalPages ?> (<?= number_format($totalRows) ?> total purchases)</span>
+                    <nav aria-label="Drugs navigation">
+                        <ul class="pagination pagination-sm mb-0">
+                            <?php if ($page > 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="<?= url('/feed-drugs?tab=drugs&page=' . ($page - 1)) ?>">Previous</a>
+                                </li>
+                            <?php endif; ?>
+                            <li class="page-item active">
+                                <span class="page-link"><?= $page ?></span>
+                            </li>
+                            <?php if ($page < $totalPages): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="<?= url('/feed-drugs?tab=drugs&page=' . ($page + 1)) ?>">Next</a>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
+                </div>
+            <?php endif; ?>
         </div>
 
     <?php else: ?>
         <!-- Feed Purchases Table -->
-        <div class="card border-0 shadow-sm rounded-3 bg-white">
-            <div class="card-header bg-white border-bottom p-3">
-                <h5 class="fw-bold mb-0 text-dark fs-6">Feed Inventory & Procurement Log</h5>
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">
+            <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark fs-6"><i class="bi bi-box-seam me-2 text-success"></i>Feed Inventory & Procurement Log</h5>
+                <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                    Showing <?= count($feedPurchases) ?> of <?= number_format($totalRows ?? count($feedPurchases)) ?> Purchases
+                </span>
             </div>
             <div class="table-responsive">
-                <table class="table-modern align-middle mb-0">
-                    <thead>
+                <table class="table table-hover align-middle mb-0 font-monospace">
+                    <thead class="table-light text-muted small text-uppercase" style="font-size: 0.72rem;">
                         <tr>
-                            <th class="ps-3 py-3" style="width: 140px;">Purchase Date</th>
-                            <th class="py-3">Feed Type</th>
+                            <th class="ps-3 py-3" style="width: 140px; font-family: inherit;">Purchase Date</th>
+                            <th class="py-3" style="font-family: inherit;">Feed Type</th>
                             <th class="text-end py-3" style="width: 140px;">Quantity (kg)</th>
                             <th class="text-end py-3" style="width: 130px;">Unit Cost / kg</th>
                             <th class="text-end py-3" style="width: 150px;">Total Cost (MWK)</th>
-                            <th class="pe-3 py-3">Supplier</th>
+                            <th class="pe-3 py-3" style="font-family: inherit;">Supplier</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($feedPurchases)): ?>
                             <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">No feed purchases recorded yet.</td>
+                                <td colspan="6" class="text-center py-5 text-muted font-sans-serif">No feed purchases recorded yet.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($feedPurchases as $fp): ?>
@@ -149,20 +179,44 @@
                                 $perKg = $kg > 0 ? round($c / $kg) : 0;
                                 ?>
                                 <tr>
-                                    <td class="ps-3 fw-semibold"><?= date('d-M-Y', strtotime($fp['purchase_date'])) ?></td>
+                                    <td class="ps-3 fw-semibold font-monospace"><?= date('d-M-Y', strtotime($fp['purchase_date'])) ?></td>
                                     <td>
                                         <span class="badge bg-light text-dark border"><?= e($fp['feed_type_name']) ?></span>
                                     </td>
                                     <td class="text-end fw-bold text-dark"><?= number_format($kg, 1) ?> kg</td>
                                     <td class="text-end text-muted"><?= number_format($perKg) ?> MWK</td>
                                     <td class="text-end fw-bold text-success"><?= number_format($c) ?> MWK</td>
-                                    <td class="pe-3 text-muted small"><?= e($fp['supplier'] ?? 'Local Feed Supplier') ?></td>
+                                    <td class="pe-3 text-muted small font-sans-serif"><?= e($fp['supplier'] ?? 'Local Feed Supplier') ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
+            <?php if (!empty($totalPages) && $totalPages > 1): ?>
+                <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center p-3">
+                    <span class="text-muted small">Showing page <?= $page ?> of <?= $totalPages ?> (<?= number_format($totalRows) ?> total purchases)</span>
+                    <nav aria-label="Feed navigation">
+                        <ul class="pagination pagination-sm mb-0">
+                            <?php if ($page > 1): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="<?= url('/feed-drugs?tab=feed&page=' . ($page - 1)) ?>">Previous</a>
+                                </li>
+                            <?php endif; ?>
+                            <li class="page-item active">
+                                <span class="page-link"><?= $page ?></span>
+                            </li>
+                            <?php if ($page < $totalPages): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="<?= url('/feed-drugs?tab=feed&page=' . ($page + 1)) ?>">Next</a>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
+                </div>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
 </div>

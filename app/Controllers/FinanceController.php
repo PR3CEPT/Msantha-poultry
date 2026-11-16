@@ -306,12 +306,23 @@ class FinanceController
         $pnlData = $this->financeService->getProfitAndLoss($year);
         $units = $this->financeService->getBusinessUnits();
 
+        $page = max(1, (int) $request->query('page', 1));
+        $perPage = 25;
+        $monthlyRows = $pnlData['monthly_rows'] ?? [];
+        $totalRows = count($monthlyRows);
+        $totalPages = max(1, (int) ceil($totalRows / $perPage));
+        $pnlData['monthly_rows'] = array_slice($monthlyRows, ($page - 1) * $perPage, $perPage);
+
         return View::render('finance/pnl', [
             'pageTitle' => 'Profit & Loss Statement (' . $year . ')',
             'activeNav' => 'finance',
             'year' => $year,
             'pnl' => $pnlData,
             'units' => $units,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'totalRows' => $totalRows,
+            'perPage' => $perPage,
         ]);
     }
 
@@ -342,12 +353,22 @@ class FinanceController
         $units = $this->financeService->getBusinessUnits();
         $reconciliation = $this->financeService->reconcileMonthTotals($buId);
 
+        $page = max(1, (int) $request->query('page', 1));
+        $perPage = 25;
+        $totalRows = count($reconciliation);
+        $totalPages = max(1, (int) ceil($totalRows / $perPage));
+        $paginatedReconciliation = array_slice($reconciliation, ($page - 1) * $perPage, $perPage);
+
         return View::render('finance/reconciliation', [
             'pageTitle' => 'Month-End Reconciliation',
             'activeNav' => 'finance',
             'bu' => $bu,
             'units' => $units,
-            'reconciliation' => $reconciliation,
+            'reconciliation' => $paginatedReconciliation,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'totalRows' => $totalRows,
+            'perPage' => $perPage,
         ]);
     }
 }

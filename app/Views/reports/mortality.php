@@ -47,52 +47,54 @@
     </div>
 
     <!-- Table Card -->
-    <div class="card border-0 shadow-sm rounded-3">
+    <div class="card border-0 shadow-sm rounded-4 bg-white mb-4 overflow-hidden">
         <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
             <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-heart-pulse me-2 text-danger"></i>Flock Intake & Mortality Metrics</h5>
-            <span class="badge bg-light text-secondary border"><?= count($flocks) ?> Flocks Analyzed</span>
+            <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                Showing <?= count($flocks) ?> of <?= number_format($totalRows ?? count($flocks)) ?> Flocks Analyzed
+            </span>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead class="table-light text-muted small text-uppercase">
+                <thead class="table-light text-muted small text-uppercase font-monospace" style="font-size: 0.72rem;">
                     <tr>
-                        <th class="ps-3">Batch Code</th>
-                        <th>Breed</th>
-                        <th>Start Date</th>
-                        <th class="text-end">Start Count</th>
-                        <th class="text-end">Total Deaths</th>
-                        <th class="text-end">Total Sold</th>
-                        <th class="text-end">Current Stock</th>
-                        <th class="text-center">Mortality %</th>
-                        <th class="text-center pe-3">Status</th>
+                        <th class="ps-3 py-3">Batch Code</th>
+                        <th class="py-3">Breed</th>
+                        <th class="py-3" style="width: 120px;">Start Date</th>
+                        <th class="text-end py-3" style="width: 110px;">Start Count</th>
+                        <th class="text-end py-3" style="width: 110px;">Total Deaths</th>
+                        <th class="text-end py-3" style="width: 110px;">Total Sold</th>
+                        <th class="text-end py-3" style="width: 120px;">Current Stock</th>
+                        <th class="text-center py-3" style="width: 110px;">Mortality %</th>
+                        <th class="text-center pe-3 py-3" style="width: 95px;">Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($flocks)): ?>
-                        <tr><td colspan="9" class="text-center py-4 text-muted">No flock batches found.</td></tr>
+                        <tr><td colspan="9" class="text-center py-5 text-muted">No flock batches found matching criteria.</td></tr>
                     <?php else: ?>
                         <?php foreach ($flocks as $f): ?>
                             <?php
                             $rate = (float) $f['mortality_rate'];
-                            $badgeClass = $rate >= 2.0 ? 'bg-danger text-white' : ($rate >= 1.0 ? 'bg-warning text-dark' : 'bg-success text-white');
+                            $badgeClass = $rate >= 5.0 ? 'bg-danger text-white' : ($rate >= 2.0 ? 'bg-warning text-dark' : 'bg-success text-white');
                             ?>
                             <tr>
-                                <td class="ps-3">
+                                <td class="ps-3 font-monospace">
                                     <a href="<?= url("/flocks/{$f['flock_id']}") ?>" class="fw-bold text-dark text-decoration-none">
                                         <?= e($f['batch_code']) ?>
                                     </a>
                                 </td>
-                                <td><?= e($f['breed_name']) ?></td>
-                                <td><?= date('d-M-Y', strtotime($f['start_date'])) ?></td>
-                                <td class="text-end fw-semibold"><?= number_format((int)$f['start_count']) ?></td>
-                                <td class="text-end text-danger fw-bold">-<?= number_format((int)$f['total_deaths']) ?></td>
-                                <td class="text-end text-success fw-bold"><?= number_format((int)$f['total_sold']) ?></td>
-                                <td class="text-end fw-bold text-dark"><?= number_format((int)$f['current_stock']) ?></td>
-                                <td class="text-center">
-                                    <span class="badge <?= $badgeClass ?>"><?= number_format($rate, 2) ?>%</span>
+                                <td><span class="badge bg-light text-dark border"><?= e($f['breed_name']) ?></span></td>
+                                <td class="font-monospace small text-muted"><?= date('d-M-Y', strtotime($f['start_date'])) ?></td>
+                                <td class="text-end font-monospace text-muted small"><?= number_format((int)$f['start_count']) ?></td>
+                                <td class="text-end font-monospace text-danger fw-semibold">-<?= number_format((int)$f['total_deaths']) ?></td>
+                                <td class="text-end font-monospace text-success fw-semibold"><?= number_format((int)$f['total_sold']) ?></td>
+                                <td class="text-end font-monospace fw-bold text-dark fs-6"><?= number_format((int)$f['current_stock']) ?></td>
+                                <td class="text-center font-monospace">
+                                    <span class="badge <?= $badgeClass ?> fw-bold px-2 py-1"><?= number_format($rate, 2) ?>%</span>
                                 </td>
                                 <td class="text-center pe-3">
-                                    <span class="badge <?= $f['is_active'] ? 'bg-success' : 'bg-secondary' ?>">
+                                    <span class="badge <?= $f['is_active'] ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-light text-secondary border' ?> fw-semibold">
                                         <?= $f['is_active'] ? 'Active' : 'Closed' ?>
                                     </span>
                                 </td>
@@ -102,6 +104,32 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination -->
+        <?php if (!empty($totalPages) && $totalPages > 1): ?>
+            <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center p-3">
+                <span class="text-muted small">
+                    Showing page <?= $page ?> of <?= $totalPages ?> (<?= number_format($totalRows) ?> total batches)
+                </span>
+                <nav aria-label="Mortality report navigation">
+                    <ul class="pagination pagination-sm mb-0">
+                        <?php if ($page > 1): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="<?= url('/reports/mortality?page=' . ($page - 1) . '&from=' . urlencode($from ?? '') . '&to=' . urlencode($to ?? '')) ?>">Previous</a>
+                            </li>
+                        <?php endif; ?>
+                        <li class="page-item active">
+                            <span class="page-link"><?= $page ?></span>
+                        </li>
+                        <?php if ($page < $totalPages): ?>
+                            <li class="page-item">
+                                <a class="page-link" href="<?= url('/reports/mortality?page=' . ($page + 1) . '&from=' . urlencode($from ?? '') . '&to=' . urlencode($to ?? '')) ?>">Next</a>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
+                </nav>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 

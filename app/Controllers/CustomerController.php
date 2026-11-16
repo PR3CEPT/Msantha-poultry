@@ -146,6 +146,22 @@ class CustomerController
         $chicks = array_sum(array_column($jobs, 'hatched'));
         $avgHatch = $eggsSet > 0 ? round(($chicks / $eggsSet) * 100, 1) : 0;
 
+        // Fetch commercial sales history for this customer
+        $salesStmt = $pdo->prepare("
+            SELECT s.*, 
+                (SELECT COUNT(*) FROM sale_items si WHERE si.sale_id = s.id) AS items_count
+            FROM sales s
+            WHERE s.customer_id = ?
+            ORDER BY s.sale_date DESC, s.id DESC
+            LIMIT 50
+        ");
+        $salesStmt->execute([$id]);
+        $sales = $salesStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $totalSales = array_sum(array_column($sales, 'total'));
+        $totalSalesPaid = array_sum(array_column($sales, 'paid'));
+        $salesBalance = max(0, $totalSales - $totalSalesPaid);
+
         $legacyNames = [];
         if (!empty($customer['legacy_names'])) {
             $decoded = json_decode((string)$customer['legacy_names'], true);
@@ -153,6 +169,13 @@ class CustomerController
                 $legacyNames = $decoded;
             }
         }
+
+        // Pagination for incubation jobs
+        $page = max(1, (int) $request->query('page', 1));
+        $perPage = 25;
+        $totalJobs = count($jobs);
+        $totalPages = max(1, (int) ceil($totalJobs / $perPage));
+        $paginatedJobs = array_slice($jobs, ($page - 1) * $perPage, $perPage);
 
         $flashSuccess = $_SESSION['flash_success'] ?? null;
         $flashError = $_SESSION['flash_error'] ?? null;
@@ -162,7 +185,11 @@ class CustomerController
             'pageTitle' => "Customer Profile: {$customer['name']}",
             'activeNav' => 'customers',
             'customer' => $customer,
-            'jobs' => $jobs,
+            'jobs' => $paginatedJobs,
+            'totalJobs' => $totalJobs,
+            'sales' => $sales,
+            'totalSales' => $totalSales,
+            'salesBalance' => $salesBalance,
             'potentialDuplicates' => $potentialDuplicates,
             'totalCost' => $totalCost,
             'totalPaid' => $totalPaid,
@@ -173,6 +200,9 @@ class CustomerController
             'legacyNames' => $legacyNames,
             'flashSuccess' => $flashSuccess,
             'flashError' => $flashError,
+            'page' => $page,
+            'totalPages' => $totalPages,
+            'perPage' => $perPage,
         ]);
     }
 

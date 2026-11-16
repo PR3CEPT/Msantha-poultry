@@ -192,7 +192,7 @@ class FlockService
 
         // Check if legacy daily rows exist for this flock
         $legacyRows = $this->pdo->prepare("
-            SELECT record_date, balance, deaths_todate, deaths
+            SELECT record_date, balance, deaths_todate, deaths, sold
             FROM flock_daily_legacy
             WHERE flock_id = ? AND row_kind = 'day' AND is_projected = 0
             ORDER BY excel_row ASC
@@ -203,9 +203,12 @@ class FlockService
         $dates = [];
         $stock = [];
         $cumDeaths = [];
+        $cumSold = [];
+        $dailySold = [];
 
         if (!empty($rows)) {
             $runningDeaths = 0;
+            $runningSold = 0;
             foreach ($rows as $r) {
                 if (!empty($r['record_date'])) {
                     $dates[] = date('d-M-y', strtotime($r['record_date']));
@@ -216,6 +219,10 @@ class FlockService
                         $runningDeaths += (int) ($r['deaths'] ?? 0);
                         $cumDeaths[] = $runningDeaths;
                     }
+                    $s = (int) ($r['sold'] ?? 0);
+                    $runningSold += $s;
+                    $cumSold[] = $runningSold;
+                    $dailySold[] = $s;
                 }
             }
         } else {
@@ -231,24 +238,34 @@ class FlockService
 
             $current = $initStock;
             $deathsTotal = 0;
+            $soldTotal = 0;
             $dates[] = date('d-M-y', strtotime($flock['start_date']));
             $stock[] = $current;
             $cumDeaths[] = 0;
+            $cumSold[] = 0;
+            $dailySold[] = 0;
 
             foreach ($events as $ev) {
                 $evDate = date('d-M-y', strtotime($ev['event_date']));
                 $qty = (int) $ev['quantity'];
+                $sToday = 0;
                 if ($ev['event_type'] === 'death') {
                     $current -= $qty;
                     $deathsTotal += $qty;
                 } elseif (in_array($ev['event_type'], ['sale', 'cull', 'consumed'], true)) {
                     $current -= $qty;
+                    if ($ev['event_type'] === 'sale') {
+                        $soldTotal += $qty;
+                        $sToday = $qty;
+                    }
                 } elseif ($ev['event_type'] === 'addition') {
                     $current += $qty;
                 }
                 $dates[] = $evDate;
                 $stock[] = max(0, $current);
                 $cumDeaths[] = $deathsTotal;
+                $cumSold[] = $soldTotal;
+                $dailySold[] = $sToday;
             }
         }
 
@@ -256,6 +273,8 @@ class FlockService
             'dates' => $dates,
             'stock' => $stock,
             'cumulative_deaths' => $cumDeaths,
+            'cumulative_sold' => $cumSold,
+            'daily_sold' => $dailySold,
         ];
     }
 

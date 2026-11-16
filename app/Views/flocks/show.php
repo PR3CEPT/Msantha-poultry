@@ -55,41 +55,48 @@
 
     <!-- KPI Metrics Row -->
     <div class="row g-3 mb-4">
-        <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-success">
+        <div class="col-6 col-md">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-success">
                 <span class="text-muted small fw-semibold text-uppercase">Current Stock</span>
-                <div class="fs-3 fw-bold text-success mt-1"><?= number_format((int)$flock['current_stock']) ?></div>
+                <div class="fs-3 fw-bold text-success mt-1 font-monospace"><?= number_format((int)$flock['current_stock']) ?></div>
                 <small class="text-muted">Live birds in pen</small>
             </div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-info">
+        <div class="col-6 col-md">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-info">
                 <span class="text-muted small fw-semibold text-uppercase">Computed Age</span>
-                <div class="fs-3 fw-bold text-info mt-1"><?= $age['weeks'] ?> <small class="fs-6 text-muted">Weeks</small></div>
-                <small class="text-muted"><?= $age['days'] ?> Days &middot; <?= $age['months'] ?> Months</small>
+                <div class="fs-3 fw-bold text-info mt-1 font-monospace"><?= $age['weeks'] ?> <small class="fs-6 text-muted font-sans-serif">Weeks</small></div>
+                <small class="text-muted font-monospace"><?= $age['days'] ?> Days &middot; <?= $age['months'] ?> Mths</small>
             </div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-danger">
+        <div class="col-6 col-md">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-danger">
                 <span class="text-muted small fw-semibold text-uppercase">Mortality To Date</span>
-                <div class="fs-3 fw-bold text-danger mt-1"><?= number_format((int)$flock['deaths_todate']) ?></div>
-                <small class="text-muted">Mortality Rate: <?= (int)$flock['starting_count'] > 0 ? round(((int)$flock['deaths_todate'] / (int)$flock['starting_count']) * 100, 1) : 0 ?>%</small>
+                <div class="fs-3 fw-bold text-danger mt-1 font-monospace"><?= number_format((int)$flock['deaths_todate']) ?></div>
+                <small class="text-muted">Mortality: <?= (int)$flock['starting_count'] > 0 ? round(((int)$flock['deaths_todate'] / (int)$flock['starting_count']) * 100, 1) : 0 ?>%</small>
             </div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-warning">
+        <div class="col-6 col-md">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-primary">
+                <span class="text-muted small fw-semibold text-uppercase">Birds Sold / Offload</span>
+                <div class="fs-3 fw-bold text-primary mt-1 font-monospace"><?= number_format((int)($flock['sold_todate'] ?? $flock['sold_count'] ?? 0)) ?></div>
+                <small class="text-muted">Commercial offloads</small>
+            </div>
+        </div>
+        <div class="col-12 col-md">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-warning">
                 <span class="text-muted small fw-semibold text-uppercase">Estimated Price / Bird</span>
-                <div class="fs-3 fw-bold text-dark mt-1"><?= number_format($estPrice) ?> <small class="fs-6 text-muted">MWK</small></div>
+                <div class="fs-3 fw-bold text-dark mt-1 font-monospace"><?= number_format($estPrice) ?> <small class="fs-6 text-muted font-sans-serif">MWK</small></div>
                 <small class="text-muted">Age-ladder price</small>
             </div>
         </div>
     </div>
 
-    <!-- Chart: Stock and Cumulative Deaths Trajectory -->
-    <div class="card border-0 shadow-sm rounded-3 p-3 bg-white mb-4">
+    <!-- Chart: Stock and Cumulative Deaths & Sold Trajectory -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="fw-bold mb-0 text-dark fs-6">
-                <i class="bi bi-graph-up text-primary me-2"></i>Stock Balance & Cumulative Deaths Curve
+                <i class="bi bi-graph-up text-primary me-2"></i>Stock Balance, Cumulative Deaths & Offload Sales Trajectory
             </h5>
             <span class="badge bg-light text-muted border">Daily Dynamics</span>
         </div>
@@ -101,7 +108,7 @@
     <div class="row g-4 mb-4">
         <!-- Vaccination Due List -->
         <div class="col-12 col-lg-5">
-            <div class="card border-0 shadow-sm rounded-3 h-100 bg-white">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white overflow-hidden">
                 <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
                     <h5 class="fw-bold mb-0 text-dark fs-6">
                         <i class="bi bi-shield-plus text-info me-2"></i>Vaccination Schedule
@@ -138,52 +145,80 @@
             </div>
         </div>
 
-        <!-- Events Timeline Section -->
+        <!-- Events Timeline / Daily Dynamics Section -->
         <div class="col-12 col-lg-7">
-            <div class="card border-0 shadow-sm rounded-3 h-100 bg-white">
-                <div class="card-header bg-white border-bottom p-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white overflow-hidden">
+                <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
                     <h5 class="fw-bold mb-0 text-dark fs-6">
-                        <i class="bi bi-clock-history text-secondary me-2"></i>Recent Authoritative Events
+                        <i class="bi bi-clock-history text-secondary me-2"></i>Daily Dynamics & Movement Log
                     </h5>
+                    <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                        Showing <?= count($events) ?> Events
+                    </span>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0 small">
+                    <table class="table table-hover align-middle mb-0 font-monospace small">
                         <thead class="table-light text-muted text-uppercase" style="font-size: 0.72rem;">
                             <tr>
-                                <th class="ps-3">Date</th>
-                                <th>Event Type</th>
-                                <th class="text-end">Qty</th>
-                                <th class="text-end">Price / Amt</th>
-                                <th class="pe-3">Remarks</th>
+                                <th class="ps-3 py-3" style="font-family: inherit;">Date</th>
+                                <th class="py-3" style="font-family: inherit;">Event Type</th>
+                                <th class="text-end py-3">Quantity</th>
+                                <th class="text-end py-3">Price / Total</th>
+                                <th class="pe-3 py-3" style="font-family: inherit;">Customer / Remarks</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($events)): ?>
                                 <tr>
-                                    <td colspan="5" class="text-center py-4 text-muted">No events recorded yet.</td>
+                                    <td colspan="5" class="text-center py-4 text-muted font-sans-serif">No movements or events recorded yet.</td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($events as $ev): ?>
+                                    <?php
+                                    $isDeath = ($ev['event_type'] === 'death');
+                                    $isSale = ($ev['event_type'] === 'sale');
+                                    $qty = (int)$ev['quantity'];
+                                    $amt = (int)($ev['amount'] ?? 0);
+                                    $unitPrice = ($qty > 0 && $amt > 0) ? round($amt / $qty) : 0;
+                                    ?>
                                     <tr>
-                                        <td class="ps-3 fw-semibold"><?= date('d-M-Y', strtotime($ev['event_date'])) ?></td>
-                                        <td>
-                                            <?php if ($ev['event_type'] === 'death'): ?>
+                                        <td class="ps-3 fw-semibold font-monospace"><?= date('d-M-Y', strtotime($ev['event_date'])) ?></td>
+                                        <td class="font-sans-serif">
+                                            <?php if ($isDeath): ?>
                                                 <span class="badge bg-danger-subtle text-danger border border-danger-subtle">DEATH</span>
-                                            <?php elseif ($ev['event_type'] === 'sale'): ?>
-                                                <span class="badge bg-success-subtle text-success border border-success-subtle">SOLD</span>
+                                            <?php elseif ($isSale): ?>
+                                                <span class="badge bg-success text-white"><i class="bi bi-cart-check me-1"></i>SOLD</span>
                                             <?php elseif ($ev['event_type'] === 'vaccination'): ?>
                                                 <span class="badge bg-info-subtle text-info border border-info-subtle">VACCINE</span>
+                                            <?php elseif ($ev['event_type'] === 'addition'): ?>
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">ADDITION</span>
                                             <?php else: ?>
                                                 <span class="badge bg-light text-dark border"><?= strtoupper(e($ev['event_type'])) ?></span>
                                             <?php endif; ?>
                                         </td>
-                                        <td class="text-end fw-bold <?= $ev['event_type'] === 'death' ? 'text-danger' : 'text-dark' ?>">
-                                            <?= (int)$ev['quantity'] > 0 ? number_format((int)$ev['quantity']) : '—' ?>
+                                        <td class="text-end fw-bold font-monospace <?= $isDeath ? 'text-danger' : ($isSale ? 'text-success' : 'text-dark') ?>">
+                                            <?php if ($qty > 0): ?>
+                                                <?= $isDeath ? '-' : ($isSale ? '-' : '+') ?><?= number_format($qty) ?>
+                                            <?php else: ?>
+                                                —
+                                            <?php endif; ?>
                                         </td>
-                                        <td class="text-end text-muted">
-                                            <?= !empty($ev['amount']) ? number_format((int)$ev['amount']) . ' MWK' : '—' ?>
+                                        <td class="text-end font-monospace">
+                                            <?php if ($amt > 0): ?>
+                                                <div class="fw-bold text-success">+<?= number_format($amt) ?> MWK</div>
+                                                <?php if ($unitPrice > 0): ?>
+                                                    <small class="text-muted" style="font-size: 0.68rem;">@ <?= number_format($unitPrice) ?>/bird</small>
+                                                <?php endif; ?>
+                                            <?php else: ?>
+                                                <span class="text-muted">—</span>
+                                            <?php endif; ?>
                                         </td>
-                                        <td class="pe-3 small text-muted"><?= e($ev['remarks'] ?: '—') ?></td>
+                                        <td class="pe-3 small font-sans-serif">
+                                            <?php if (!empty($ev['customer_name'])): ?>
+                                                <div class="fw-bold text-dark"><i class="bi bi-person me-1"></i><?= e($ev['customer_name']) ?></div>
+                                            <?php endif; ?>
+                                            <div class="text-muted"><?= e($ev['remarks'] ?: ($isSale ? 'Commercial flock offload' : '—')) ?></div>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -192,6 +227,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
 </div>
 
@@ -231,6 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const dates = <?= json_encode($trajectory['dates']) ?>;
     const stockData = <?= json_encode($trajectory['stock']) ?>;
     const deathsData = <?= json_encode($trajectory['cumulative_deaths']) ?>;
+    const soldData = <?= json_encode($trajectory['cumulative_sold'] ?? []) ?>;
 
     new Chart(ctx, {
         type: 'line',
@@ -257,6 +294,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     tension: 0.2,
                     pointRadius: 1,
                     borderWidth: 1.5,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Cumulative Birds Sold',
+                    data: soldData,
+                    borderColor: '#0284c7',
+                    backgroundColor: 'transparent',
+                    borderDash: [2, 2],
+                    tension: 0.2,
+                    pointRadius: 2,
+                    borderWidth: 2,
                     yAxisID: 'y'
                 }
             ]

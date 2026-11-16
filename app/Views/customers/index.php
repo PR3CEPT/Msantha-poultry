@@ -22,37 +22,37 @@
     <!-- KPI Summary Row -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-info">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-info">
                 <span class="text-muted small fw-semibold text-uppercase">Total Customers</span>
-                <div class="fs-3 fw-bold text-dark mt-1"><?= number_format($stats['total_customers']) ?></div>
+                <div class="fs-3 fw-bold text-dark mt-1 font-monospace"><?= number_format($stats['total_customers']) ?></div>
                 <small class="text-muted">Registered in database</small>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-success">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-success">
                 <span class="text-muted small fw-semibold text-uppercase">Total Invoiced</span>
-                <div class="fs-3 fw-bold text-success mt-1"><?= number_format($stats['total_spent']) ?> <small class="fs-6 text-muted">MWK</small></div>
+                <div class="fs-3 fw-bold text-success mt-1 font-monospace"><?= number_format($stats['total_spent']) ?> <small class="fs-6 text-muted">MWK</small></div>
                 <small class="text-muted">Historical Hatchery Fees</small>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-danger">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-danger">
                 <span class="text-muted small fw-semibold text-uppercase">Uncollected Balances</span>
-                <div class="fs-3 fw-bold text-danger mt-1"><?= number_format($stats['total_balance']) ?> <small class="fs-6 text-muted">MWK</small></div>
+                <div class="fs-3 fw-bold text-danger mt-1 font-monospace"><?= number_format($stats['total_balance']) ?> <small class="fs-6 text-muted">MWK</small></div>
                 <small class="text-muted">Customer debts</small>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-secondary">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-secondary">
                 <span class="text-muted small fw-semibold text-uppercase">Farm Internal</span>
-                <div class="fs-3 fw-bold text-secondary mt-1"><?= number_format($stats['internal_customers']) ?></div>
+                <div class="fs-3 fw-bold text-secondary mt-1 font-monospace"><?= number_format($stats['internal_customers']) ?></div>
                 <small class="text-muted">Msantha Farm Accounts</small>
             </div>
         </div>
     </div>
 
     <!-- Search & Filter Card -->
-    <div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-white">
         <div class="card-header bg-white border-bottom p-3">
             <form method="GET" action="<?= url('/customers') ?>" class="row g-2 align-items-center">
                 <div class="col-md-6">

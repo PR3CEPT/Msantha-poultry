@@ -217,12 +217,14 @@ class FlockController
         // Chart trajectory (stock & cumulative deaths)
         $trajectory = $flockService->getFlockTrajectory($id);
 
-        // Events timeline
+        // Events timeline with customer join for sales
         $eventsStmt = $pdo->prepare("
-            SELECT * FROM flock_events 
-            WHERE flock_id = ? 
-            ORDER BY event_date DESC, id DESC 
-            LIMIT 50
+            SELECT fe.*, c.name AS customer_name 
+            FROM flock_events fe
+            LEFT JOIN customers c ON c.id = fe.customer_id
+            WHERE fe.flock_id = ? 
+            ORDER BY fe.event_date DESC, fe.id DESC 
+            LIMIT 100
         ");
         $eventsStmt->execute([$id]);
         $events = $eventsStmt->fetchAll(PDO::FETCH_ASSOC);
