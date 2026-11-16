@@ -85,7 +85,7 @@ class SaleController
             LEFT JOIN customers c ON c.id = s.customer_id
             LEFT JOIN sale_items si ON si.sale_id = s.id
             {$whereSql}
-            GROUP BY s.id
+            GROUP BY s.id, c.name, c.phone
             ORDER BY s.sale_date DESC, s.id DESC
             LIMIT {$perPage} OFFSET {$offset}
         ";

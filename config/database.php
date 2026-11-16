@@ -24,14 +24,14 @@ if ($isSsl) {
     }
 }
 
-// Synchronize MySQL session timezone with application timezone (e.g. +02:00 for Africa/Blantyre)
+// Synchronize MySQL session timezone and relax ONLY_FULL_GROUP_BY for cross-DB compatibility
 $appTz = $_ENV['APP_TIMEZONE'] ?? 'Africa/Blantyre';
 try {
     $tzObj = new DateTimeZone($appTz);
     $tzOffset = (new DateTime('now', $tzObj))->format('P');
-    $options[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET time_zone = '{$tzOffset}'";
+    $options[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET time_zone = '{$tzOffset}', sql_mode = (SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))";
 } catch (Throwable) {
-    $options[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET time_zone = '+02:00'";
+    $options[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET time_zone = '+02:00', sql_mode = (SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))";
 }
 
 return [
