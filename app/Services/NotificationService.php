@@ -104,8 +104,8 @@ class NotificationService
 
             // 1. SMS Reminders (Failed Deliveries & Pending Queue)
             $failedSmsStmt = $pdo->query("
-                SELECT id, recipient, error, created_at
-                FROM sms_queue
+                SELECT id, to_phone, error, created_at
+                FROM sms_outbox
                 WHERE status IN ('failed', 'error')
                 ORDER BY id DESC
                 LIMIT 4
@@ -119,7 +119,7 @@ class NotificationService
                         'category' => 'SMS',
                         'type' => 'danger',
                         'title' => 'SMS Delivery Failed',
-                        'message' => "Recipient {$sms['recipient']} failed: " . ($sms['error'] ?: 'Gateway delivery timeout'),
+                        'message' => "Recipient {$sms['to_phone']} failed: " . ($sms['error'] ?: 'Gateway delivery timeout'),
                         'link' => url('/admin/sms'),
                         'time' => date('H:i', strtotime((string)$sms['created_at'])),
                         'is_urgent' => true,
@@ -128,7 +128,7 @@ class NotificationService
                 }
             }
 
-            $pendingSmsCount = (int)$pdo->query("SELECT COUNT(*) FROM sms_queue WHERE status = 'queued'")->fetchColumn();
+            $pendingSmsCount = (int)$pdo->query("SELECT COUNT(*) FROM sms_outbox WHERE status = 'queued'")->fetchColumn();
             if ($pendingSmsCount > 0) {
                 $key = 'sms_pending_queue_' . date('YmdH');
                 $alerts[] = [
@@ -244,7 +244,7 @@ class NotificationService
                 JOIN (
                     SELECT customer_id, SUM(cost) AS incubation_cost, SUM(amount_paid) AS incubation_paid
                     FROM incubation_jobs
-                    WHERE created_at <= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+                    WHERE COALESCE(date_hatched, date_received, created_at) <= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
                     GROUP BY customer_id
                 ) j ON j.customer_id = c.id
                 WHERE c.is_internal = 0

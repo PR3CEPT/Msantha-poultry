@@ -55,6 +55,24 @@ class AfricasTalkingProvider implements SmsProviderInterface
             $postData['from'] = $this->senderId;
         }
 
+        $result = $this->executeRequest($postData, $phone, $message);
+
+        // Fallback: If carrier rejects with InvalidSenderId, retry without 'from' so SMS is never lost
+        if (!$result['success'] && !empty($this->senderId) && (str_contains((string)($result['error'] ?? ''), 'InvalidSenderId') || str_contains((string)($result['error'] ?? ''), 'SenderId'))) {
+            unset($postData['from']);
+            $result = $this->executeRequest($postData, $phone, $message);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Helper to execute cURL POST to Africa's Talking.
+     * @param array<string, mixed> $postData
+     * @return array{success: bool, message_id: ?string, error: ?string}
+     */
+    private function executeRequest(array $postData, string $phone, string $message): array
+    {
         $body = http_build_query($postData);
 
         $headers = [
@@ -78,7 +96,7 @@ class AfricasTalkingProvider implements SmsProviderInterface
         curl_close($ch);
 
         // Fallback audit log
-        $logDir = dirname(__DIR__, 2) . '/storage/logs';
+        $logDir = dirname(__DIR__, 3) . '/storage/logs';
         if (!is_dir($logDir)) {
             @mkdir($logDir, 0777, true);
         }

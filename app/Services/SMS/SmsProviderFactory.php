@@ -25,12 +25,12 @@ class SmsProviderFactory
             // fallback if settings table query fails
         }
 
-        $providerName = strtolower(trim((string) ($settings['sms_provider'] ?? Config::get('sms.provider', 'fake'))));
-        $senderId = $settings['sms_sender_id'] ?? Config::get('sms.sender_id', 'MSANTHA');
+        $providerName = strtolower(trim((string) ($settings['sms_provider'] ?? Config::get('sms.provider', $_ENV['SMS_PROVIDER'] ?? 'africas_talking'))));
+        $senderId = !empty($settings['sms_sender_id']) ? $settings['sms_sender_id'] : Config::get('sms.sender_id', null);
 
         if ($providerName === 'africas_talking') {
-            $username = $settings['africastalking_username'] ?? (string) Config::get('sms.africastalking.username', '');
-            $apiKey = $settings['africastalking_api_key'] ?? (string) Config::get('sms.africastalking.api_key', '');
+            $username = $settings['africastalking_username'] ?? (string) Config::get('sms.africastalking.username', $_ENV['SMS_USERNAME'] ?? 'ziweto');
+            $apiKey = $settings['africastalking_api_key'] ?? (string) Config::get('sms.africastalking.api_key', $_ENV['SMS_API_KEY'] ?? '');
             $isSandbox = (bool) ($settings['africastalking_sandbox'] ?? Config::get('sms.africastalking.sandbox', false));
             return new AfricasTalkingProvider($username, $apiKey, $senderId, $isSandbox);
         }
