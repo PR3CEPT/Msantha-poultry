@@ -446,23 +446,26 @@
                         <h4 class="fw-bold text-dark mb-2"><i class="bi bi-search text-success me-2"></i>Track Your Incubation Batch</h4>
                         <p class="text-muted small mb-4">Are you a registered customer with eggs currently in our Liwonde incubators? Enter your phone number or batch code to check your status.</p>
                         
-                        <form onsubmit="event.preventDefault(); alert('Please sign in or call farm administration at +265 9998 996 20 for real-time batch lookup.');">
+                        <form id="trackIncubationForm">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold text-dark small">Customer Mobile Number</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light">+265</span>
-                                    <input type="tel" class="form-control" placeholder="999 899 620">
+                                    <input type="tel" name="phone" id="trackPhone" class="form-control" placeholder="999 899 620" required>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold text-dark small">Batch Receipt / Job Number (Optional)</label>
-                                <input type="text" class="form-control" placeholder="e.g. JOB-837 or Customer Name">
+                                <input type="text" name="job_ref" id="trackJobRef" class="form-control" placeholder="e.g. JOB-837 or 837">
                             </div>
-                            <button type="submit" class="btn btn-success fw-bold w-100 py-2 shadow-sm mb-3">
+                            <button type="submit" id="trackSubmitBtn" class="btn btn-success fw-bold w-100 py-2 shadow-sm mb-3">
                                 <i class="bi bi-arrow-right-circle me-1"></i>Track Hatch Schedule
                             </button>
                             <small class="text-muted text-center d-block">For batch deliveries, egg bookings, or inquiries: <a href="tel:+265999899620" class="text-success fw-bold text-decoration-none">+265 9998 996 20</a></small>
                         </form>
+
+                        <!-- Track Results Container -->
+                        <div id="trackResultContainer" class="mt-3" style="display: none;"></div>
                     </div>
                 </div>
             </div>
@@ -583,34 +586,37 @@
                     </div>
                     <div class="col-12 col-lg-6 p-4 p-md-5 bg-white d-flex flex-column justify-content-center">
                         <h4 class="fw-bold text-dark mb-2">Send an Inquiry</h4>
-                        <p class="text-muted small mb-4">Fill out your message and our Liwonde team will respond promptly.</p>
-                        <form onsubmit="event.preventDefault(); alert('Thank you! Your message has been sent to Msantha Investments (MIGS). We will reach out shortly.');">
+                        <p class="text-muted small mb-4">Fill out your message and our Liwonde management team will respond promptly.</p>
+                        
+                        <form id="contactInquiryForm">
                             <div class="mb-3">
                                 <label class="form-label fw-semibold text-dark small">Your Name</label>
-                                <input type="text" class="form-control" required placeholder="e.g. Gilbert Mponda">
+                                <input type="text" name="name" id="inqName" class="form-control" required placeholder="e.g. Gilbert Mponda">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold text-dark small">Phone Number</label>
-                                <input type="tel" class="form-control" required placeholder="e.g. 0999 899 620">
+                                <input type="tel" name="phone" id="inqPhone" class="form-control" required placeholder="e.g. 0999 899 620">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-semibold text-dark small">Subject / Purpose</label>
-                                <select class="form-select">
-                                    <option>Egg Incubation Booking</option>
-                                    <option>Livestock & Poultry Purchase</option>
-                                    <option>Veterinary Vaccines & Ear Tags</option>
-                                    <option>Farmer Training & Consultancy</option>
-                                    <option>General Agribusiness Inquiry</option>
+                                <select name="subject" id="inqSubject" class="form-select">
+                                    <option value="Egg Incubation Booking">Egg Incubation Booking</option>
+                                    <option value="Livestock & Poultry Purchase">Livestock & Poultry Purchase</option>
+                                    <option value="Veterinary Vaccines & Ear Tags">Veterinary Vaccines & Ear Tags</option>
+                                    <option value="Farmer Training & Consultancy">Farmer Training & Consultancy</option>
+                                    <option value="General Agribusiness Inquiry">General Agribusiness Inquiry</option>
                                 </select>
                             </div>
                             <div class="mb-4">
                                 <label class="form-label fw-semibold text-dark small">Message</label>
-                                <textarea class="form-control" rows="3" placeholder="Tell us about your flock, egg quantities, or livestock requirements..."></textarea>
+                                <textarea name="message" id="inqMessage" class="form-control" rows="3" required placeholder="Tell us about your flock, egg quantities, or livestock requirements..."></textarea>
                             </div>
-                            <button type="submit" class="btn btn-success fw-bold w-100 py-2 shadow-sm">
+                            <button type="submit" id="inqSubmitBtn" class="btn btn-success fw-bold w-100 py-2 shadow-sm">
                                 <i class="bi bi-send-fill me-2"></i>Submit Message
                             </button>
                         </form>
+
+                        <div id="inquiryFeedback" class="mt-3" style="display: none;"></div>
                     </div>
                 </div>
             </div>
@@ -683,6 +689,190 @@
 
     <!-- Bootstrap 5.3 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+    // 1. Live Incubation Batch Tracker
+    const trackForm = document.getElementById('trackIncubationForm');
+    const trackBtn = document.getElementById('trackSubmitBtn');
+    const trackContainer = document.getElementById('trackResultContainer');
+
+    if (trackForm) {
+        trackForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const phone = document.getElementById('trackPhone').value.trim();
+            const jobRef = document.getElementById('trackJobRef').value.trim();
+
+            if (!phone && !jobRef) {
+                alert('Please enter your mobile phone number.');
+                return;
+            }
+
+            const origHtml = trackBtn.innerHTML;
+            trackBtn.disabled = true;
+            trackBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Searching Incubators...';
+            trackContainer.style.display = 'block';
+            trackContainer.innerHTML = '<div class="text-center py-3 text-muted"><div class="spinner-border text-success" role="status"></div><p class="small mt-2 mb-0">Querying live setter & hatcher database...</p></div>';
+
+            try {
+                const res = await fetch('<?= url("/api/public/track-incubation") ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new URLSearchParams({ phone: phone, job_ref: jobRef })
+                });
+
+                const data = await res.json();
+                trackBtn.disabled = false;
+                trackBtn.innerHTML = origHtml;
+
+                if (!data.success) {
+                    trackContainer.innerHTML = `
+                        <div class="alert alert-danger rounded-3 py-2 px-3 small border-0 shadow-sm">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>${data.message || 'Lookup failed.'}
+                        </div>`;
+                    return;
+                }
+
+                if (data.count === 0) {
+                    trackContainer.innerHTML = `
+                        <div class="alert alert-warning rounded-4 p-3 border-0 shadow-sm text-start">
+                            <h6 class="fw-bold text-dark mb-1"><i class="bi bi-info-circle-fill text-warning me-1"></i>No Active Batch Found</h6>
+                            <p class="small text-muted mb-2">${data.message}</p>
+                            <a href="tel:+265999899620" class="btn btn-outline-dark btn-sm rounded-pill fw-semibold">
+                                <i class="bi bi-telephone-fill me-1 text-success"></i>Call +265 9998 996 20
+                            </a>
+                        </div>`;
+                    return;
+                }
+
+                let html = `<div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold">${data.count} Batch(es) Found</span>
+                    <small class="text-muted font-monospace">Liwonde Hatchery</small>
+                </div>`;
+
+                data.jobs.forEach(j => {
+                    html += `
+                        <div class="card border border-success-subtle shadow-sm rounded-4 mb-3 overflow-hidden text-start">
+                            <div class="card-header bg-light border-bottom p-2.5 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong class="text-dark d-block small">${j.customer_name}</strong>
+                                    <code class="text-muted" style="font-size: 0.72rem;">${j.batch_code}</code>
+                                </div>
+                                <span class="badge ${j.badge_class} rounded-pill px-2.5 py-1 fw-bold" style="font-size: 0.75rem;">
+                                    ${j.countdown_text}
+                                </span>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="row g-2 mb-2">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block" style="font-size: 0.7rem;">Breed</small>
+                                        <strong class="text-dark small">${j.breed_name}</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block" style="font-size: 0.7rem;">Eggs Incubated</small>
+                                        <strong class="text-success small">${Number(j.eggs_incubated).toLocaleString()} eggs</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block" style="font-size: 0.7rem;">Day 18 Candling/Transfer</small>
+                                        <span class="font-monospace small text-dark">${j.date_transfer}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block" style="font-size: 0.7rem;">Expected Hatch Date</small>
+                                        <span class="font-monospace small text-dark fw-bold">${j.expected_hatch_date}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-2 pt-2 border-top">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <small class="text-muted" style="font-size: 0.7rem;">Incubation Stage: <strong>${j.stage_text}</strong></small>
+                                        <small class="text-muted font-monospace" style="font-size: 0.7rem;">Day ${j.day_number} of 21</small>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: ${j.progress_percent}%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+
+                trackContainer.innerHTML = html;
+            } catch (err) {
+                trackBtn.disabled = false;
+                trackBtn.innerHTML = origHtml;
+                trackContainer.innerHTML = `<div class="alert alert-danger py-2 px-3 small rounded-3">Connection error. Please try again or call +265 9998 996 20.</div>`;
+            }
+        });
+    }
+
+    // 2. Public Contact Inquiry Form
+    const inqForm = document.getElementById('contactInquiryForm');
+    const inqBtn = document.getElementById('inqSubmitBtn');
+    const inqFeedback = document.getElementById('inquiryFeedback');
+
+    if (inqForm) {
+        inqForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('inqName').value.trim();
+            const phone = document.getElementById('inqPhone').value.trim();
+            const subject = document.getElementById('inqSubject').value.trim();
+            const message = document.getElementById('inqMessage').value.trim();
+
+            if (!name || !phone || !message) {
+                alert('Please fill out your name, phone number, and message.');
+                return;
+            }
+
+            const origHtml = inqBtn.innerHTML;
+            inqBtn.disabled = true;
+            inqBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending to MIGS Management...';
+            inqFeedback.style.display = 'none';
+
+            try {
+                const res = await fetch('<?= url("/api/public/contact-inquiry") ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new URLSearchParams({
+                        name: name,
+                        phone: phone,
+                        subject: subject,
+                        message: message
+                    })
+                });
+
+                const data = await res.json();
+                inqBtn.disabled = false;
+                inqBtn.innerHTML = origHtml;
+                inqFeedback.style.display = 'block';
+
+                if (data.success) {
+                    inqForm.reset();
+                    inqFeedback.innerHTML = `
+                        <div class="alert alert-success border-0 shadow-sm rounded-4 p-3 text-start">
+                            <h6 class="fw-bold text-success mb-1 d-flex align-items-center gap-2">
+                                <i class="bi bi-check-circle-fill"></i>Inquiry Dispatched Successfully!
+                            </h6>
+                            <p class="small text-muted mb-0">${data.message}</p>
+                        </div>`;
+                } else {
+                    inqFeedback.innerHTML = `
+                        <div class="alert alert-danger border-0 shadow-sm rounded-3 py-2 px-3 small text-start">
+                            <i class="bi bi-exclamation-octagon-fill me-1"></i>${data.message || 'Submission failed.'}
+                        </div>`;
+                }
+            } catch (err) {
+                inqBtn.disabled = false;
+                inqBtn.innerHTML = origHtml;
+                inqFeedback.style.display = 'block';
+                inqFeedback.innerHTML = `<div class="alert alert-danger py-2 px-3 small rounded-3">Connection error. Please call +265 9998 996 20 directly.</div>`;
+            }
+        });
+    }
+    </script>
 </body>
 </html>
 

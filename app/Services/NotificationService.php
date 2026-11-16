@@ -102,6 +102,34 @@ class NotificationService
         try {
             $pdo = DB::pdo();
 
+            // 0. Public Web Inquiries (Shared Manager Queue)
+            try {
+                $newInqStmt = $pdo->query("
+                    SELECT id, name, phone, subject, created_at
+                    FROM contact_inquiries
+                    WHERE status = 'new'
+                    ORDER BY id DESC
+                    LIMIT 4
+                ");
+                if ($newInqStmt) {
+                    while ($inq = $newInqStmt->fetch(PDO::FETCH_ASSOC)) {
+                        $key = 'inquiry_' . $inq['id'];
+                        $alerts[] = [
+                            'id' => $key,
+                            'key' => $key,
+                            'category' => 'Inquiry',
+                            'type' => 'warning',
+                            'title' => 'Web Message: ' . $inq['name'],
+                            'message' => "{$inq['subject']} ({$inq['phone']}) - Awaiting manager attention",
+                            'link' => url('/admin/inquiries'),
+                            'time' => date('H:i', strtotime((string)$inq['created_at'])),
+                            'is_urgent' => true,
+                            'is_seen' => false,
+                        ];
+                    }
+                }
+            } catch (Throwable) {}
+
             // 1. SMS Reminders (Failed Deliveries & Pending Queue)
             $failedSmsStmt = $pdo->query("
                 SELECT id, to_phone, error, created_at

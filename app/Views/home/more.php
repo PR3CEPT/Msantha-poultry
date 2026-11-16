@@ -173,13 +173,18 @@
                     <small class="text-muted" style="font-size: 0.72rem;">CSV ingestion</small>
                 </a>
             </div>
-            <div class="col-12">
-                <a href="<?= url('/admin/sms') ?>" class="card border-0 shadow-sm rounded-3 text-decoration-none p-3 bg-white d-flex flex-row align-items-center gap-3">
-                    <i class="bi bi-chat-dots text-success fs-3"></i>
-                    <div>
-                        <span class="fw-bold text-dark d-block">SMS Notifications</span>
-                        <small class="text-muted" style="font-size: 0.72rem;">Africa's Talking & customer alert logs</small>
-                    </div>
+            <div class="col-6">
+                <a href="<?= url('/admin/sms') ?>" class="card border-0 shadow-sm rounded-3 text-decoration-none p-3 h-100 bg-white">
+                    <i class="bi bi-chat-dots text-success fs-3 mb-2"></i>
+                    <span class="fw-bold text-dark d-block">SMS Logs</span>
+                    <small class="text-muted" style="font-size: 0.72rem;">Customer alerts</small>
+                </a>
+            </div>
+            <div class="col-6">
+                <a href="<?= url('/admin/inquiries') ?>" class="card border-0 shadow-sm rounded-3 text-decoration-none p-3 h-100 bg-white">
+                    <i class="bi bi-chat-left-dots text-warning fs-3 mb-2"></i>
+                    <span class="fw-bold text-dark d-block">Web Inquiries</span>
+                    <small class="text-muted" style="font-size: 0.72rem;">Customer messages</small>
                 </a>
             </div>
         </div>

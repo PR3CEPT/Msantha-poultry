@@ -104,6 +104,13 @@ $currentRole = \App\Core\Auth::role();
         </a>
     <?php endif; ?>
 
+    <?php if (in_array($currentRole, ['owner', 'manager'], true)): ?>
+        <a class="nav-link <?= ($activeNav ?? '') === 'admin_inquiries' ? 'active' : '' ?>" href="<?= url('/admin/inquiries') ?>">
+            <span class="nav-icon-wrap"><i class="bi bi-chat-left-text text-warning"></i></span>
+            <span>Web Inquiries</span>
+        </a>
+    <?php endif; ?>
+
     <!-- Administration -->
     <?php if (in_array($currentRole, ['owner', 'manager'], true)): ?>
         <div class="sidebar-section-title">Administration</div>

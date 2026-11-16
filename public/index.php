@@ -6,8 +6,10 @@ use App\Controllers\Admin\AuditController;
 use App\Controllers\Admin\BackupController;
 use App\Controllers\Admin\DataReviewController;
 use App\Controllers\Admin\ImportController;
+use App\Controllers\Admin\InquiryController;
 use App\Controllers\Admin\SmsController;
 use App\Controllers\Admin\UserController;
+use App\Controllers\Api\PublicController;
 use App\Controllers\Api\SyncController;
 use App\Controllers\AuthController;
 use App\Controllers\CustomerController;
@@ -253,6 +255,14 @@ $router->get('/reports/aged-debtors', [ReportController::class, 'agedDebtors']);
 $router->get('/reports/sales-by-item', [ReportController::class, 'salesByItem']);
 $router->get('/reports/incubation-allocation', [ReportController::class, 'incubationAllocation']);
 $router->get('/reports/feed-efficiency', [ReportController::class, 'feedEfficiency']);
+
+// Public Website APIs (Incubation Tracking & Contact Inquiries)
+$router->post('/api/public/track-incubation', [PublicController::class, 'trackIncubation']);
+$router->post('/api/public/contact-inquiry', [PublicController::class, 'submitInquiry']);
+
+// Admin Web Inquiries (Shared Manager Queue)
+$router->get('/admin/inquiries', [InquiryController::class, 'index']);
+$router->post('/admin/inquiries/{id}/attend', [InquiryController::class, 'attend']);
 
 $router->get('/more', [HomeController::class, 'more']);
 
