@@ -2,6 +2,22 @@
 
 declare(strict_types=1);
 
+$options = [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES => false,
+];
+
+// Automatically enable SSL for TiDB Cloud Serverless or when DB_SSL is requested
+$isSsl = !empty($_ENV['DB_SSL']) || (isset($_ENV['DB_HOST']) && str_contains((string) $_ENV['DB_HOST'], 'tidbcloud.com'));
+if ($isSsl) {
+    if (!empty($_ENV['DB_SSL_CA']) && file_exists((string) $_ENV['DB_SSL_CA'])) {
+        $options[PDO::MYSQL_ATTR_SSL_CA] = (string) $_ENV['DB_SSL_CA'];
+    } elseif (defined('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')) {
+        $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+    }
+}
+
 return [
     'default' => $_ENV['DB_CONNECTION'] ?? 'mysql',
     'connections' => [
@@ -16,11 +32,7 @@ return [
             'password' => $_ENV['DB_PASSWORD'] ?? '',
             'charset' => $_ENV['DB_CHARSET'] ?? 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
-            'options' => [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
-            ],
+            'options' => $options,
         ],
     ],
 ];

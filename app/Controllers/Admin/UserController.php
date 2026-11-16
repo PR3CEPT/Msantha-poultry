@@ -154,7 +154,7 @@ class UserController
         return Response::redirect(url('/admin/users'));
     }
 
-    public function edit(Request $request, string $id): Response
+    public function edit(Request $request, int|string $id): Response
     {
         $this->checkAccess();
 
@@ -184,7 +184,7 @@ class UserController
         ]);
     }
 
-    public function update(Request $request, string $id): Response
+    public function update(Request $request, int|string $id): Response
     {
         $this->checkAccess();
 
@@ -291,7 +291,7 @@ class UserController
         return Response::redirect(url('/admin/users'));
     }
 
-    public function toggleActive(Request $request, string $id): Response
+    public function toggleActive(Request $request, int|string $id): Response
     {
         $this->checkAccess();
 
@@ -332,7 +332,7 @@ class UserController
         return Response::redirect(url('/admin/users'));
     }
 
-    public function forceLogout(Request $request, string $id): Response
+    public function forceLogout(Request $request, int|string $id): Response
     {
         $this->checkAccess();
 
