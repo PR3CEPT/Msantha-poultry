@@ -50,8 +50,10 @@ CREATE TABLE customers (
   location VARCHAR(120) NULL,                 -- e.g. Nsanama, Liwonde, Ulongwe
   phone VARCHAR(20) NULL,
   phone_alt VARCHAR(20) NULL,
+  email VARCHAR(150) NULL,
   is_internal TINYINT(1) NOT NULL DEFAULT 0,  -- 1 = the farm's own eggs ("Msantha")
   sms_opt_in TINYINT(1) NOT NULL DEFAULT 1,
+  email_opt_in TINYINT(1) NOT NULL DEFAULT 1,
   notes VARCHAR(255) NULL,
   legacy_names JSON NULL,                     -- every spelling found in Excel
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

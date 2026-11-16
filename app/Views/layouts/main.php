@@ -593,25 +593,49 @@
                 <span><?= t('nav.home') ?></span>
             </a>
         </div>
-        <div class="nav-item">
-            <a href="<?= url('/flocks') ?>" class="nav-link <?= ($activeNav ?? '') === 'flocks' ? 'active' : '' ?>">
-                <i class="bi bi-feather"></i>
-                <span><?= t('nav.flocks') ?></span>
-            </a>
-        </div>
-        <div class="nav-item">
-            <a href="<?= url('/eggs') ?>" class="nav-link <?= ($activeNav ?? '') === 'eggs' ? 'active' : '' ?>">
-                <i class="bi bi-egg-fried"></i>
-                <span><?= t('nav.eggs') ?></span>
-            </a>
-        </div>
-        <div class="nav-item">
-            <a href="<?= url('/incubation-jobs') ?>"
-                class="nav-link <?= ($activeNav ?? '') === 'incubation' ? 'active' : '' ?>">
-                <i class="bi bi-thermometer-half"></i>
-                <span><?= t('nav.incubation') ?></span>
-            </a>
-        </div>
+        <?php if (\App\Core\Auth::can('flocks', 'view')): ?>
+            <div class="nav-item">
+                <a href="<?= url('/flocks') ?>" class="nav-link <?= ($activeNav ?? '') === 'flocks' ? 'active' : '' ?>">
+                    <i class="bi bi-feather"></i>
+                    <span><?= t('nav.flocks') ?></span>
+                </a>
+            </div>
+        <?php endif; ?>
+        <?php if (\App\Core\Auth::can('eggs', 'view')): ?>
+            <div class="nav-item">
+                <a href="<?= url('/eggs') ?>" class="nav-link <?= ($activeNav ?? '') === 'eggs' ? 'active' : '' ?>">
+                    <i class="bi bi-egg-fried"></i>
+                    <span><?= t('nav.eggs') ?></span>
+                </a>
+            </div>
+        <?php endif; ?>
+        <?php if (\App\Core\Auth::can('incubation', 'view')): ?>
+            <div class="nav-item">
+                <a href="<?= url('/incubation-jobs') ?>"
+                    class="nav-link <?= ($activeNav ?? '') === 'incubation' ? 'active' : '' ?>">
+                    <i class="bi bi-thermometer-half"></i>
+                    <span><?= t('nav.incubation') ?></span>
+                </a>
+            </div>
+        <?php endif; ?>
+        <?php if (!\App\Core\Auth::can('incubation', 'view') && \App\Core\Auth::can('finance', 'view')): ?>
+            <div class="nav-item">
+                <a href="<?= url('/finance') ?>"
+                    class="nav-link <?= ($activeNav ?? '') === 'finance' ? 'active' : '' ?>">
+                    <i class="bi bi-cash-stack"></i>
+                    <span>Finance</span>
+                </a>
+            </div>
+        <?php endif; ?>
+        <?php if (!\App\Core\Auth::can('eggs', 'view') && \App\Core\Auth::can('sales', 'view')): ?>
+            <div class="nav-item">
+                <a href="<?= url('/sales') ?>"
+                    class="nav-link <?= ($activeNav ?? '') === 'sales' ? 'active' : '' ?>">
+                    <i class="bi bi-cart-check"></i>
+                    <span>Sales</span>
+                </a>
+            </div>
+        <?php endif; ?>
         <div class="nav-item">
             <a href="<?= url('/more') ?>" class="nav-link <?= ($activeNav ?? '') === 'more' ? 'active' : '' ?>">
                 <i class="bi bi-grid-fill"></i>

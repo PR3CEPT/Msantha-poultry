@@ -30,24 +30,41 @@
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark">Email Address (Optional)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                                <input type="email" name="email" class="form-control" placeholder="e.g. customer@example.com" value="<?= e($customer['email'] ?? '') ?>">
+                            </div>
+                            <div class="form-text small">For sending digital incubation receipts, payment confirmations, and invoices.</div>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label fw-semibold text-dark">Trading Location / Area</label>
                             <input type="text" name="location" class="form-control" value="<?= e($customer['location'] ?? '') ?>">
                         </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <div class="form-check form-switch p-3 bg-light rounded-3 border">
+                        <div class="row g-2 mb-3">
+                            <div class="col-12 col-md-4">
+                                <div class="form-check form-switch p-3 bg-light rounded-3 border h-100">
                                     <input class="form-check-input ms-0 me-2" type="checkbox" name="is_internal" value="1" id="isInternal" <?= !empty($customer['is_internal']) ? 'checked' : '' ?>>
-                                    <label class="form-check-label fw-semibold text-dark" for="isInternal">
-                                        Msantha Farm Internal
+                                    <label class="form-check-label fw-semibold text-dark small" for="isInternal">
+                                        Msantha Internal
                                     </label>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-check form-switch p-3 bg-light rounded-3 border">
+                            <div class="col-12 col-md-4">
+                                <div class="form-check form-switch p-3 bg-light rounded-3 border h-100">
                                     <input class="form-check-input ms-0 me-2" type="checkbox" name="sms_opt_in" value="1" id="smsOptIn" <?= !empty($customer['sms_opt_in']) ? 'checked' : '' ?>>
-                                    <label class="form-check-label fw-semibold text-dark" for="smsOptIn">
+                                    <label class="form-check-label fw-semibold text-dark small" for="smsOptIn">
                                         SMS Notifications
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <div class="form-check form-switch p-3 bg-light rounded-3 border h-100">
+                                    <input class="form-check-input ms-0 me-2" type="checkbox" name="email_opt_in" value="1" id="emailOptIn" <?= !empty($customer['email_opt_in']) ? 'checked' : '' ?>>
+                                    <label class="form-check-label fw-semibold text-dark small" for="emailOptIn">
+                                        Email Notifications
                                     </label>
                                 </div>
                             </div>

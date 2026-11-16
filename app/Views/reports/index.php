@@ -59,6 +59,53 @@
         </div>
     </div>
 
+    <!-- Manager Custom Date Range Report Generator -->
+    <div class="card border-0 shadow-sm rounded-4 p-3.5 bg-white mb-4 border-top border-4 border-success">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <h5 class="fw-bold text-dark mb-0 fs-6">
+                <i class="bi bi-sliders text-success me-2"></i>Custom Date Range Report Generator
+            </h5>
+            <span class="badge bg-success-subtle text-success border border-success-subtle">Any Date Range</span>
+        </div>
+        <p class="text-muted small mb-3">Produce customized management reports for any specific date, week, month, or custom period.</p>
+
+        <form method="GET" action="<?= url('/reports/sales-by-item') ?>" id="customReportForm" class="row g-2 align-items-end">
+            <div class="col-12 col-md-4">
+                <label class="form-label small fw-semibold text-dark mb-1">Select Report Type</label>
+                <select id="reportTypeSelect" class="form-select form-select-sm" onchange="updateReportAction(this.value)">
+                    <option value="/reports/sales-by-item" selected>Commercial Sales Revenue by Item</option>
+                    <option value="/reports/eggs">Egg Production & Yield Breakdown</option>
+                    <option value="/reports/hatch">Incubation Hatch Rate % Performance</option>
+                    <option value="/reports/mortality">Flock Mortality % Analysis</option>
+                    <option value="/reports/aged-debtors">Aged Customer Debtors</option>
+                    <option value="/finance/pnl">Profit & Loss Operating Statement</option>
+                    <option value="/reports/feed-efficiency">Feed Cost Efficiency</option>
+                    <option value="/reports/incubation-allocation">Statutory Incubation Allocations</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label small fw-semibold text-dark mb-1">From Date</label>
+                <input type="date" name="from" id="reportFromDate" class="form-control form-control-sm" value="<?= date('Y-m-01') ?>">
+            </div>
+            <div class="col-6 col-md-3">
+                <label class="form-label small fw-semibold text-dark mb-1">To Date</label>
+                <input type="date" name="to" id="reportToDate" class="form-control form-control-sm" value="<?= date('Y-m-d') ?>">
+            </div>
+            <div class="col-12 col-md-2">
+                <button type="submit" class="btn btn-success btn-sm w-100 fw-bold">
+                    <i class="bi bi-file-earmark-bar-graph me-1"></i>Generate
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+    function updateReportAction(route) {
+        var form = document.getElementById('customReportForm');
+        form.action = '<?= url('') ?>' + route;
+    }
+    </script>
+
     <!-- Top Summary Metrics Cards -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-4">

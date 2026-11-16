@@ -23,6 +23,8 @@ class SaleController
         $pdo = DB::pdo();
 
         $search = trim((string) $request->query('q', ''));
+        $dateFrom = trim((string) $request->query('date_from', ''));
+        $dateTo = trim((string) $request->query('date_to', ''));
         $page = max(1, (int) $request->query('page', 1));
         $perPage = 25;
         $offset = ($page - 1) * $perPage;
@@ -61,6 +63,16 @@ class SaleController
             $params[] = "%{$search}%";
         }
 
+        if ($dateFrom !== '') {
+            $whereSql .= " AND s.sale_date >= ?";
+            $params[] = $dateFrom;
+        }
+
+        if ($dateTo !== '') {
+            $whereSql .= " AND s.sale_date <= ?";
+            $params[] = $dateTo;
+        }
+
         $countStmt = $pdo->prepare("SELECT COUNT(*) FROM sales s LEFT JOIN customers c ON c.id = s.customer_id {$whereSql}");
         $countStmt->execute($params);
         $totalRows = (int) $countStmt->fetchColumn();
@@ -91,6 +103,8 @@ class SaleController
             'stats' => $stats,
             'sales' => $sales,
             'search' => $search,
+            'dateFrom' => $dateFrom,
+            'dateTo' => $dateTo,
             'page' => $page,
             'totalPages' => $totalPages,
             'totalRows' => $totalRows,

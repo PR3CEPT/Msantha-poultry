@@ -101,25 +101,37 @@ class ProfileController
             }
         }
 
+        $email = trim((string) $request->input('email'));
+        if ($email === '') {
+            $email = null;
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['flash_error'] = 'Please provide a valid email address.';
+            return Response::redirect(url('/profile'));
+        }
+
         $stmt = $pdo->prepare("
             UPDATE users SET
                 full_name = ?,
-                phone = ?
+                phone = ?,
+                email = ?
             WHERE id = ?
         ");
-        $stmt->execute([$fullName, $normalizedPhone, $user['id']]);
+        $stmt->execute([$fullName, $normalizedPhone, $email, $user['id']]);
 
         // Refresh session user data
         $_SESSION['user']['full_name'] = $fullName;
         $_SESSION['user']['phone'] = $normalizedPhone;
+        $_SESSION['user']['email'] = $email;
         Auth::reset();
 
         Audit::log('update_profile', 'users', (int) $user['id'], [
             'full_name' => $user['full_name'],
             'phone' => $user['phone'],
+            'email' => $user['email'] ?? null,
         ], [
             'full_name' => $fullName,
             'phone' => $normalizedPhone,
+            'email' => $email,
         ]);
 
         $_SESSION['flash_success'] = 'Your profile details have been updated successfully.';

@@ -31,27 +31,45 @@
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label fw-semibold text-dark">Email Address (Optional)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                                <input type="email" name="email" class="form-control" placeholder="customer@gmail.com">
+                            </div>
+                            <small class="text-muted">For digital receipts, payment confirmations, and batch notifications.</small>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label fw-semibold text-dark">Trading Location / Area</label>
                             <input type="text" name="location" class="form-control" placeholder="e.g. Liwonde, Nsanama, Ulongwe">
                         </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <div class="form-check form-switch p-3 bg-light rounded-3 border">
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-4">
+                                <div class="form-check form-switch p-2.5 bg-light rounded-3 border h-100">
                                     <input class="form-check-input ms-0 me-2" type="checkbox" name="is_internal" value="1" id="isInternal">
-                                    <label class="form-check-label fw-semibold text-dark" for="isInternal">
-                                        Msantha Farm Internal
+                                    <label class="form-check-label fw-semibold text-dark small" for="isInternal">
+                                        Msantha Internal
                                     </label>
-                                    <small class="d-block text-muted">Tick if own farm eggs</small>
+                                    <small class="d-block text-muted" style="font-size: 0.72rem;">Own farm eggs</small>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-check form-switch p-3 bg-light rounded-3 border">
+                            <div class="col-md-4">
+                                <div class="form-check form-switch p-2.5 bg-light rounded-3 border h-100">
                                     <input class="form-check-input ms-0 me-2" type="checkbox" name="sms_opt_in" value="1" id="smsOptIn" checked>
-                                    <label class="form-check-label fw-semibold text-dark" for="smsOptIn">
-                                        SMS Notifications
+                                    <label class="form-check-label fw-semibold text-dark small" for="smsOptIn">
+                                        SMS Alerts
                                     </label>
-                                    <small class="d-block text-muted">Receive hatch & fee alerts</small>
+                                    <small class="d-block text-muted" style="font-size: 0.72rem;">Hatch & fee SMS</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check form-switch p-2.5 bg-light rounded-3 border h-100">
+                                    <input class="form-check-input ms-0 me-2" type="checkbox" name="email_opt_in" value="1" id="emailOptIn" checked>
+                                    <label class="form-check-label fw-semibold text-dark small" for="emailOptIn">
+                                        Email Alerts
+                                    </label>
+                                    <small class="d-block text-muted" style="font-size: 0.72rem;">Invoices & receipts</small>
                                 </div>
                             </div>
                         </div>

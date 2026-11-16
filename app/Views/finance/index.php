@@ -101,7 +101,7 @@
     }
 
     .zfold-card.is-unfolded .zfold-body {
-        display: block;
+        display: block !important;
     }
 
     @keyframes zfoldSlideDown {
@@ -170,6 +170,8 @@
                     data-bs-target="#addEntryModal" <?= $stats['is_locked'] ? 'disabled title="Month is locked"' : '' ?>>
                     <i class="bi bi-plus-circle me-1"></i>Add Cash Entry
                 </button>
+            <?php endif; ?>
+            <?php if (\App\Core\Auth::hasRole(['owner', 'manager'])): ?>
                 <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 fw-semibold" data-bs-toggle="modal"
                     data-bs-target="#bankMovementModal">
                     <i class="bi bi-bank me-1"></i>Bank Deposit / Withdraw
@@ -287,10 +289,14 @@
 
                 <div class="d-flex gap-2">
                     <?php if (!$stats['is_locked']): ?>
-                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                            data-bs-target="#lockMonthModal">
-                            <i class="bi bi-lock me-1"></i>Close & Lock Month
-                        </button>
+                        <?php if (\App\Core\Auth::hasRole(['owner', 'manager'])): ?>
+                            <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#lockMonthModal">
+                                <i class="bi bi-lock me-1"></i>Close & Lock Month
+                            </button>
+                        <?php else: ?>
+                            <span class="badge bg-light text-muted border py-2 px-3"><i class="bi bi-unlock me-1"></i>Month Open</span>
+                        <?php endif; ?>
                     <?php else: ?>
                         <?php if (\App\Core\Auth::hasRole('owner')): ?>
                             <form method="POST" action="<?= url('/finance/unlock-month') ?>"
@@ -312,41 +318,50 @@
         </div>
     <?php endif; ?>
 
-    <!-- Filter & Search Card -->
+    <!-- Filter & Search Card with Date Ranges -->
     <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4">
         <form method="GET" action="<?= url('/finance') ?>" class="row g-2 align-items-center">
             <input type="hidden" name="unit" value="<?= e($selectedUnit ?? 'POULTRY') ?>">
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-3">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
                     <input type="text" name="q" value="<?= e($search ?? '') ?>"
                         class="form-control form-control-sm border-start-0"
-                        placeholder="Search particulars, cheque or voucher...">
+                        placeholder="Search particulars, cheque...">
                 </div>
             </div>
-            <div class="col-6 col-md-3">
-                <input type="month" name="month" value="<?= e($yearMonth ?? '') ?>" class="form-control form-control-sm"
-                    title="Filter by Month">
+            <div class="col-6 col-md-2">
+                <input type="date" name="date_from" value="<?= e($dateFrom ?? '') ?>" class="form-control form-control-sm"
+                    title="Start Date" placeholder="From Date">
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-2">
+                <input type="date" name="date_to" value="<?= e($dateTo ?? '') ?>" class="form-control form-control-sm"
+                    title="End Date" placeholder="To Date">
+            </div>
+            <div class="col-6 col-md-2">
+                <input type="month" name="month" value="<?= e($yearMonth ?? '') ?>" class="form-control form-control-sm"
+                    title="Or select Month">
+            </div>
+            <div class="col-6 col-md-2">
                 <select name="kind" class="form-select form-select-sm">
                     <option value="all" <?= ($kind ?? 'all') === 'all' ? 'selected' : '' ?>>All Entries</option>
-                    <option value="transaction" <?= ($kind ?? '') === 'transaction' ? 'selected' : '' ?>>Transactions Only
-                    </option>
-                    <option value="month_total" <?= ($kind ?? '') === 'month_total' ? 'selected' : '' ?>>Month-End Closes
-                        Only</option>
+                    <option value="transaction" <?= ($kind ?? '') === 'transaction' ? 'selected' : '' ?>>Transactions Only</option>
+                    <option value="month_total" <?= ($kind ?? '') === 'month_total' ? 'selected' : '' ?>>Month Closes Only</option>
                 </select>
             </div>
-            <div class="col-12 col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-success btn-sm w-100 fw-bold rounded-pill">
-                    <i class="bi bi-funnel me-1"></i>Filter
+            <div class="col-12 col-md-1 d-flex gap-1">
+                <button type="submit" class="btn btn-success btn-sm w-100 fw-bold rounded-pill" title="Apply Filter">
+                    <i class="bi bi-funnel"></i>
                 </button>
-                <?php if (!empty($search) || !empty($yearMonth) || ($kind ?? 'all') !== 'all'): ?>
+                <?php if (!empty($search) || !empty($yearMonth) || !empty($dateFrom) || !empty($dateTo) || ($kind ?? 'all') !== 'all'): ?>
                     <a href="<?= url('/finance?unit=' . urlencode($selectedUnit ?? 'POULTRY')) ?>"
-                        class="btn btn-outline-secondary btn-sm rounded-pill px-2.5" title="Reset Filters">
+                        class="btn btn-outline-secondary btn-sm rounded-pill px-2" title="Reset Filters">
                         <i class="bi bi-arrow-counterclockwise"></i>
                     </a>
                 <?php endif; ?>
+            </div>
+        </form>
+    </div>
             </div>
         </form>
     </div>
@@ -391,7 +406,7 @@
                 ?>
                 <div class="zfold-card mb-2.5 <?= $cardBorderClass ?>">
                     <!-- Z-Fold Header: 2-Tier Folding Scan -->
-                    <div class="zfold-header">
+                    <div class="zfold-header" onclick="if (!event.target.closest('a, button, input, select, .no-fold')) this.closest('.zfold-card').classList.toggle('is-unfolded');">
                         <!-- Tier 1: Date & Unit on Left <---> Amount in MWK & Chevron on Right -->
                         <div class="zfold-tier-top">
                             <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -427,7 +442,7 @@
                                 <?php else: ?>
                                     <span class="badge bg-light text-dark border fw-bold fs-6 px-2.5 py-1">0 MWK</span>
                                 <?php endif; ?>
-                                <button type="button" class="zfold-toggle-btn" aria-label="Toggle transaction breakdown">
+                                <button type="button" class="zfold-toggle-btn" aria-label="Toggle transaction breakdown" onclick="event.stopPropagation(); this.closest('.zfold-card').classList.toggle('is-unfolded');">
                                     <i class="bi bi-chevron-down"></i>
                                 </button>
                             </div>
@@ -746,17 +761,9 @@
 <?php endif; ?>
 
 <script>
-    // Immediate Resilient Z-Fold Click Controller
+    // Global Unfold All / Fold All Controller
     (function () {
         document.addEventListener('click', function (e) {
-            var header = e.target.closest('.zfold-header');
-            if (header) {
-                if (e.target.closest('a') || e.target.closest('button:not(.zfold-toggle-btn)') || e.target.closest('.no-fold')) return;
-                var card = header.closest('.zfold-card');
-                if (card) {
-                    card.classList.toggle('is-unfolded');
-                }
-            }
             var toggleBtn = e.target.closest('[data-zfold-toggle-all]');
             if (toggleBtn) {
                 var sel = toggleBtn.getAttribute('data-zfold-toggle-all') || '.zfold-container';

@@ -110,34 +110,38 @@
         </div>
 
         <!-- KPI 4: Incubation Batches -->
-        <div class="col-6 col-md-4 col-xl">
-            <a href="<?= url('/incubation-jobs') ?>" class="card kpi-card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-info text-decoration-none">
-                <div class="d-flex align-items-center justify-content-between mb-1">
-                    <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">In Incubators</span>
-                    <div class="p-1.5 bg-info-subtle rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                        <?= icon('incubator', 18) ?>
+        <?php if (\App\Core\Auth::can('incubation', 'view')): ?>
+            <div class="col-6 col-md-4 col-xl">
+                <a href="<?= url('/incubation-jobs') ?>" class="card kpi-card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-info text-decoration-none">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">In Incubators</span>
+                        <div class="p-1.5 bg-info-subtle rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                            <?= icon('incubator', 18) ?>
+                        </div>
                     </div>
-                </div>
-                <div class="fs-3 fw-bold text-info mt-1 kpi-value"><?= number_format($stats['incubating_batches']) ?> <small class="fs-6 text-muted">batches</small></div>
-                <small class="text-muted">Active setting & hatcher units</small>
-            </a>
-        </div>
+                    <div class="fs-3 fw-bold text-info mt-1 kpi-value"><?= number_format($stats['incubating_batches']) ?> <small class="fs-6 text-muted">batches</small></div>
+                    <small class="text-muted">Active setting & hatcher units</small>
+                </a>
+            </div>
+        <?php endif; ?>
 
         <!-- KPI 5: Receivables Due -->
-        <div class="col-12 col-md-8 col-xl">
-            <a href="<?= url('/reports/aged-debtors') ?>" class="card kpi-card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 <?= $stats['unpaid_balances_total'] > 0 ? 'border-warning' : 'border-success' ?> text-decoration-none">
-                <div class="d-flex align-items-center justify-content-between mb-1">
-                    <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Unpaid Balances</span>
-                    <div class="p-1.5 bg-warning-subtle rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                        <?= icon('debt', 18) ?>
+        <?php if (\App\Core\Auth::can('reports', 'view') || \App\Core\Auth::can('finance', 'view')): ?>
+            <div class="col-12 col-md-8 col-xl">
+                <a href="<?= url('/reports/aged-debtors') ?>" class="card kpi-card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 <?= $stats['unpaid_balances_total'] > 0 ? 'border-warning' : 'border-success' ?> text-decoration-none">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <span class="text-muted small fw-bold text-uppercase" style="font-size: 0.72rem;">Unpaid Balances</span>
+                        <div class="p-1.5 bg-warning-subtle rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                            <?= icon('debt', 18) ?>
+                        </div>
                     </div>
-                </div>
-                <div class="fs-3 fw-bold <?= $stats['unpaid_balances_total'] > 0 ? 'text-danger' : 'text-success' ?> mt-1 kpi-value">
-                    <?= number_format($stats['unpaid_balances_total']) ?> <small class="fs-6 text-muted">MWK</small>
-                </div>
-                <small class="text-muted"><?= (int) $stats['debtors_count'] ?> customer account(s) pending</small>
-            </a>
-        </div>
+                    <div class="fs-3 fw-bold <?= $stats['unpaid_balances_total'] > 0 ? 'text-danger' : 'text-success' ?> mt-1 kpi-value">
+                        <?= number_format($stats['unpaid_balances_total']) ?> <small class="fs-6 text-muted">MWK</small>
+                    </div>
+                    <small class="text-muted"><?= (int) $stats['debtors_count'] ?> customer account(s) pending</small>
+                </a>
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- Main Two-Column Layout -->
@@ -145,6 +149,7 @@
         <!-- Left Column: Incubation Pipeline & Poultry Financial Position (8 cols) -->
         <div class="col-12 col-lg-8">
             <!-- Incubation Pipeline & Countdown Card -->
+            <?php if (\App\Core\Auth::can('incubation', 'view')): ?>
             <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white overflow-hidden">
                 <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center gap-2">
@@ -224,6 +229,7 @@
                     <?php endif; ?>
                 </div>
             </div>
+            <?php endif; ?>
 
             <!-- Poultry Financial Overview (Strictly Poultry Operations) -->
             <?php if (\App\Core\Auth::can('finance', 'view')): ?>
@@ -289,30 +295,38 @@
                 </div>
                 <div class="card-body p-2">
                     <div class="list-group list-group-flush">
-                        <a href="<?= url('/flocks/quick-entry') ?>" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-2.5 px-3 border-0 rounded-2">
-                            <span class="small fw-semibold d-inline-flex align-items-center gap-2">
-                                <?= icon('chicken', 18) ?> Daily Flock Log (Mortality)
-                            </span>
-                            <i class="bi bi-chevron-right text-muted small"></i>
-                        </a>
-                        <a href="<?= url('/flocks/price-ladder') ?>" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-2.5 px-3 border-0 rounded-2">
-                            <span class="small fw-semibold d-inline-flex align-items-center gap-2">
-                                <?= icon('ladder', 18) ?> Age-Based Price Ladder
-                            </span>
-                            <i class="bi bi-chevron-right text-muted small"></i>
-                        </a>
-                        <a href="<?= url('/incubation/receive') ?>" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-2.5 px-3 border-0 rounded-2">
-                            <span class="small fw-semibold d-inline-flex align-items-center gap-2">
-                                <?= icon('incubator', 18) ?> Receive Customer Eggs
-                            </span>
-                            <i class="bi bi-chevron-right text-muted small"></i>
-                        </a>
-                        <a href="<?= url('/reports/aged-debtors') ?>" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-2.5 px-3 border-0 rounded-2">
-                            <span class="small fw-semibold d-inline-flex align-items-center gap-2">
-                                <?= icon('debt', 18) ?> Aged Debtors 30/60/90d
-                            </span>
-                            <i class="bi bi-chevron-right text-muted small"></i>
-                        </a>
+                        <?php if (\App\Core\Auth::can('flocks', 'create')): ?>
+                            <a href="<?= url('/flocks/quick-entry') ?>" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-2.5 px-3 border-0 rounded-2">
+                                <span class="small fw-semibold d-inline-flex align-items-center gap-2">
+                                    <?= icon('chicken', 18) ?> Daily Flock Log (Mortality)
+                                </span>
+                                <i class="bi bi-chevron-right text-muted small"></i>
+                            </a>
+                        <?php endif; ?>
+                        <?php if (\App\Core\Auth::can('flocks', 'view')): ?>
+                            <a href="<?= url('/flocks/price-ladder') ?>" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-2.5 px-3 border-0 rounded-2">
+                                <span class="small fw-semibold d-inline-flex align-items-center gap-2">
+                                    <?= icon('ladder', 18) ?> Age-Based Price Ladder
+                                </span>
+                                <i class="bi bi-chevron-right text-muted small"></i>
+                            </a>
+                        <?php endif; ?>
+                        <?php if (\App\Core\Auth::can('incubation', 'create')): ?>
+                            <a href="<?= url('/incubation/receive') ?>" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-2.5 px-3 border-0 rounded-2">
+                                <span class="small fw-semibold d-inline-flex align-items-center gap-2">
+                                    <?= icon('incubator', 18) ?> Receive Customer Eggs
+                                </span>
+                                <i class="bi bi-chevron-right text-muted small"></i>
+                            </a>
+                        <?php endif; ?>
+                        <?php if (\App\Core\Auth::can('reports', 'view')): ?>
+                            <a href="<?= url('/reports/aged-debtors') ?>" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-2.5 px-3 border-0 rounded-2">
+                                <span class="small fw-semibold d-inline-flex align-items-center gap-2">
+                                    <?= icon('debt', 18) ?> Aged Debtors 30/60/90d
+                                </span>
+                                <i class="bi bi-chevron-right text-muted small"></i>
+                            </a>
+                        <?php endif; ?>
                         <?php if (in_array(\App\Core\Auth::role(), ['owner', 'manager'], true)): ?>
                             <a href="<?= url('/admin/backups') ?>" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-2.5 px-3 border-0 rounded-2">
                                 <span class="small fw-semibold d-inline-flex align-items-center gap-2">

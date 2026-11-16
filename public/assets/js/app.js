@@ -393,12 +393,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Global Folding Z-Fold Interactive Controller
     document.addEventListener('click', (e) => {
         // 1. Z-fold card header click -> toggle fold
+        if (e._zfoldHandled) return;
         const header = e.target.closest('.zfold-header');
         if (header) {
             // Don't toggle if user clicked a link, button or .no-fold element
             if (e.target.closest('a') || e.target.closest('button:not(.zfold-toggle-btn)') || e.target.closest('.no-fold')) {
                 return;
             }
+            e._zfoldHandled = true;
             const card = header.closest('.zfold-card');
             if (card) {
                 card.classList.toggle('is-unfolded');
@@ -408,6 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. Expand all / Collapse all button
         const toggleAllBtn = e.target.closest('[data-zfold-toggle-all]');
         if (toggleAllBtn) {
+            e._zfoldHandled = true;
             const containerSelector = toggleAllBtn.dataset.zfoldToggleAll || '.zfold-container';
             const container = document.querySelector(containerSelector);
             if (container) {

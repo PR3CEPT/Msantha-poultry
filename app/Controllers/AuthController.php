@@ -99,15 +99,29 @@ class AuthController
         }
 
         $pdo = DB::pdo();
-        $normalizedPhone = Phone::normalize($identifier);
+        $cleanIdent = trim($identifier);
+        $compactIdent = strtolower(str_replace([' ', '.', '-', '_'], '', $cleanIdent));
+        $normalizedPhone = Phone::normalize($cleanIdent);
 
         $stmt = $pdo->prepare("
             SELECT id, full_name, phone, username, is_active
             FROM users
-            WHERE (username = :u OR (phone IS NOT NULL AND phone = :p))
+            WHERE username = :u1
+               OR LOWER(username) = LOWER(:u2)
+               OR LOWER(email) = LOWER(:u3)
+               OR (phone IS NOT NULL AND phone = :p)
+               OR LOWER(REPLACE(REPLACE(REPLACE(username, '.', ''), '_', ''), '-', '')) = :compact
+               OR LOWER(REPLACE(REPLACE(REPLACE(full_name, '.', ''), ' ', ''), '-', '')) LIKE :compact_like
             LIMIT 1
         ");
-        $stmt->execute(['u' => $identifier, 'p' => $normalizedPhone]);
+        $stmt->execute([
+            'u1' => $cleanIdent,
+            'u2' => $cleanIdent,
+            'u3' => $cleanIdent,
+            'p' => $normalizedPhone,
+            'compact' => $compactIdent,
+            'compact_like' => "%{$compactIdent}%",
+        ]);
         $user = $stmt->fetch();
 
         if (!$user) {

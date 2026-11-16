@@ -69,16 +69,22 @@
     <div class="card border-0 shadow-sm rounded-3 bg-white mb-4">
         <div class="card-header bg-white border-bottom p-3">
             <form method="GET" action="<?= url('/sales') ?>" class="row g-2 align-items-center">
-                <div class="col-md-6">
-                    <div class="input-group">
+                <div class="col-12 col-md-5">
+                    <div class="input-group input-group-sm">
                         <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
-                        <input type="text" name="q" value="<?= e($search ?? '') ?>" class="form-control" placeholder="Search customer, method, or legacy ref...">
+                        <input type="text" name="q" value="<?= e($search ?? '') ?>" class="form-control form-control-sm" placeholder="Search customer, method, or ref...">
                     </div>
                 </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-filter me-1"></i>Filter</button>
-                    <?php if (!empty($search)): ?>
-                        <a href="<?= url('/sales') ?>" class="btn btn-outline-secondary">Reset</a>
+                <div class="col-6 col-md-3">
+                    <input type="date" name="date_from" value="<?= e($dateFrom ?? '') ?>" class="form-control form-control-sm" title="From Date" placeholder="From Date">
+                </div>
+                <div class="col-6 col-md-3">
+                    <input type="date" name="date_to" value="<?= e($dateTo ?? '') ?>" class="form-control form-control-sm" title="To Date" placeholder="To Date">
+                </div>
+                <div class="col-12 col-md-1 d-flex gap-1">
+                    <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-filter"></i></button>
+                    <?php if (!empty($search) || !empty($dateFrom) || !empty($dateTo)): ?>
+                        <a href="<?= url('/sales') ?>" class="btn btn-sm btn-outline-secondary" title="Reset Filters"><i class="bi bi-arrow-counterclockwise"></i></a>
                     <?php endif; ?>
                 </div>
             </form>

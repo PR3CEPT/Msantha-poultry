@@ -174,15 +174,23 @@
     <div class="card border-0 shadow-sm rounded-3 mb-4">
         <div class="card-header bg-white border-bottom p-3">
             <form method="GET" action="<?= url('/incubation-jobs') ?>" class="row g-2 align-items-center">
-                <div class="col-md-5">
-                    <div class="input-group">
+                <div class="col-12 col-md-4">
+                    <div class="input-group input-group-sm">
                         <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
                         <input type="text" name="q" value="<?= e($search ?? '') ?>" class="form-control"
                             placeholder="Search customer, phone, or batch ref...">
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <select name="status" class="form-select">
+                <div class="col-6 col-md-2">
+                    <input type="date" name="date_from" value="<?= e($dateFrom ?? '') ?>" class="form-control form-control-sm"
+                        title="Received From Date" placeholder="From Date">
+                </div>
+                <div class="col-6 col-md-2">
+                    <input type="date" name="date_to" value="<?= e($dateTo ?? '') ?>" class="form-control form-control-sm"
+                        title="Received To Date" placeholder="To Date">
+                </div>
+                <div class="col-8 col-md-2">
+                    <select name="status" class="form-select form-select-sm">
                         <option value="all" <?= ($status ?? 'all') === 'all' ? 'selected' : '' ?>>All Statuses</option>
                         <option value="incubating" <?= ($status ?? '') === 'incubating' ? 'selected' : '' ?>>Incubating (In
                             Setter)</option>
@@ -195,10 +203,12 @@
                         </option>
                     </select>
                 </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-filter me-1"></i>Filter</button>
-                    <?php if (!empty($search) || ($status ?? 'all') !== 'all'): ?>
-                        <a href="<?= url('/incubation-jobs') ?>" class="btn btn-outline-secondary">Reset</a>
+                <div class="col-4 col-md-2 d-flex gap-1">
+                    <button type="submit" class="btn btn-primary btn-sm flex-grow-1"><i class="bi bi-filter me-1"></i>Filter</button>
+                    <?php if (!empty($search) || ($status ?? 'all') !== 'all' || !empty($dateFrom) || !empty($dateTo)): ?>
+                        <a href="<?= url('/incubation-jobs') ?>" class="btn btn-sm btn-outline-secondary" title="Reset">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </a>
                     <?php endif; ?>
                 </div>
             </form>

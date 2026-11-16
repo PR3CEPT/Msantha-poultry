@@ -34,6 +34,8 @@ class FinanceController
         $kind = trim((string) $request->query('kind', 'all'));
         $search = trim((string) $request->query('q', ''));
         $yearMonth = trim((string) $request->query('month', ''));
+        $dateFrom = trim((string) $request->query('date_from', ''));
+        $dateTo = trim((string) $request->query('date_to', ''));
         $page = max(1, (int) $request->query('page', 1));
         $perPage = 30;
         $offset = ($page - 1) * $perPage;
@@ -72,6 +74,14 @@ class FinanceController
             $statWhere .= " AND DATE_FORMAT(c.entry_date, '%Y-%m') = ?";
             $statParams[] = $yearMonth;
         }
+        if ($dateFrom !== '') {
+            $statWhere .= " AND c.entry_date >= ?";
+            $statParams[] = $dateFrom;
+        }
+        if ($dateTo !== '') {
+            $statWhere .= " AND c.entry_date <= ?";
+            $statParams[] = $dateTo;
+        }
 
         $summaryStmt = $pdo->prepare("
             SELECT 
@@ -108,6 +118,16 @@ class FinanceController
         if ($yearMonth !== '') {
             $whereSql .= " AND DATE_FORMAT(c.entry_date, '%Y-%m') = ?";
             $params[] = $yearMonth;
+        }
+
+        if ($dateFrom !== '') {
+            $whereSql .= " AND c.entry_date >= ?";
+            $params[] = $dateFrom;
+        }
+
+        if ($dateTo !== '') {
+            $whereSql .= " AND c.entry_date <= ?";
+            $params[] = $dateTo;
         }
 
         if ($search !== '') {
@@ -158,6 +178,8 @@ class FinanceController
             'kind' => $kind,
             'search' => $search,
             'yearMonth' => $yearMonth,
+            'dateFrom' => $dateFrom,
+            'dateTo' => $dateTo,
             'page' => $page,
             'totalPages' => $totalPages,
             'totalRows' => $totalRows,

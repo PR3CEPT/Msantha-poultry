@@ -19,6 +19,7 @@
                     <p class="mb-1 text-white-50 small">
                         <i class="bi bi-person me-1"></i><strong>@<?= e($user['username']) ?></strong> &bull;
                         <i class="bi bi-telephone me-1"></i><?= e($user['phone'] ?? 'No phone set') ?> &bull;
+                        <i class="bi bi-envelope me-1"></i><?= e($user['email'] ?? 'No email set') ?> &bull;
                         <i class="bi bi-geo-alt me-1"></i>Liwonde, Mawira Area by Chipamba Road, Machinga District
                     </p>
                     <small class="text-white-50">
@@ -75,13 +76,22 @@
                                     <input type="text" name="full_name" id="full_name" class="form-control" required value="<?= e($user['full_name'] ?? '') ?>" placeholder="e.g. Isaac Chipeta">
                                 </div>
 
-                                <div class="mb-4">
+                                <div class="mb-3">
                                     <label for="phone" class="form-label fw-semibold text-dark small">Phone Number (Malawi Mobile)</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-light text-muted">+265</span>
                                         <input type="tel" name="phone" id="phone" class="form-control" value="<?= e(preg_replace('/^\+265/', '', (string)($user['phone'] ?? ''))) ?>" placeholder="e.g. 999899620">
                                     </div>
                                     <div class="form-text small">Used for farm password resets and operational SMS alerts (Airtel / TNM).</div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="email" class="form-label fw-semibold text-dark small">Email Address</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light text-muted"><i class="bi bi-envelope"></i></span>
+                                        <input type="email" name="email" id="email" class="form-control" value="<?= e($user['email'] ?? '') ?>" placeholder="e.g. staff@msanthapoultry.mw">
+                                    </div>
+                                    <div class="form-text small">Used for executive reports, backup archives, and administrative notifications.</div>
                                 </div>
 
                                 <button type="submit" class="btn btn-success fw-bold px-4 py-2 shadow-sm">

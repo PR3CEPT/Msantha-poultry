@@ -25,6 +25,27 @@
         </div>
     </div>
 
+    <!-- Date Range Filter Form -->
+    <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4 d-print-none">
+        <form method="GET" action="<?= url('/reports/mortality') ?>" class="row g-2 align-items-center">
+            <div class="col-12 col-md-4">
+                <span class="small fw-semibold text-dark"><i class="bi bi-calendar-range me-1 text-primary"></i>Flock Start Date Filter:</span>
+            </div>
+            <div class="col-6 col-md-3">
+                <input type="date" name="from" value="<?= e($from ?? '') ?>" class="form-control form-control-sm" placeholder="From Date">
+            </div>
+            <div class="col-6 col-md-3">
+                <input type="date" name="to" value="<?= e($to ?? '') ?>" class="form-control form-control-sm" placeholder="To Date">
+            </div>
+            <div class="col-12 col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold"><i class="bi bi-funnel me-1"></i>Filter</button>
+                <?php if (!empty($from) || !empty($to)): ?>
+                    <a href="<?= url('/reports/mortality') ?>" class="btn btn-outline-secondary btn-sm" title="Reset"><i class="bi bi-arrow-counterclockwise"></i></a>
+                <?php endif; ?>
+            </div>
+        </form>
+    </div>
+
     <!-- Table Card -->
     <div class="card border-0 shadow-sm rounded-3">
         <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">

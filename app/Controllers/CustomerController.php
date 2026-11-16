@@ -56,7 +56,8 @@ class CustomerController
         $params = [];
 
         if ($search !== '') {
-            $whereSql .= " AND (c.name LIKE ? OR c.phone LIKE ? OR c.location LIKE ?)";
+            $whereSql .= " AND (c.name LIKE ? OR c.phone LIKE ? OR c.email LIKE ? OR c.location LIKE ?)";
+            $params[] = "%{$search}%";
             $params[] = "%{$search}%";
             $params[] = "%{$search}%";
             $params[] = "%{$search}%";
@@ -193,8 +194,10 @@ class CustomerController
         $name = trim((string) $request->input('name', ''));
         $location = trim((string) $request->input('location', ''));
         $phoneRaw = trim((string) $request->input('phone', ''));
+        $email = trim((string) $request->input('email', ''));
         $isInternal = (int) $request->input('is_internal', 0);
         $smsOptIn = (int) $request->input('sms_opt_in', 1);
+        $emailOptIn = (int) $request->input('email_opt_in', 1);
         $notes = trim((string) $request->input('notes', ''));
 
         if ($name === '') {
@@ -205,16 +208,17 @@ class CustomerController
         $phone = $phoneRaw !== '' ? Phone::formatE164($phoneRaw) : null;
 
         $stmt = $pdo->prepare("
-            INSERT INTO customers (name, location, phone, is_internal, sms_opt_in, notes, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, NOW())
+            INSERT INTO customers (name, location, phone, email, is_internal, sms_opt_in, email_opt_in, notes, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
         ");
-        $stmt->execute([$name, $location ?: null, $phone, $isInternal, $smsOptIn, $notes ?: null]);
+        $stmt->execute([$name, $location ?: null, $phone, $email ?: null, $isInternal, $smsOptIn, $emailOptIn, $notes ?: null]);
         $newId = (int) $pdo->lastInsertId();
 
         Audit::log('create', 'customers', $newId, null, [
             'name' => $name,
             'location' => $location,
             'phone' => $phone,
+            'email' => $email,
             'is_internal' => $isInternal,
         ]);
 
@@ -262,8 +266,10 @@ class CustomerController
         $name = trim((string) $request->input('name', ''));
         $location = trim((string) $request->input('location', ''));
         $phoneRaw = trim((string) $request->input('phone', ''));
+        $email = trim((string) $request->input('email', ''));
         $isInternal = (int) $request->input('is_internal', 0);
         $smsOptIn = (int) $request->input('sms_opt_in', 1);
+        $emailOptIn = (int) $request->input('email_opt_in', 1);
         $notes = trim((string) $request->input('notes', ''));
 
         if ($name === '') {
@@ -275,17 +281,19 @@ class CustomerController
 
         $update = $pdo->prepare("
             UPDATE customers
-            SET name = ?, location = ?, phone = ?, is_internal = ?, sms_opt_in = ?, notes = ?
+            SET name = ?, location = ?, phone = ?, email = ?, is_internal = ?, sms_opt_in = ?, email_opt_in = ?, notes = ?
             WHERE id = ?
         ");
-        $update->execute([$name, $location ?: null, $phone, $isInternal, $smsOptIn, $notes ?: null, $id]);
+        $update->execute([$name, $location ?: null, $phone, $email ?: null, $isInternal, $smsOptIn, $emailOptIn, $notes ?: null, $id]);
 
         Audit::log('update', 'customers', $id, $old, [
             'name' => $name,
             'location' => $location,
             'phone' => $phone,
+            'email' => $email,
             'is_internal' => $isInternal,
             'sms_opt_in' => $smsOptIn,
+            'email_opt_in' => $emailOptIn,
             'notes' => $notes,
         ]);
 

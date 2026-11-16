@@ -101,7 +101,7 @@
                     $isInternal = !empty($c['is_internal']);
                     ?>
                     <div class="zfold-card mb-2.5 <?= $bal > 0 ? 'border-start border-4 border-danger' : 'border-start border-4 border-success' ?>">
-                        <div class="zfold-header">
+                        <div class="zfold-header" onclick="if (!event.target.closest('a, button, input, select, .no-fold')) this.closest('.zfold-card').classList.toggle('is-unfolded');">
                             <!-- Tier 1: Customer Name & Phone on Left <---> Balance Due & Chevron on Right -->
                             <div class="zfold-tier-top">
                                 <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -116,6 +116,11 @@
                                             <i class="bi bi-telephone text-success me-1"></i><?= e($c['phone']) ?>
                                         </span>
                                     <?php endif; ?>
+                                    <?php if (!empty($c['email'])): ?>
+                                        <span class="badge bg-light text-dark border font-monospace d-none d-sm-inline-block" style="font-size: 0.72rem;">
+                                            <i class="bi bi-envelope text-primary me-1"></i><?= e($c['email']) ?>
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
                                     <?php if ($bal > 0): ?>
@@ -127,7 +132,7 @@
                                             <i class="bi bi-check-circle-fill me-1"></i>Settled / Nil
                                         </span>
                                     <?php endif; ?>
-                                    <button type="button" class="zfold-toggle-btn" aria-label="Toggle customer details">
+                                    <button type="button" class="zfold-toggle-btn" aria-label="Toggle customer details" onclick="event.stopPropagation(); this.closest('.zfold-card').classList.toggle('is-unfolded');">
                                         <i class="bi bi-chevron-down"></i>
                                     </button>
                                 </div>
@@ -180,8 +185,16 @@
                                                     <i class="bi bi-chat-text me-1"></i>Direct SMS Message
                                                 </a>
                                             </div>
-                                        <?php else: ?>
-                                            <p class="text-muted small font-monospace">No phone registered for SMS.</p>
+                                        <?php endif; ?>
+                                        <?php if (!empty($c['email'])): ?>
+                                            <div class="mt-1.5">
+                                                <a href="mailto:<?= e($c['email']) ?>" class="btn btn-sm btn-outline-info rounded-pill w-100 text-start px-3" style="font-size: 0.75rem;">
+                                                    <i class="bi bi-envelope me-1"></i>Email (<?= e($c['email']) ?>)
+                                                </a>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if (empty($c['phone']) && empty($c['email'])): ?>
+                                            <p class="text-muted small font-monospace">No phone or email registered.</p>
                                         <?php endif; ?>
                                     </div>
                                 </div>

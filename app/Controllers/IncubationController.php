@@ -24,6 +24,8 @@ class IncubationController
 
         $search = trim((string) $request->query('q', ''));
         $status = trim((string) $request->query('status', 'all'));
+        $dateFrom = trim((string) $request->query('date_from', ''));
+        $dateTo = trim((string) $request->query('date_to', ''));
         $page = max(1, (int) $request->query('page', 1));
         $perPage = 25;
         $offset = ($page - 1) * $perPage;
@@ -96,6 +98,16 @@ class IncubationController
             $params[] = $status;
         }
 
+        if ($dateFrom !== '') {
+            $whereSql .= " AND date_received >= ?";
+            $params[] = $dateFrom;
+        }
+
+        if ($dateTo !== '') {
+            $whereSql .= " AND date_received <= ?";
+            $params[] = $dateTo;
+        }
+
         if ($search !== '') {
             $whereSql .= " AND (customer_name LIKE ? OR customer_phone LIKE ? OR legacy_ref LIKE ? OR remarks LIKE ?)";
             $params[] = "%{$search}%";
@@ -131,6 +143,8 @@ class IncubationController
             'jobs' => $jobs,
             'search' => $search,
             'status' => $status,
+            'dateFrom' => $dateFrom,
+            'dateTo' => $dateTo,
             'page' => $page,
             'totalPages' => $totalPages,
             'totalRows' => $totalRows,

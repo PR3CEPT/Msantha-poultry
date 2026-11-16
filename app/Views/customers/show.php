@@ -17,6 +17,15 @@
                 <i class="bi bi-geo-alt me-1 text-danger"></i><?= e($customer['location'] ?? 'Location Unspecified') ?>
                 <?php if (!empty($customer['phone'])): ?>
                     &middot; <i class="bi bi-telephone me-1 text-success"></i><a href="tel:<?= e($customer['phone']) ?>" class="text-decoration-none text-dark fw-semibold"><?= e($customer['phone']) ?></a>
+                    <?php if (!empty($customer['sms_opt_in'])): ?>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle py-0 px-1" style="font-size: 0.65rem;">SMS On</span>
+                    <?php endif; ?>
+                <?php endif; ?>
+                <?php if (!empty($customer['email'])): ?>
+                    &middot; <i class="bi bi-envelope me-1 text-primary"></i><a href="mailto:<?= e($customer['email']) ?>" class="text-decoration-none text-dark fw-semibold"><?= e($customer['email']) ?></a>
+                    <?php if (!empty($customer['email_opt_in'])): ?>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle py-0 px-1" style="font-size: 0.65rem;">Email On</span>
+                    <?php endif; ?>
                 <?php endif; ?>
             </p>
         </div>

@@ -30,50 +30,62 @@
                 <small class="text-muted" style="font-size: 0.72rem;">Live flock & cash KPIs</small>
             </a>
         </div>
-        <div class="col-6">
-            <a href="<?= url('/flocks') ?>" class="card border-0 shadow-sm rounded-3 text-decoration-none p-3 h-100 bg-white">
-                <i class="bi bi-feather text-primary fs-3 mb-2"></i>
-                <span class="fw-bold text-dark d-block">Flock Dynamics</span>
-                <small class="text-muted" style="font-size: 0.72rem;">Daily mortality & counts</small>
-            </a>
-        </div>
-        <div class="col-6">
-            <a href="<?= url('/eggs') ?>" class="card border-0 shadow-sm rounded-3 text-decoration-none p-3 h-100 bg-white">
-                <i class="bi bi-egg-fried text-warning fs-3 mb-2"></i>
-                <span class="fw-bold text-dark d-block">Egg Production</span>
-                <small class="text-muted" style="font-size: 0.72rem;">Trays & collections</small>
-            </a>
-        </div>
-        <div class="col-6">
-            <a href="<?= url('/incubation-jobs') ?>" class="card border-0 shadow-sm rounded-3 text-decoration-none p-3 h-100 bg-white">
-                <i class="bi bi-thermometer-half text-info fs-3 mb-2"></i>
-                <span class="fw-bold text-dark d-block">Incubation</span>
-                <small class="text-muted" style="font-size: 0.72rem;">Batches & countdown</small>
-            </a>
-        </div>
-        <div class="col-6">
-            <a href="<?= url('/customers') ?>" class="card border-0 shadow-sm rounded-3 text-decoration-none p-3 h-100 bg-white">
-                <i class="bi bi-people text-success fs-3 mb-2"></i>
-                <span class="fw-bold text-dark d-block">Customers</span>
-                <small class="text-muted" style="font-size: 0.72rem;">Contacts & balances</small>
-            </a>
-        </div>
-        <div class="col-6">
-            <a href="<?= url('/sales') ?>" class="card border-0 shadow-sm rounded-3 text-decoration-none p-3 h-100 bg-white">
-                <i class="bi bi-cart-check text-danger fs-3 mb-2"></i>
-                <span class="fw-bold text-dark d-block">Farm Sales / POS</span>
-                <small class="text-muted" style="font-size: 0.72rem;">Point of sale & receipts</small>
-            </a>
-        </div>
-        <div class="col-12">
-            <a href="<?= url('/feed-drugs') ?>" class="card border-0 shadow-sm rounded-3 text-decoration-none p-3 bg-white d-flex flex-row align-items-center gap-3">
-                <i class="bi bi-capsule text-danger fs-3"></i>
-                <div>
-                    <span class="fw-bold text-dark d-block">Feed & Vet Products</span>
-                    <small class="text-muted" style="font-size: 0.72rem;">Vaccines, feed inventory & animal ear tags</small>
-                </div>
-            </a>
-        </div>
+        <?php if (\App\Core\Auth::can('flocks', 'view')): ?>
+            <div class="col-6">
+                <a href="<?= url('/flocks') ?>" class="card border-0 shadow-sm rounded-3 text-decoration-none p-3 h-100 bg-white">
+                    <i class="bi bi-feather text-primary fs-3 mb-2"></i>
+                    <span class="fw-bold text-dark d-block">Flock Dynamics</span>
+                    <small class="text-muted" style="font-size: 0.72rem;">Daily mortality & counts</small>
+                </a>
+            </div>
+        <?php endif; ?>
+        <?php if (\App\Core\Auth::can('eggs', 'view')): ?>
+            <div class="col-6">
+                <a href="<?= url('/eggs') ?>" class="card border-0 shadow-sm rounded-3 text-decoration-none p-3 h-100 bg-white">
+                    <i class="bi bi-egg-fried text-warning fs-3 mb-2"></i>
+                    <span class="fw-bold text-dark d-block">Egg Production</span>
+                    <small class="text-muted" style="font-size: 0.72rem;">Trays & collections</small>
+                </a>
+            </div>
+        <?php endif; ?>
+        <?php if (\App\Core\Auth::can('incubation', 'view')): ?>
+            <div class="col-6">
+                <a href="<?= url('/incubation-jobs') ?>" class="card border-0 shadow-sm rounded-3 text-decoration-none p-3 h-100 bg-white">
+                    <i class="bi bi-thermometer-half text-info fs-3 mb-2"></i>
+                    <span class="fw-bold text-dark d-block">Incubation</span>
+                    <small class="text-muted" style="font-size: 0.72rem;">Batches & countdown</small>
+                </a>
+            </div>
+        <?php endif; ?>
+        <?php if (\App\Core\Auth::can('customers', 'view')): ?>
+            <div class="col-6">
+                <a href="<?= url('/customers') ?>" class="card border-0 shadow-sm rounded-3 text-decoration-none p-3 h-100 bg-white">
+                    <i class="bi bi-people text-success fs-3 mb-2"></i>
+                    <span class="fw-bold text-dark d-block">Customers</span>
+                    <small class="text-muted" style="font-size: 0.72rem;">Contacts & balances</small>
+                </a>
+            </div>
+        <?php endif; ?>
+        <?php if (\App\Core\Auth::can('sales', 'view')): ?>
+            <div class="col-6">
+                <a href="<?= url('/sales') ?>" class="card border-0 shadow-sm rounded-3 text-decoration-none p-3 h-100 bg-white">
+                    <i class="bi bi-cart-check text-danger fs-3 mb-2"></i>
+                    <span class="fw-bold text-dark d-block">Farm Sales / POS</span>
+                    <small class="text-muted" style="font-size: 0.72rem;">Point of sale & receipts</small>
+                </a>
+            </div>
+        <?php endif; ?>
+        <?php if (\App\Core\Auth::can('feed_drugs', 'view')): ?>
+            <div class="col-12">
+                <a href="<?= url('/feed-drugs') ?>" class="card border-0 shadow-sm rounded-3 text-decoration-none p-3 bg-white d-flex flex-row align-items-center gap-3">
+                    <i class="bi bi-capsule text-danger fs-3"></i>
+                    <div>
+                        <span class="fw-bold text-dark d-block">Feed & Vet Products</span>
+                        <small class="text-muted" style="font-size: 0.72rem;">Vaccines, feed inventory & animal ear tags</small>
+                    </div>
+                </a>
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- Section 2: Finance & Multi-Business -->

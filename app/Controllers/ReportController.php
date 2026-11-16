@@ -58,7 +58,10 @@ class ReportController
         Auth::requirePermission('reports', 'view');
         Audit::logView('reports_mortality');
 
-        $flocks = $this->reportService->getMortalityPerFlock();
+        $from = trim((string) $request->query('from', ''));
+        $to = trim((string) $request->query('to', ''));
+
+        $flocks = $this->reportService->getMortalityPerFlock(null, $from ?: null, $to ?: null);
 
         if ($request->query('format') === 'csv') {
             return $this->exportMortalityCsv($flocks);
@@ -68,6 +71,8 @@ class ReportController
             'pageTitle' => 'Flock Mortality % Analysis',
             'activeNav' => 'reports',
             'flocks' => $flocks,
+            'from' => $from,
+            'to' => $to,
         ]);
     }
 

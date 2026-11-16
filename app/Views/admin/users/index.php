@@ -67,7 +67,17 @@
                         <?php else: ?>
                             <?php foreach ($users as $u): ?>
                                 <tr>
-                                    <td class="fw-semibold text-dark"><?= e($u['full_name']) ?></td>
+                                    <td class="fw-semibold text-dark">
+                                        <div><?= e($u['full_name']) ?></div>
+                                        <div class="small text-muted font-monospace" style="font-size: 0.72rem;">
+                                            <?php if (!empty($u['email'])): ?>
+                                                <span class="me-2"><i class="bi bi-envelope text-primary me-1"></i><?= e($u['email']) ?></span>
+                                            <?php endif; ?>
+                                            <?php if (!empty($u['phone'])): ?>
+                                                <span><i class="bi bi-telephone text-success me-1"></i><?= e($u['phone']) ?></span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
                                     <td><code><?= e($u['username']) ?></code></td>
                                     <td>
                                         <span class="badge bg-light text-dark border"><?= e($u['role_name']) ?></span>
@@ -155,6 +165,12 @@
                         </div>
                         <div class="small text-muted mb-3">
                             <div><i class="bi bi-shield me-1"></i>Role: <strong><?= e($u['role_name']) ?></strong></div>
+                            <?php if (!empty($u['email'])): ?>
+                                <div><i class="bi bi-envelope me-1 text-primary"></i><?= e($u['email']) ?></div>
+                            <?php endif; ?>
+                            <?php if (!empty($u['phone'])): ?>
+                                <div><i class="bi bi-telephone me-1 text-success"></i><?= e($u['phone']) ?></div>
+                            <?php endif; ?>
                             <?php if ((int)$u['must_change_password'] === 1): ?>
                                 <div><i class="bi bi-key me-1 text-warning"></i>Must change password at next login</div>
                             <?php endif; ?>
