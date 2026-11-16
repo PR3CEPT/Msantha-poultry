@@ -49,9 +49,37 @@ class ReportService
 
         $totalReceipts = 0;
         $totalExpenses = 0;
+        $poultryReceipts = 0;
+        $poultryExpenses = 0;
+        $poultryProfit = 0;
+        $byUnit = [];
+
         foreach ($rows as $r) {
-            $totalReceipts += (int) $r['total_receipts'];
-            $totalExpenses += (int) $r['total_expenses'];
+            $rec = (int) $r['total_receipts'];
+            $exp = (int) $r['total_expenses'];
+            $net = (int) $r['net_profit'];
+            $totalReceipts += $rec;
+            $totalExpenses += $exp;
+
+            $code = (string) $r['unit_code'];
+            if (!isset($byUnit[$code])) {
+                $byUnit[$code] = [
+                    'code' => $code,
+                    'name' => (string) $r['unit_name'],
+                    'receipts' => 0,
+                    'expenses' => 0,
+                    'net' => 0,
+                ];
+            }
+            $byUnit[$code]['receipts'] += $rec;
+            $byUnit[$code]['expenses'] += $exp;
+            $byUnit[$code]['net'] += $net;
+
+            if ($code === 'POULTRY') {
+                $poultryReceipts += $rec;
+                $poultryExpenses += $exp;
+                $poultryProfit += $net;
+            }
         }
 
         return [
@@ -59,6 +87,10 @@ class ReportService
             'total_receipts' => $totalReceipts,
             'total_expenses' => $totalExpenses,
             'net_profit' => $totalReceipts - $totalExpenses,
+            'poultry_receipts' => $poultryReceipts,
+            'poultry_expenses' => $poultryExpenses,
+            'poultry_profit' => $poultryProfit,
+            'by_unit' => $byUnit,
         ];
     }
 
@@ -331,7 +363,7 @@ class ReportService
                 DATEDIFF(CURDATE(), COALESCE(j.date_hatched, j.date_received, CURDATE())) AS days_aged
             FROM incubation_jobs j
             JOIN customers c ON c.id = j.customer_id
-            WHERE c.is_internal = 0
+            WHERE c.is_internal = 0 AND LOWER(c.name) NOT LIKE '%msantha%'
             HAVING (CAST(j.cost AS SIGNED) - CAST(amount_paid AS SIGNED)) > 0
             ORDER BY days_aged DESC, (CAST(j.cost AS SIGNED) - CAST(amount_paid AS SIGNED)) DESC
         ";

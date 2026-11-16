@@ -4,16 +4,19 @@
     <?php include __DIR__ . '/_print_header.php'; ?>
 
     <!-- Header -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div
+        class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
             <div class="d-flex align-items-center gap-2">
-                <a href="<?= url('/reports') ?>" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Reports</a>
+                <a href="<?= url('/reports') ?>" class="btn btn-outline-secondary btn-sm"><i
+                        class="bi bi-arrow-left"></i> Reports</a>
                 <h1 class="h3 fw-bold mb-0 text-dark">Aged Debtors & Outstanding Receivables</h1>
                 <span class="badge bg-danger-subtle text-danger border border-danger-subtle fs-6">
                     Credit & Collections
                 </span>
             </div>
-            <p class="text-muted small mb-0 mt-1">Aging analysis of unpaid customer balances across 0-30, 31-60, 61-90, and 90+ days intervals.</p>
+            <p class="text-muted small mb-0 mt-1">Aging analysis of unpaid customer balances across 0-30, 31-60, 61-90,
+                and 90+ days intervals.</p>
         </div>
         <div class="d-flex gap-2">
             <a href="<?= url('/reports/aged-debtors?format=csv') ?>" class="btn btn-outline-success btn-sm">
@@ -28,7 +31,8 @@
     <!-- Table Card -->
     <div class="card border-0 shadow-sm rounded-4 bg-white mb-4 overflow-hidden">
         <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
-            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-2 text-danger"></i>Debtor Aging Ledger</h5>
+            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-2 text-danger"></i>Debtor Aging Ledger
+            </h5>
             <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
                 Showing <?= count($debtors) ?> of <?= number_format($totalRows ?? count($debtors)) ?> Debtors On File
             </span>
@@ -48,20 +52,32 @@
                 </thead>
                 <tbody>
                     <?php if (empty($debtors)): ?>
-                        <tr><td colspan="7" class="text-center py-5 text-muted font-sans-serif">No outstanding debtor accounts found. All payments settled!</td></tr>
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted font-sans-serif">No outstanding debtor
+                                accounts found. All payments settled!</td>
+                        </tr>
                     <?php else: ?>
                         <?php foreach ($debtors as $d): ?>
                             <tr>
                                 <td class="ps-3 font-monospace">
-                                    <a href="<?= url("/customers/{$d['customer_id']}") ?>" class="fw-bold text-dark text-decoration-none">
+                                    <a href="<?= url("/customers/{$d['customer_id']}") ?>"
+                                        class="fw-bold text-dark text-decoration-none">
                                         <?= e($d['name']) ?>
                                     </a>
                                 </td>
                                 <td class="small text-muted"><?= e($d['phone']) ?></td>
-                                <td class="text-end text-muted small"><?= $d['current_30'] > 0 ? number_format($d['current_30']) : '—' ?></td>
-                                <td class="text-end text-warning-emphasis fw-semibold"><?= $d['aged_31_60'] > 0 ? number_format($d['aged_31_60']) : '—' ?></td>
-                                <td class="text-end text-danger fw-semibold"><?= $d['aged_61_90'] > 0 ? number_format($d['aged_61_90']) : '—' ?></td>
-                                <td class="text-end text-danger fw-bold"><?= $d['aged_over_90'] > 0 ? number_format($d['aged_over_90']) : '—' ?></td>
+                                <td class="text-end text-muted small">
+                                    <?= $d['current_30'] > 0 ? number_format($d['current_30']) : '—' ?>
+                                </td>
+                                <td class="text-end text-warning-emphasis fw-semibold">
+                                    <?= $d['aged_31_60'] > 0 ? number_format($d['aged_31_60']) : '—' ?>
+                                </td>
+                                <td class="text-end text-danger fw-semibold">
+                                    <?= $d['aged_61_90'] > 0 ? number_format($d['aged_61_90']) : '—' ?>
+                                </td>
+                                <td class="text-end text-danger fw-bold">
+                                    <?= $d['aged_over_90'] > 0 ? number_format($d['aged_over_90']) : '—' ?>
+                                </td>
                                 <td class="text-end pe-3 fw-bold text-danger fs-6">
                                     <?= number_format($d['total_due']) ?> MWK
                                 </td>
@@ -110,4 +126,3 @@
         <?php endif; ?>
     </div>
 </div>
-
