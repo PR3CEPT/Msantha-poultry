@@ -24,6 +24,16 @@ if ($isSsl) {
     }
 }
 
+// Synchronize MySQL session timezone with application timezone (e.g. +02:00 for Africa/Blantyre)
+$appTz = $_ENV['APP_TIMEZONE'] ?? 'Africa/Blantyre';
+try {
+    $tzObj = new DateTimeZone($appTz);
+    $tzOffset = (new DateTime('now', $tzObj))->format('P');
+    $options[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET time_zone = '{$tzOffset}'";
+} catch (Throwable) {
+    $options[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET time_zone = '+02:00'";
+}
+
 return [
     'default' => $_ENV['DB_CONNECTION'] ?? 'mysql',
     'connections' => [

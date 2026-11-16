@@ -111,22 +111,25 @@ class Auth
         $ip = $req->ip();
         $agent = $req->header('user-agent') ?? ($_SERVER['HTTP_USER_AGENT'] ?? null);
 
+        $now = date('Y-m-d H:i:s');
         // Store active session in user_sessions table
         $sessionStmt = $pdo->prepare("
             INSERT INTO user_sessions (user_id, session_id, ip, user_agent, logged_in_at, last_activity_at)
-            VALUES (?, ?, ?, ?, NOW(), NOW())
+            VALUES (?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE
                 session_id = VALUES(session_id),
                 ip = VALUES(ip),
                 user_agent = VALUES(user_agent),
-                logged_in_at = NOW(),
-                last_activity_at = NOW()
+                logged_in_at = VALUES(logged_in_at),
+                last_activity_at = VALUES(last_activity_at)
         ");
         $sessionStmt->execute([
             (int) $user['id'],
             $sessionId,
             $ip,
             $agent ? substr($agent, 0, 250) : null,
+            $now,
+            $now,
         ]);
 
         $_SESSION['user_id'] = (int) $user['id'];
@@ -184,8 +187,8 @@ class Auth
         }
 
         // 2. Idle timeout check: 30 minutes of inactivity
-        $lastActivity = strtotime((string) $row['last_activity_at']);
-        if ($lastActivity < (time() - 1800)) {
+        $lastActivity = !empty($row['last_activity_at']) ? strtotime((string) $row['last_activity_at']) : 0;
+        if ($lastActivity > 0 && ($lastActivity < (time() - 1800))) {
             self::logout();
             $_SESSION['flash_error'] = "Session expired due to 30 minutes of inactivity. Please sign in again.";
             Response::redirect(url('/login'))->send();
@@ -193,8 +196,8 @@ class Auth
         }
 
         // 3. Update last_activity_at
-        $updateStmt = $pdo->prepare("UPDATE user_sessions SET last_activity_at = NOW() WHERE user_id = ?");
-        $updateStmt->execute([$userId]);
+        $updateStmt = $pdo->prepare("UPDATE user_sessions SET last_activity_at = ? WHERE user_id = ?");
+        $updateStmt->execute([date('Y-m-d H:i:s'), $userId]);
     }
 
     public static function forceLogoutUser(int $targetUserId): void
@@ -234,14 +237,15 @@ class Auth
         $sessionId = session_id() ?: bin2hex(random_bytes(16));
         $req = Request::capture();
 
+        $now = date('Y-m-d H:i:s');
         $sessionStmt = $pdo->prepare("
             INSERT INTO user_sessions (user_id, session_id, ip, user_agent, logged_in_at, last_activity_at)
-            VALUES (?, ?, ?, ?, NOW(), NOW())
+            VALUES (?, ?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE
                 session_id = VALUES(session_id),
-                last_activity_at = NOW()
+                last_activity_at = VALUES(last_activity_at)
         ");
-        $sessionStmt->execute([(int) $user['id'], $sessionId, $req->ip(), 'TestAgent']);
+        $sessionStmt->execute([(int) $user['id'], $sessionId, $req->ip(), 'TestAgent', $now, $now]);
 
         $_SESSION['user_id'] = (int) $user['id'];
         self::$cachedUser = $user;
