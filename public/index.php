@@ -212,6 +212,8 @@ $router->get('/sales/{id}/receipt', [SaleController::class, 'receipt']);
 
 // Finance Routes
 $router->get('/finance', [FinanceController::class, 'index']);
+$router->get('/finance/receipt', [FinanceController::class, 'receipt']);
+$router->get('/finance/{id}/receipt', [FinanceController::class, 'receipt']);
 $router->post('/finance/entries', [FinanceController::class, 'storeEntry']);
 $router->post('/finance/lock-month', [FinanceController::class, 'lockMonth']);
 $router->post('/finance/unlock-month', [FinanceController::class, 'unlockMonth']);

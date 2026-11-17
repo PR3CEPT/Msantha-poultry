@@ -327,7 +327,13 @@
                                     <span class="badge bg-light text-secondary border small"><?= e($e['category_name'] ?: 'General') ?></span>
                                 </td>
                                 <td class="font-monospace small text-muted">
-                                    <?= e($e['voucher_no'] ?: ($e['cheque_no'] ?: '—')) ?>
+                                    <?php
+                                    $ref = $e['legacy_ref'] ?? $e['reference'] ?? $e['voucher_no'] ?? $e['cheque_no'] ?? '';
+                                    if ($ref && preg_match('/^[A-Z0-9_]+:row_(\d+)$/i', $ref, $rm)) {
+                                        $ref = 'REF-' . $rm[1];
+                                    }
+                                    ?>
+                                    <?= e($ref ?: '—') ?>
                                 </td>
                                 <td class="text-end font-monospace">
                                     <?php if ($rec > 0): ?>

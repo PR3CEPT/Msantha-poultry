@@ -371,4 +371,39 @@ class FinanceController
             'perPage' => $perPage,
         ]);
     }
+
+    public function receipt(Request $request, int|string $id = 0): Response
+    {
+        Auth::requirePermission('finance', 'view');
+        $pdo = DB::pdo();
+
+        $entryId = (int) $id;
+        if ($entryId <= 0) {
+            $entryId = (int) $request->input('id', 0);
+        }
+
+        if ($entryId <= 0) {
+            return Response::html("<h1>Invalid Transaction ID</h1><p>Please specify a valid transaction ID.</p>", 400);
+        }
+
+        $stmt = $pdo->prepare("
+            SELECT c.*, bu.code AS unit_code, bu.name AS unit_name, ec.name AS category_name, u.full_name AS cashier_name
+            FROM cash_entries c
+            JOIN business_units bu ON bu.id = c.business_unit_id
+            LEFT JOIN expense_categories ec ON ec.id = c.category_id
+            LEFT JOIN users u ON u.id = c.created_by
+            WHERE c.id = ?
+        ");
+        $stmt->execute([$entryId]);
+        $entry = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$entry) {
+            return Response::html("<h1>Transaction Not Found</h1><p>The requested cash entry #{$entryId} does not exist.</p>", 404);
+        }
+
+        return View::render('finance/receipt', [
+            'pageTitle' => "Finance Voucher #{$entry['id']}",
+            'entry' => $entry,
+        ]);
+    }
 }
