@@ -220,6 +220,15 @@ class UserController
             $pendingRequest = null;
         }
 
+        $userSession = null;
+        try {
+            $sessionStmt = $pdo->prepare("SELECT * FROM user_sessions WHERE user_id = ? LIMIT 1");
+            $sessionStmt->execute([(int) $id]);
+            $userSession = $sessionStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        } catch (Throwable) {
+            $userSession = null;
+        }
+
         return View::render('admin/users/edit', [
             'pageTitle' => 'Edit User',
             'user' => $user,
@@ -228,6 +237,7 @@ class UserController
             'isMD' => $isMD,
             'userPasswordDisplay' => $userPasswordDisplay,
             'pendingRequest' => $pendingRequest,
+            'userSession' => $userSession,
         ]);
     }
 

@@ -6,6 +6,38 @@
                 <i class="bi bi-pencil-square text-success"></i>Edit User: <?= e($user['username']) ?>
             </h3>
 
+            <!-- Active Device Session & Security Control -->
+            <div class="card bg-light border-0 rounded-3 p-3 mb-4">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                    <div>
+                        <div class="fw-bold small text-dark d-flex align-items-center gap-1.5 mb-1">
+                            <i class="bi bi-shield-shaded text-primary"></i>Device Session Status
+                        </div>
+                        <?php if (!empty($userSession)): ?>
+                            <div class="small text-muted" style="font-size: 0.78rem;">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle me-1">
+                                    <i class="bi bi-circle-fill me-1" style="font-size: 0.45rem;"></i>Active Session
+                                </span>
+                                IP: <code class="text-dark"><?= e($userSession['ip']) ?></code> &bull; Last seen: <?= date('d-M H:i', strtotime($userSession['last_activity_at'])) ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="small text-muted" style="font-size: 0.78rem;">
+                                <span class="badge bg-light text-muted border me-1">Offline</span>
+                                No active device session currently recorded.
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <?php if (!empty($userSession) && $user['id'] != \App\Core\Auth::id()): ?>
+                        <form method="POST" action="<?= url("/admin/users/{$user['id']}/force-logout") ?>" class="m-0">
+                            <?= csrf_field() ?>
+                            <button type="submit" class="btn btn-sm btn-danger fw-semibold px-3" data-confirm="Terminate active session for '<?= e($user['username']) ?>'? This will disconnect their device immediately.">
+                                <i class="bi bi-box-arrow-right me-1"></i>Force Logout User
+                            </button>
+                        </form>
+                    <?php endif; ?>
+                </div>
+            </div>
+
             <form method="POST" action="<?= url("/admin/users/{$user['id']}") ?>">
                 <?= csrf_field() ?>
 

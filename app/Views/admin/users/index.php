@@ -52,6 +52,9 @@
         <div>
             <h2 class="h4 fw-bold mb-0">User Accounts</h2>
             <small class="text-muted">Manage farm staff roles, access permissions, and active device sessions</small>
+            <div class="mt-1 small text-muted" style="font-size: 0.76rem;">
+                <i class="bi bi-shield-check text-success me-1"></i><strong>Executive Security:</strong> Monitor active device sessions in real-time. Click <span class="badge bg-danger-subtle text-danger border border-danger-subtle font-monospace"><i class="bi bi-box-arrow-right me-0.5"></i>Force Logout</span> to instantly disconnect suspicious or compromised user sessions.
+            </div>
         </div>
         <div>
             <a href="<?= url('/admin/users/create') ?>" class="btn btn-primary fw-bold shadow-sm">
@@ -131,11 +134,16 @@
                                     </td>
                                     <td>
                                         <?php
-                                        $hasActiveSession = !empty($u['active_session_time']) && (strtotime($u['active_session_time']) >= (time() - 900));
+                                        $hasSessionRow = !empty($u['active_session_time']);
+                                        $isRecentlyActive = $hasSessionRow && (strtotime($u['active_session_time']) >= (time() - 900));
                                         ?>
-                                        <?php if ($hasActiveSession): ?>
-                                            <span class="badge bg-success-subtle text-success border border-success-subtle">
-                                                <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Active (<?= date('H:i', strtotime($u['active_session_time'])) ?>)
+                                        <?php if ($isRecentlyActive): ?>
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle d-inline-flex align-items-center" title="Active on platform right now">
+                                                <i class="bi bi-circle-fill me-1 text-success" style="font-size: 0.45rem;"></i>Online (<?= date('H:i', strtotime($u['active_session_time'])) ?>)
+                                            </span>
+                                        <?php elseif ($hasSessionRow): ?>
+                                            <span class="badge bg-warning-subtle text-dark border border-warning-subtle d-inline-flex align-items-center" title="Session token in database, idle since <?= date('d-M H:i', strtotime($u['active_session_time'])) ?>">
+                                                <i class="bi bi-pause-circle me-1 text-warning" style="font-size: 0.65rem;"></i>Idle (<?= date('H:i', strtotime($u['active_session_time'])) ?>)
                                             </span>
                                         <?php else: ?>
                                             <span class="badge bg-light text-muted border">Offline</span>
@@ -175,25 +183,27 @@
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-end">
-                                        <?php if ($hasActiveSession && $u['id'] != \App\Core\Auth::id()): ?>
-                                            <form method="POST" action="<?= url("/admin/users/{$u['id']}/force-logout") ?>" class="d-inline">
-                                                <?= csrf_field() ?>
-                                                <button type="submit" class="btn btn-sm btn-outline-warning me-1" data-confirm="Terminate active session for this user?" title="Force Logout">
-                                                    <i class="bi bi-box-arrow-right"></i>
-                                                </button>
-                                            </form>
-                                        <?php endif; ?>
-                                        <a href="<?= url("/admin/users/{$u['id']}/edit") ?>" class="btn btn-sm btn-outline-secondary me-1" title="Edit">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <?php if ($u['id'] != \App\Core\Auth::id() && $u['username'] !== 'ik.chipeta'): ?>
-                                            <form method="POST" action="<?= url("/admin/users/{$u['id']}/toggle-active") ?>" class="d-inline">
-                                                <?= csrf_field() ?>
-                                                <button type="submit" class="btn btn-sm <?= (int) $u['is_active'] === 1 ? 'btn-outline-danger' : 'btn-outline-success' ?>" data-confirm="Are you sure you want to change this user's active status?">
-                                                    <?= (int) $u['is_active'] === 1 ? '<i class="bi bi-person-x"></i>' : '<i class="bi bi-person-check"></i>' ?>
-                                                </button>
-                                            </form>
-                                        <?php endif; ?>
+                                        <div class="d-inline-flex align-items-center gap-1">
+                                            <?php if ($hasSessionRow && $u['id'] != \App\Core\Auth::id()): ?>
+                                                <form method="POST" action="<?= url("/admin/users/{$u['id']}/force-logout") ?>" class="d-inline m-0">
+                                                    <?= csrf_field() ?>
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger px-2 py-0.5" data-confirm="Terminate active session for '<?= e($u['username']) ?>'? This will disconnect their session immediately." title="Force Logout Active Session">
+                                                        <i class="bi bi-box-arrow-right me-1"></i>Force Logout
+                                                    </button>
+                                                </form>
+                                            <?php endif; ?>
+                                            <a href="<?= url("/admin/users/{$u['id']}/edit") ?>" class="btn btn-sm btn-outline-secondary px-2 py-0.5" title="Edit User">
+                                                <i class="bi bi-pencil me-1"></i>Edit
+                                            </a>
+                                            <?php if ($u['id'] != \App\Core\Auth::id() && $u['username'] !== 'ik.chipeta'): ?>
+                                                <form method="POST" action="<?= url("/admin/users/{$u['id']}/toggle-active") ?>" class="d-inline m-0">
+                                                    <?= csrf_field() ?>
+                                                    <button type="submit" class="btn btn-sm <?= (int) $u['is_active'] === 1 ? 'btn-outline-danger' : 'btn-outline-success' ?> px-2 py-0.5" data-confirm="Are you sure you want to change this user's active status?" title="<?= (int)$u['is_active'] === 1 ? 'Deactivate User' : 'Activate User' ?>">
+                                                        <?= (int) $u['is_active'] === 1 ? '<i class="bi bi-person-x"></i>' : '<i class="bi bi-person-check"></i>' ?>
+                                                    </button>
+                                                </form>
+                                            <?php endif; ?>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
