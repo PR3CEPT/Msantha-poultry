@@ -262,7 +262,7 @@ class IncubationController
         $newCustomerPhone = trim((string) $request->input('new_customer_phone', ''));
 
         if ($customerId <= 0 && $newCustomerName !== '') {
-            $formattedPhone = $newCustomerPhone !== '' ? Phone::formatE164($newCustomerPhone) : null;
+            $formattedPhone = $newCustomerPhone !== '' ? Phone::normalize($newCustomerPhone) : null;
             $cInsert = $pdo->prepare("INSERT INTO customers (name, phone, created_at) VALUES (?, ?, NOW())");
             $cInsert->execute([$newCustomerName, $formattedPhone]);
             $customerId = (int) $pdo->lastInsertId();
