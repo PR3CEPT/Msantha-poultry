@@ -417,6 +417,49 @@ class IncubationController
         ]);
     }
 
+    public function recordCollection(Request $request, int|string $id): Response
+    {
+        $id = (int) $id;
+        Auth::requirePermission('incubation', 'edit');
+        $pdo = DB::pdo();
+
+        $stmt = $pdo->prepare("SELECT * FROM incubation_jobs WHERE id = ?");
+        $stmt->execute([$id]);
+        $job = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$job) {
+            $_SESSION['flash_error'] = "Incubation batch #{$id} not found.";
+            return Response::redirect(url('/incubation-jobs'));
+        }
+
+        $dateCollected = trim((string) $request->input('date_collected', date('Y-m-d')));
+        $chicksCollected = max(0, (int) $request->input('chicks_collected', $job['hatched'] ?? 0));
+        $collectorNotes = trim((string) $request->input('collector_notes', ''));
+
+        // Format remarks to retain previous remarks and append collection details
+        $prevRemarks = trim((string)($job['remarks'] ?? ''));
+        $collectionStamp = "[Collected: " . date('d-M-Y', strtotime($dateCollected)) . " | {$chicksCollected} chicks" . ($collectorNotes !== '' ? " | Notes: {$collectorNotes}" : "") . "]";
+        $newRemarks = $prevRemarks !== '' ? "{$prevRemarks} | {$collectionStamp}" : $collectionStamp;
+
+        $up = $pdo->prepare("
+            UPDATE incubation_jobs
+            SET status = 'collected',
+                remarks = ?
+            WHERE id = ?
+        ");
+        $up->execute([$newRemarks, $id]);
+
+        Audit::log('update', 'incubation_jobs', $id, $job, [
+            'status' => 'collected',
+            'date_collected' => $dateCollected,
+            'chicks_collected' => $chicksCollected,
+            'collector_notes' => $collectorNotes,
+        ]);
+
+        $_SESSION['flash_success'] = "Batch " . ($job['batch_code'] ? "({$job['batch_code']})" : "#{$id}") . " successfully marked as Collected ({$chicksCollected} chicks handed over).";
+        return Response::redirect(url("/incubation-jobs/{$id}"));
+    }
+
     public function edit(Request $request, int|string $id): Response
     {
         $id = (int) $id;
@@ -449,7 +492,7 @@ class IncubationController
             ORDER BY s.name ASC, b.name ASC
         ")->fetchAll(PDO::FETCH_ASSOC);
         $species = $pdo->query("SELECT * FROM species ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC);
-        $incubators = $pdo->query("SELECT id, name, capacity, status FROM incubators ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+        $incubators = $pdo->query("SELECT id, name, capacity, is_active FROM incubators WHERE is_active = 1 ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 
         $flashError = $_SESSION['flash_error'] ?? null;
         unset($_SESSION['flash_error']);

@@ -48,11 +48,11 @@ class PublicController
         if ($rawJobRef !== '') {
             $jobId = preg_replace('/\D/', '', $rawJobRef);
             if ($jobId !== '') {
-                $where[] = "(j.id = :job_id OR j.legacy_ref LIKE :job_code)";
+                $where[] = "(j.id = :job_id OR j.batch_code LIKE :job_code OR j.legacy_ref LIKE :job_code)";
                 $params['job_id'] = (int) $jobId;
                 $params['job_code'] = "%{$rawJobRef}%";
             } else {
-                $where[] = "j.legacy_ref LIKE :job_code";
+                $where[] = "(j.batch_code LIKE :job_code OR j.legacy_ref LIKE :job_code)";
                 $params['job_code'] = "%{$rawJobRef}%";
             }
         }
@@ -62,7 +62,7 @@ class PublicController
         try {
             $sql = "
                 SELECT 
-                    j.id, j.legacy_ref, j.eggs_incubated, j.date_incubated, j.date_transfer,
+                    j.id, j.batch_code, j.legacy_ref, j.eggs_incubated, j.date_incubated, j.date_transfer,
                     j.expected_hatch_date, j.status, j.cost, j.amount_paid,
                     c.name AS customer_name, c.phone AS customer_phone,
                     b.name AS breed_name
@@ -158,6 +158,9 @@ class PublicController
                 $jobs[] = [
                     'id' => $job['id'],
                     'batch_code' => (function() use ($job): string {
+                        if (!empty($job['batch_code'])) {
+                            return (string)$job['batch_code'];
+                        }
                         $ref = (string)($job['legacy_ref'] ?? '');
                         // Strip import artifact prefixes like "incubation_01:row_860"
                         if (preg_match('/^incubation_\d+:row_(\d+)$/i', $ref, $m)) {

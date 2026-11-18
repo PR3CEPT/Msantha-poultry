@@ -32,6 +32,13 @@
                     <form method="POST" action="<?= url("/incubation-jobs/{$job['id']}") ?>" id="editBatchForm">
                         <?= csrf_field() ?>
 
+                        <?php if (in_array(strtolower((string)$job['status']), ['completed', 'collected'], true)): ?>
+                            <div class="alert alert-warning small mb-4">
+                                <i class="bi bi-shield-exclamation me-1"></i>
+                                <strong>Post-Hatch Integrity Notice:</strong> This batch has reached <em><?= ucfirst(e($job['status'])) ?></em>. Eggs set and pricing rates should generally remain locked to preserve financial ledger consistency and historical hatch rates. Only adjust candling/hatch recounts, collection notes, or minor customer details.
+                            </div>
+                        <?php endif; ?>
+
                         <!-- 1. Customer Selection -->
                         <div class="card bg-light border p-3 rounded-3 mb-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -160,6 +167,7 @@
                                         <option value="incubating" <?= ($job['status'] === 'incubating') ? 'selected' : '' ?>>Incubating (in setter)</option>
                                         <option value="hatching" <?= ($job['status'] === 'hatching') ? 'selected' : '' ?>>Hatching (transferred to hatcher)</option>
                                         <option value="completed" <?= ($job['status'] === 'completed') ? 'selected' : '' ?>>Completed</option>
+                                        <option value="collected" <?= ($job['status'] === 'collected') ? 'selected' : '' ?>>Collected (Chicks Picked Up by Customer)</option>
                                         <option value="cancelled" <?= ($job['status'] === 'cancelled') ? 'selected' : '' ?>>Cancelled</option>
                                     </select>
                                 </div>

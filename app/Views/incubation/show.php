@@ -219,6 +219,23 @@ $isOwnerBatch = !empty($job['customer_is_internal']) || stripos((string)($job['c
                             <i class="bi bi-check2-circle me-1"></i>Save Hatch Results
                         </button>
                     </form>
+
+                    <?php if ($job['status'] === 'collected'): ?>
+                        <div class="alert alert-dark d-flex align-items-center py-2 px-3 mt-3 mb-0 small rounded-2">
+                            <i class="bi bi-box-seam text-warning fs-5 me-2"></i>
+                            <div>
+                                <span class="fw-bold d-block text-white">Chicks Collected</span>
+                                <span class="text-secondary"><?= e($job['remarks'] ?? 'Handover complete.') ?></span>
+                            </div>
+                        </div>
+                    <?php elseif (!empty($job['hatched']) && (int)$job['hatched'] > 0): ?>
+                        <div class="mt-3 pt-3 border-top">
+                            <button type="button" class="btn btn-warning w-100 fw-bold shadow-sm text-dark" data-bs-toggle="modal" data-bs-target="#collectChicksModal">
+                                <i class="bi bi-box-seam me-1"></i>Notify System: Chicks Collected
+                            </button>
+                            <small class="text-muted d-block text-center mt-1">Record handover of live chicks to customer</small>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -324,6 +341,61 @@ $isOwnerBatch = !empty($job['customer_is_internal']) || stripos((string)($job['c
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-success fw-bold">
                         <i class="bi bi-check2-circle me-1"></i>Record & Allocate Payment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Notify System: Chicks Collected Modal -->
+<div class="modal fade" id="collectChicksModal" tabindex="-1" aria-labelledby="collectChicksModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title fw-bold" id="collectChicksModalLabel">
+                    <i class="bi bi-box-seam me-2"></i>Record Chicks Handover & Collection
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="<?= url("/incubation-jobs/{$job['id']}/collect") ?>">
+                <?= csrf_field() ?>
+                <div class="modal-body p-4">
+                    <div class="alert alert-light border small mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Batch:</span>
+                            <strong><?= e($job['batch_code'] ?: ('#' . $job['id'])) ?></strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted">Customer:</span>
+                            <strong><?= e($job['customer_name']) ?></strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Recorded Hatched Chicks:</span>
+                            <strong class="text-success"><?= number_format((int)$job['hatched']) ?> chicks (<?= $job['hatch_percent'] ?? '0' ?>% hatch rate)</strong>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Date of Collection <span class="text-danger">*</span></label>
+                        <input type="date" name="date_collected" class="form-control" value="<?= date('Y-m-d') ?>" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Live Chicks Collected / Handed Over <span class="text-danger">*</span></label>
+                        <input type="number" name="chicks_collected" class="form-control fs-5 fw-bold text-success" min="0" max="<?= max(1, (int)$job['hatched'] * 2) ?>" value="<?= (int)$job['hatched'] ?>" required>
+                        <small class="text-muted">Enter the actual count taken by the customer (in case of dead-in-shell or recount).</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Collector Name / Handover Remarks</label>
+                        <input type="text" name="collector_notes" class="form-control" placeholder="e.g. Picked up by owner, all lively and vaccinated">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning fw-bold text-dark">
+                        <i class="bi bi-check2-circle me-1"></i>Confirm Collection & Update Status
                     </button>
                 </div>
             </form>

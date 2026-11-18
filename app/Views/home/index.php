@@ -202,7 +202,14 @@
                                         <tr>
                                             <td class="ps-3">
                                                 <div class="d-flex align-items-center gap-1.5 flex-wrap">
-                                                    <span class="fw-bold text-dark"><?= e($jb['customer_name'] ?? 'Customer') ?></span>
+                                                    <a href="<?= url("/incubation-jobs/{$jb['id']}") ?>" class="text-decoration-none">
+                                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace fw-bold me-1">
+                                                            <?= e($jb['batch_code'] ?: ('#' . $jb['id'])) ?>
+                                                        </span>
+                                                    </a>
+                                                    <a href="<?= url("/incubation-jobs/{$jb['id']}") ?>" class="fw-bold text-dark text-decoration-none">
+                                                        <?= e($jb['customer_name'] ?? 'Customer') ?>
+                                                    </a>
                                                     <?php if ($isInternal): ?>
                                                         <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.65rem;">Owner • Internal</span>
                                                     <?php endif; ?>

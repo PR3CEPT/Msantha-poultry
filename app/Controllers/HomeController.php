@@ -73,7 +73,7 @@ class HomeController
 
             // 4. Incubating batches + countdown
             $incubatingBatches = $pdo->query("
-                SELECT j.id, j.eggs_incubated, j.expected_hatch_date, j.date_transfer,
+                SELECT j.id, j.batch_code, j.eggs_incubated, j.expected_hatch_date, j.date_transfer,
                        b.name AS breed_name, c.name AS customer_name,
                        DATEDIFF(j.expected_hatch_date, CURDATE()) AS days_to_hatch
                 FROM incubation_jobs j

@@ -180,6 +180,7 @@ $router->get('/incubation-jobs/{id}/edit', [IncubationController::class, 'edit']
 $router->post('/incubation-jobs/{id}', [IncubationController::class, 'update']);
 $router->post('/incubation-jobs/{id}/delete', [IncubationController::class, 'destroy']);
 $router->post('/incubation-jobs/{id}/hatch', [IncubationController::class, 'recordHatch']);
+$router->post('/incubation-jobs/{id}/collect', [IncubationController::class, 'recordCollection']);
 $router->post('/incubation-jobs/{id}/payment', [IncubationController::class, 'addPayment']);
 $router->get('/incubation-jobs/{id}/receipt', [IncubationController::class, 'receipt']);
 $router->get('/incubation-jobs/{id}/certificate', [IncubationController::class, 'certificate']);
