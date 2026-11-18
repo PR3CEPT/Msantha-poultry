@@ -11,7 +11,12 @@ $isOwnerBatch = !empty($job['customer_is_internal']) || stripos((string)($job['c
                 <a href="<?= url('/incubation-jobs') ?>" class="btn btn-sm btn-light border text-muted">
                     <i class="bi bi-arrow-left"></i>
                 </a>
-                <h1 class="h3 fw-bold mb-0 text-dark">Incubation Batch #<?= $job['id'] ?></h1>
+                <h1 class="h3 fw-bold mb-0 text-dark">
+                    Batch <?= e($job['batch_code'] ?: ('#' . $job['id'])) ?>
+                    <?php if (!empty($job['batch_code'])): ?>
+                        <span class="text-muted fs-6 fw-normal">(#<?= $job['id'] ?>)</span>
+                    <?php endif; ?>
+                </h1>
                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle fs-6">
                     <?= ucfirst(e($job['status'])) ?>
                 </span>
@@ -31,6 +36,11 @@ $isOwnerBatch = !empty($job['customer_is_internal']) || stripos((string)($job['c
             </p>
         </div>
         <div class="d-flex flex-wrap gap-2 align-items-center">
+            <?php if (\App\Core\Auth::can('incubation', 'edit')): ?>
+                <a href="<?= url("/incubation-jobs/{$job['id']}/edit") ?>" class="btn btn-outline-primary">
+                    <i class="bi bi-pencil-square me-1"></i>Edit Batch
+                </a>
+            <?php endif; ?>
             <a href="<?= url("/incubation-jobs/{$job['id']}/receipt") ?>" target="_blank" class="btn btn-outline-dark">
                 <i class="bi bi-receipt me-1"></i>Print Receipt
             </a>
@@ -38,6 +48,11 @@ $isOwnerBatch = !empty($job['customer_is_internal']) || stripos((string)($job['c
                 <a href="<?= url("/incubation-jobs/{$job['id']}/certificate") ?>" target="_blank" class="btn btn-outline-success">
                     <i class="bi bi-award me-1"></i>Hatch Certificate
                 </a>
+            <?php endif; ?>
+            <?php if (\App\Core\Auth::hasRole(['owner', 'manager'])): ?>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteBatchModal">
+                    <i class="bi bi-trash3 me-1"></i>Delete
+                </button>
             <?php endif; ?>
             <?php if ($isOwnerBatch): ?>
                 <span class="badge bg-light text-muted border p-2">
@@ -315,4 +330,39 @@ $isOwnerBatch = !empty($job['customer_is_internal']) || stripos((string)($job['c
         </div>
     </div>
 </div>
+
+<?php if (\App\Core\Auth::hasRole(['owner', 'manager'])): ?>
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteBatchModal" tabindex="-1" aria-labelledby="deleteBatchModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteBatchModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Delete Incubation Batch
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="mb-3">
+                    Are you sure you want to permanently delete batch <strong><?= e($job['batch_code'] ?: ('#' . $job['id'])) ?></strong> for <strong><?= e($job['customer_name']) ?></strong>?
+                </p>
+                <div class="alert alert-warning small mb-3">
+                    <i class="bi bi-shield-lock me-1"></i>
+                    <strong>Accounting Protection:</strong> Batches with recorded cash or mobile money payments cannot be deleted to protect financial reconciliations. Any unpaid or accidental test entry will be wiped cleanly.
+                </div>
+                <p class="text-danger small mb-0">This operation is irreversible and will be logged in the system audit trail.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="<?= url("/incubation-jobs/{$job['id']}/delete") ?>" class="d-inline">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="btn btn-danger fw-bold">
+                        <i class="bi bi-trash3 me-1"></i>Yes, Delete Batch
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 

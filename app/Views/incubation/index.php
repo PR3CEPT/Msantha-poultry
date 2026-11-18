@@ -93,8 +93,9 @@
                                 <a href="<?= url("/incubation-jobs/{$t['id']}") ?>"
                                     class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-2 border-0 rounded-2 mb-1">
                                     <div>
-                                        <div class="fw-semibold text-dark small">Batch #<?= $t['id'] ?> &middot;
-                                            <?= e($t['customer_name']) ?></div>
+                                        <div class="fw-semibold text-dark small">
+                                            <?= e($t['batch_code'] ?: ('#' . $t['id'])) ?> &middot; <?= e($t['customer_name']) ?>
+                                        </div>
                                         <small class="text-muted"><?= number_format((int) $t['eggs_incubated']) ?> eggs</small>
                                     </div>
                                     <span class="badge bg-warning text-dark"><i class="bi bi-chevron-right"></i></span>
@@ -221,7 +222,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-3">Batch #</th>
+                        <th class="ps-3">Batch Code</th>
                         <th>Intake Date</th>
                         <th>Customer</th>
                         <th>Breed</th>
@@ -261,8 +262,12 @@
                             };
                             ?>
                             <tr>
-                                <td class="ps-3 font-monospace fw-bold text-dark">
-                                    #<?= e((string) $j['id']) ?>
+                                <td class="ps-3">
+                                    <a href="<?= url("/incubation-jobs/{$j['id']}") ?>" class="text-decoration-none">
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle fw-bold font-monospace">
+                                            <?= e($j['batch_code'] ?: ('#' . $j['id'])) ?>
+                                        </span>
+                                    </a>
                                 </td>
                                 <td class="text-nowrap small text-muted font-monospace">
                                     <?= !empty($j['date_received']) ? date('d-M-Y', strtotime($j['date_received'])) : '—' ?>
@@ -316,6 +321,11 @@
                                     <a href="<?= url("/incubation-jobs/{$j['id']}") ?>" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-1" title="View Batch Details">
                                         <i class="bi bi-eye me-1"></i>View
                                     </a>
+                                    <?php if (\App\Core\Auth::can('incubation', 'edit')): ?>
+                                    <a href="<?= url("/incubation-jobs/{$j['id']}/edit") ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-1" title="Edit Batch">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

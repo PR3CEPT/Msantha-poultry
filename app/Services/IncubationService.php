@@ -206,5 +206,74 @@ class IncubationService
             'status' => $newStatus,
         ], $userId);
     }
+
+    /**
+     * Compute clean uppercase initials for a customer name.
+     * E.g. "Injesi Mrs" -> "IM", "Isaac Chipeta" -> "IC", "Mai Injesi Mawira" -> "MIM", "Msantha" -> "MSA".
+     */
+    public static function getCustomerInitials(string $name): string
+    {
+        $nameNoParen = preg_replace('/\s*\(.*?\)/', '', $name);
+        $cleanName = preg_replace('/[^a-zA-Z\s]/', '', $nameNoParen);
+        $words = array_values(array_filter(preg_split('/\s+/', trim($cleanName))));
+
+        $initials = '';
+        if (count($words) >= 2) {
+            foreach ($words as $w) {
+                $initials .= strtoupper(substr($w, 0, 1));
+                if (strlen($initials) >= 4) {
+                    break;
+                }
+            }
+        } elseif (count($words) === 1) {
+            $single = strtoupper($words[0]);
+            $initials = strlen($single) >= 3 ? substr($single, 0, 3) : $single;
+        }
+
+        if (empty($initials)) {
+            $initials = 'CUST';
+        }
+
+        return $initials;
+    }
+
+    /**
+     * Generate the next batch code for a customer using initials and per-customer sequence.
+     * Example: "IM-01", "IM-02", "IC-01", "GP-03".
+     */
+    public static function generateBatchCode(int $customerId, ?PDO $pdo = null): string
+    {
+        $pdo = $pdo ?: DB::pdo();
+
+        // 1. Fetch customer name
+        $stmt = $pdo->prepare("SELECT name FROM customers WHERE id = ?");
+        $stmt->execute([$customerId]);
+        $name = (string) $stmt->fetchColumn();
+
+        $initials = self::getCustomerInitials($name);
+
+        // 2. Count existing jobs for this customer to determine sequence
+        $countStmt = $pdo->prepare("SELECT COUNT(*) FROM incubation_jobs WHERE customer_id = ?");
+        $countStmt->execute([$customerId]);
+        $existingCount = (int) $countStmt->fetchColumn();
+
+        $nextSeq = $existingCount + 1;
+
+        // Also check if any existing batch_code has a higher sequence number
+        $maxSeqStmt = $pdo->prepare("SELECT batch_code FROM incubation_jobs WHERE customer_id = ? AND batch_code IS NOT NULL");
+        $maxSeqStmt->execute([$customerId]);
+        $codes = $maxSeqStmt->fetchAll(PDO::FETCH_COLUMN);
+
+        foreach ($codes as $code) {
+            if (preg_match('/-(\d+)$/', (string) $code, $m)) {
+                $num = (int) $m[1];
+                if ($num >= $nextSeq) {
+                    $nextSeq = $num + 1;
+                }
+            }
+        }
+
+        return sprintf('%s-%02d', $initials, $nextSeq);
+    }
 }
 

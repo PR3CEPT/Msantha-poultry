@@ -285,20 +285,22 @@ class IncubationController
         // Auto date calculations based on species
         $dates = $incService->calculateDates($speciesId, $dateIncubated);
         $cost = $incService->calculateCost($eggsIncubated, $ratePerEgg);
+        $batchCode = IncubationService::generateBatchCode($customerId, $pdo);
 
         $stmt = $pdo->prepare("
             INSERT INTO incubation_jobs (
-                customer_id, breed_id, date_received, eggs_received, eggs_incubated,
+                customer_id, batch_code, breed_id, date_received, eggs_received, eggs_incubated,
                 date_incubated, date_transfer, expected_hatch_date, rate_per_egg, cost,
                 amount_paid, status, remarks, created_by, created_at
             ) VALUES (
-                ?, ?, ?, ?, ?,
+                ?, ?, ?, ?, ?, ?,
                 ?, ?, ?, ?, ?,
                 0, 'incubating', ?, ?, NOW()
             )
         ");
         $stmt->execute([
             $customerId,
+            $batchCode,
             $breedId,
             $dateReceived,
             $eggsReceived,
@@ -315,12 +317,13 @@ class IncubationController
 
         Audit::log('create', 'incubation_jobs', $newJobId, null, [
             'customer_id' => $customerId,
+            'batch_code' => $batchCode,
             'eggs_incubated' => $eggsIncubated,
             'cost' => $cost,
             'expected_hatch_date' => $dates['expected_hatch_date'],
         ]);
 
-        $_SESSION['flash_success'] = "Incubation batch #{$newJobId} created. Expected transfer: {$dates['date_transfer']}, Hatch: {$dates['expected_hatch_date']}.";
+        $_SESSION['flash_success'] = "Incubation batch {$batchCode} (#{$newJobId}) created. Expected transfer: {$dates['date_transfer']}, Hatch: {$dates['expected_hatch_date']}.";
         return Response::redirect(url("/incubation-jobs/{$newJobId}"));
     }
 
@@ -412,5 +415,221 @@ class IncubationController
             'pageTitle' => "Hatch Certificate — Batch #{$job['id']}",
             'job' => $job,
         ]);
+    }
+
+    public function edit(Request $request, int|string $id): Response
+    {
+        $id = (int) $id;
+        Auth::requirePermission('incubation', 'edit');
+        $pdo = DB::pdo();
+
+        $jobStmt = $pdo->prepare("SELECT * FROM v_incubation_jobs WHERE id = ?");
+        $jobStmt->execute([$id]);
+        $job = $jobStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$job) {
+            $_SESSION['flash_error'] = "Incubation batch #{$id} not found.";
+            return Response::redirect(url('/incubation-jobs'));
+        }
+
+        // Fetch breed details to know species_id
+        $speciesId = 1;
+        if (!empty($job['breed_id'])) {
+            $bStmt = $pdo->prepare("SELECT species_id FROM breeds WHERE id = ?");
+            $bStmt->execute([$job['breed_id']]);
+            $speciesId = (int) ($bStmt->fetchColumn() ?: 1);
+        }
+        $job['species_id'] = $speciesId;
+
+        $customers = $pdo->query("SELECT id, name, phone, location FROM customers ORDER BY name ASC LIMIT 500")->fetchAll(PDO::FETCH_ASSOC);
+        $breeds = $pdo->query("
+            SELECT b.*, s.name AS species_name, s.incubation_days 
+            FROM breeds b 
+            JOIN species s ON s.id = b.species_id 
+            ORDER BY s.name ASC, b.name ASC
+        ")->fetchAll(PDO::FETCH_ASSOC);
+        $species = $pdo->query("SELECT * FROM species ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC);
+        $incubators = $pdo->query("SELECT id, name, capacity, status FROM incubators ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+
+        $flashError = $_SESSION['flash_error'] ?? null;
+        unset($_SESSION['flash_error']);
+
+        return View::render('incubation/edit', [
+            'pageTitle' => "Edit Incubation Batch " . ($job['batch_code'] ? "({$job['batch_code']})" : "#{$job['id']}"),
+            'activeNav' => 'incubation',
+            'job' => $job,
+            'customers' => $customers,
+            'breeds' => $breeds,
+            'species' => $species,
+            'incubators' => $incubators,
+            'flashError' => $flashError,
+        ]);
+    }
+
+    public function update(Request $request, int|string $id): Response
+    {
+        $id = (int) $id;
+        Auth::requirePermission('incubation', 'edit');
+        $pdo = DB::pdo();
+        $incService = new IncubationService($pdo);
+
+        $stmt = $pdo->prepare("SELECT * FROM incubation_jobs WHERE id = ?");
+        $stmt->execute([$id]);
+        $oldJob = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$oldJob) {
+            $_SESSION['flash_error'] = "Incubation batch #{$id} not found.";
+            return Response::redirect(url('/incubation-jobs'));
+        }
+
+        $customerId = (int) $request->input('customer_id', $oldJob['customer_id']);
+        if ($customerId <= 0) {
+            $_SESSION['flash_error'] = "A valid customer is required.";
+            return Response::redirect(url("/incubation-jobs/{$id}/edit"));
+        }
+
+        $speciesId = (int) $request->input('species_id', 1);
+        $breedId = (int) $request->input('breed_id', 0) ?: null;
+        $incubatorId = (int) $request->input('incubator_id', 0) ?: null;
+
+        $dateReceived = (string) $request->input('date_received', $oldJob['date_received']);
+        $dateIncubated = (string) $request->input('date_incubated', $oldJob['date_incubated'] ?? $dateReceived);
+
+        $eggsReceived = max(0, (int) $request->input('eggs_received', $oldJob['eggs_received']));
+        $eggsIncubated = max(0, (int) $request->input('eggs_incubated', $oldJob['eggs_incubated']));
+        $ratePerEgg = max(0, (int) $request->input('rate_per_egg', $oldJob['rate_per_egg']));
+        $status = trim((string) $request->input('status', $oldJob['status']));
+        $remarks = trim((string) $request->input('remarks', $oldJob['remarks'] ?? ''));
+
+        // Candling / hatch results if completed or updated
+        $infertile = $request->input('infertile') !== '' && $request->input('infertile') !== null ? (int) $request->input('infertile') : ($oldJob['infertile'] !== null ? (int)$oldJob['infertile'] : null);
+        $fertile = $request->input('fertile') !== '' && $request->input('fertile') !== null ? (int) $request->input('fertile') : ($oldJob['fertile'] !== null ? (int)$oldJob['fertile'] : null);
+        $hatched = $request->input('hatched') !== '' && $request->input('hatched') !== null ? (int) $request->input('hatched') : ($oldJob['hatched'] !== null ? (int)$oldJob['hatched'] : null);
+        $dateHatched = trim((string) $request->input('date_hatched', '')) ?: ($oldJob['date_hatched'] ?? null);
+
+        // Date calculations or manual overrides
+        $customTransfer = trim((string) $request->input('date_transfer', ''));
+        $customHatch = trim((string) $request->input('expected_hatch_date', ''));
+
+        if ($customTransfer !== '' && $customHatch !== '') {
+            $dateTransfer = $customTransfer;
+            $expectedHatchDate = $customHatch;
+        } else {
+            $dates = $incService->calculateDates($speciesId, $dateIncubated);
+            $dateTransfer = $customTransfer ?: $dates['date_transfer'];
+            $expectedHatchDate = $customHatch ?: $dates['expected_hatch_date'];
+        }
+
+        // Cost calculation
+        $cost = $incService->calculateCost($eggsIncubated, $ratePerEgg);
+
+        // Batch code: if customer changed or batch_code is empty, generate new sequence
+        $batchCode = $oldJob['batch_code'];
+        if (empty($batchCode) || (int)$oldJob['customer_id'] !== $customerId) {
+            $batchCode = IncubationService::generateBatchCode($customerId, $pdo);
+        }
+
+        $upStmt = $pdo->prepare("
+            UPDATE incubation_jobs
+            SET customer_id = ?,
+                batch_code = ?,
+                breed_id = ?,
+                incubator_id = ?,
+                date_received = ?,
+                eggs_received = ?,
+                eggs_incubated = ?,
+                date_incubated = ?,
+                date_transfer = ?,
+                expected_hatch_date = ?,
+                date_hatched = ?,
+                infertile = ?,
+                fertile = ?,
+                hatched = ?,
+                rate_per_egg = ?,
+                cost = ?,
+                status = ?,
+                remarks = ?
+            WHERE id = ?
+        ");
+        $upStmt->execute([
+            $customerId,
+            $batchCode,
+            $breedId,
+            $incubatorId,
+            $dateReceived,
+            $eggsReceived,
+            $eggsIncubated,
+            $dateIncubated,
+            $dateTransfer,
+            $expectedHatchDate,
+            $dateHatched,
+            $infertile,
+            $fertile,
+            $hatched,
+            $ratePerEgg,
+            $cost,
+            $status,
+            $remarks ?: null,
+            $id,
+        ]);
+
+        Audit::log('update', 'incubation_jobs', $id, $oldJob, [
+            'customer_id' => $customerId,
+            'batch_code' => $batchCode,
+            'breed_id' => $breedId,
+            'eggs_incubated' => $eggsIncubated,
+            'cost' => $cost,
+            'date_transfer' => $dateTransfer,
+            'expected_hatch_date' => $expectedHatchDate,
+            'status' => $status,
+        ]);
+
+        $_SESSION['flash_success'] = "Incubation batch " . ($batchCode ? "({$batchCode})" : "#{$id}") . " updated successfully.";
+        return Response::redirect(url("/incubation-jobs/{$id}"));
+    }
+
+    public function destroy(Request $request, int|string $id): Response
+    {
+        $id = (int) $id;
+        Auth::requireRole(['owner', 'manager']);
+        $pdo = DB::pdo();
+
+        $stmt = $pdo->prepare("SELECT * FROM incubation_jobs WHERE id = ?");
+        $stmt->execute([$id]);
+        $job = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$job) {
+            $_SESSION['flash_error'] = "Incubation batch #{$id} not found.";
+            return Response::redirect(url('/incubation-jobs'));
+        }
+
+        // Safety check: Are there recorded payments?
+        $pStmt = $pdo->prepare("SELECT COUNT(*) FROM incubation_payments WHERE job_id = ?");
+        $pStmt->execute([$id]);
+        $payCount = (int) $pStmt->fetchColumn();
+        $totalPaid = (int) ($job['amount_paid'] ?? 0);
+
+        if ($payCount > 0 || $totalPaid > 0) {
+            $_SESSION['flash_error'] = "Cannot delete batch #{$id} because payments have already been recorded. Deleting paid transactions would compromise accounting and cash book integrity. Please void or refund payments before deleting.";
+            return Response::redirect(url("/incubation-jobs/{$id}"));
+        }
+
+        // Hard delete allocations and the job
+        $pdo->beginTransaction();
+        try {
+            $pdo->prepare("DELETE a FROM incubation_allocations a JOIN incubation_payments p ON p.id = a.payment_id WHERE p.job_id = ?")->execute([$id]);
+            $pdo->prepare("DELETE FROM incubation_payments WHERE job_id = ?")->execute([$id]);
+            $pdo->prepare("DELETE FROM incubation_jobs WHERE id = ?")->execute([$id]);
+
+            Audit::log('delete', 'incubation_jobs', $id, $job, null);
+            $pdo->commit();
+
+            $_SESSION['flash_success'] = "Batch " . ($job['batch_code'] ? "({$job['batch_code']})" : "#{$id}") . " has been permanently deleted.";
+            return Response::redirect(url('/incubation-jobs'));
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            $_SESSION['flash_error'] = "Failed to delete batch: " . $e->getMessage();
+            return Response::redirect(url("/incubation-jobs/{$id}"));
+        }
     }
 }

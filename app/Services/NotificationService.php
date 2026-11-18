@@ -173,30 +173,36 @@ class NotificationService
                 ];
             }
 
-            // 2. Day 18 Candling & Setter-to-Hatcher Transfer Reminder
+            // 2. Transfer Day & Candling Reminder (based on accurate date_transfer for all species)
             $transferStmt = $pdo->query("
-                SELECT j.id, j.date_received, j.eggs_incubated, c.name AS customer_name,
-                       DATEDIFF(CURDATE(), j.date_received) AS days_elapsed
+                SELECT j.id, j.batch_code, j.date_received, j.date_incubated, j.date_transfer, j.eggs_incubated, c.name AS customer_name,
+                       DATEDIFF(CURDATE(), COALESCE(j.date_incubated, j.date_received)) AS days_elapsed
                 FROM incubation_jobs j
                 JOIN customers c ON c.id = j.customer_id
                 WHERE j.status = 'incubating'
-                  AND DATEDIFF(CURDATE(), j.date_received) >= 18
-                  AND DATEDIFF(CURDATE(), j.date_received) <= 20
-                ORDER BY j.date_received ASC
-                LIMIT 4
+                  AND j.date_transfer IS NOT NULL
+                  AND (
+                      j.date_transfer = CURDATE()
+                      OR (j.date_transfer <= CURDATE() AND j.date_transfer >= DATE_SUB(CURDATE(), INTERVAL 2 DAY))
+                  )
+                ORDER BY j.date_transfer ASC
+                LIMIT 8
             ");
             if ($transferStmt) {
                 while ($t = $transferStmt->fetch(PDO::FETCH_ASSOC)) {
-                    $key = 'transfer_day18_' . $t['id'];
+                    $key = 'transfer_due_' . $t['id'] . '_' . ($t['date_transfer'] ?? '');
+                    $bCode = $t['batch_code'] ?: ('#' . $t['id']);
+                    $isToday = ($t['date_transfer'] === date('Y-m-d'));
+                    $timeLabel = $isToday ? 'Today' : (date('d M', strtotime((string)$t['date_transfer'])));
                     $alerts[] = [
                         'id' => $key,
                         'key' => $key,
                         'category' => 'Hatchery',
                         'type' => 'warning',
-                        'title' => 'Day 18 Candling & Transfer Due',
-                        'message' => "Batch #{$t['id']} ({$t['customer_name']}) has reached Day {$t['days_elapsed']} in setter. Move eggs to hatcher basket.",
+                        'title' => ($isToday ? '🔔 Transfer Due Today: ' : 'Transfer Pending: ') . "Batch {$bCode}",
+                        'message' => "Batch {$bCode} ({$t['customer_name']}) has reached transfer day ({$t['days_elapsed']} days in setter). Move {$t['eggs_incubated']} eggs to hatcher baskets & candle.",
                         'link' => url("/incubation-jobs/{$t['id']}"),
-                        'time' => "Day {$t['days_elapsed']}",
+                        'time' => $timeLabel,
                         'is_urgent' => true,
                         'is_seen' => false,
                     ];
