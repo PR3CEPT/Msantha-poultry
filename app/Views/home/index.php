@@ -187,7 +187,7 @@
                                     <tr>
                                         <th class="ps-3">Customer & Breed</th>
                                         <th class="text-nowrap">Eggs Set</th>
-                                        <th class="d-none d-md-table-cell">Transfer Day (18)</th>
+                                        <th class="d-none d-md-table-cell">Transfer Date</th>
                                         <th class="d-none d-md-table-cell">Expected Hatch</th>
                                         <th class="pe-3 text-end text-nowrap">Countdown</th>
                                     </tr>

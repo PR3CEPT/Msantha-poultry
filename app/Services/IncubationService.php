@@ -23,6 +23,7 @@ class IncubationService
      * Compute transfer day and expected hatch date based on species.
      * Species incubation days:
      * - Chicken: 21 days (transfer day 18 = +18 days, hatch day 21 = +21 days)
+     * - Guinea Fowl: 28 days (transfer day 25 = +25 days, hatch day 28 = +28 days)
      * - Turkey: 28 days (transfer day 25 = +25 days, hatch day 28 = +28 days)
      * - Duck: 28 days (transfer day 25 = +25 days, hatch day 28 = +28 days)
      * - Quail: 18 days (transfer day 15 = +15 days, hatch day 18 = +18 days)

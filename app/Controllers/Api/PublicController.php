@@ -95,14 +95,23 @@ class PublicController
                 $expectedHatch = $job['expected_hatch_date'] ?? null;
                 $dateTransfer = $job['date_transfer'] ?? null;
 
+                $totalCycleDays = 21;
+                if ($settingDate && $expectedHatch) {
+                    $diff = (int) round((strtotime($expectedHatch) - strtotime($settingDate)) / 86400);
+                    if ($diff > 0) {
+                        $totalCycleDays = $diff;
+                    }
+                }
+                $transferDayNumber = max(1, $totalCycleDays - 3);
+
                 $daysLeft = null;
                 $dayNumber = 1;
                 $progressPercent = 10;
 
                 if ($settingDate) {
                     $elapsedDays = (int) round((strtotime($today) - strtotime($settingDate)) / 86400);
-                    $dayNumber = max(1, min(21, $elapsedDays + 1));
-                    $progressPercent = (int) round(($dayNumber / 21) * 100);
+                    $dayNumber = max(1, min($totalCycleDays, $elapsedDays + 1));
+                    $progressPercent = (int) round(($dayNumber / $totalCycleDays) * 100);
                 }
 
                 if ($expectedHatch) {
@@ -132,12 +141,12 @@ class PublicController
                     $badgeClass = 'bg-success';
                     $progressPercent = 100;
                     $countdownText = 'Hatch Day Today!';
-                } elseif ($dayNumber >= 18) {
+                } elseif ($dayNumber >= $transferDayNumber) {
                     $stageText = 'In Hatcher (Final Stage)';
                     $badgeClass = 'bg-warning text-dark';
                     $countdownText = "Hatch in {$daysLeft} day" . ($daysLeft === 1 ? '' : 's');
                 } else {
-                    $countdownText = $daysLeft !== null ? "Hatch in {$daysLeft} days" : "Day {$dayNumber} of 21";
+                    $countdownText = $daysLeft !== null ? "Hatch in {$daysLeft} days" : "Day {$dayNumber} of {$totalCycleDays}";
                 }
 
                 // Obfuscate customer name for privacy (e.g. "Gilbert M***")
@@ -164,6 +173,8 @@ class PublicController
                     'expected_hatch_date' => $expectedHatch ? date('d-M-Y', strtotime($expectedHatch)) : '—',
                     'days_left' => $daysLeft,
                     'day_number' => $dayNumber,
+                    'total_days' => $totalCycleDays,
+                    'transfer_day' => $transferDayNumber,
                     'progress_percent' => $progressPercent,
                     'stage_text' => $stageText,
                     'badge_class' => $badgeClass,

@@ -179,6 +179,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         transferPrev.textContent = tDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         hatchPrev.textContent = hDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+        const speciesName = selOpt.text.split('(')[0].trim();
+        const speciesHelp = document.getElementById('speciesHelp');
+        if (speciesHelp) {
+            speciesHelp.textContent = `${speciesName}: Transfer Day ${transferDays} · Hatch Day ${days} (${days} days total)`;
+        }
     }
 
     eggsRec.addEventListener('input', function() {

@@ -340,7 +340,7 @@
                         </div>
                         <h5 class="fw-bold text-dark mb-2">Egg Incubation Services</h5>
                         <p class="text-muted small flex-grow-1">
-                            Commercial multi-stage incubation for chicken, turkey, duck, and quail eggs. Precise temperature, humidity regulation, automatic turning, Day 18 transfer candling, and official hatch certification.
+                            Commercial multi-stage incubation for chicken, guinea fowl, turkey, duck, and quail eggs. Precise temperature, humidity regulation, automatic turning, species-specific candling/transfer, and official hatch certification.
                         </p>
                         <span class="text-primary fw-bold small"><i class="bi bi-check2 me-1"></i>High Fertility Hatch Rates</span>
                     </div>
@@ -422,7 +422,7 @@
                             <div class="p-2 bg-success text-white rounded-circle"><i class="bi bi-check-lg"></i></div>
                             <div>
                                 <strong class="text-dark d-block">Species-Specific Automated Schedules</strong>
-                                <span class="text-muted small">Chickens (21 days, Day 18 transfer), Ducks & Turkeys (28 days), Quails (18 days).</span>
+                                <span class="text-muted small">Chickens (21 days, Day 18 transfer), Guinea Fowls, Ducks & Turkeys (28 days, Day 25 transfer), Quails (18 days).</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-start gap-3">
@@ -775,7 +775,7 @@
                                         <strong class="text-success small">${Number(j.eggs_incubated).toLocaleString()} eggs</strong>
                                     </div>
                                     <div class="col-6">
-                                        <small class="text-muted d-block" style="font-size: 0.7rem;">Day 18 Candling/Transfer</small>
+                                        <small class="text-muted d-block" style="font-size: 0.7rem;">Candling & Transfer (${j.transfer_day ? 'Day ' + j.transfer_day : 'Day 18/25'})</small>
                                         <span class="font-monospace small text-dark">${j.date_transfer}</span>
                                     </div>
                                     <div class="col-6">
@@ -787,7 +787,7 @@
                                 <div class="mt-2 pt-2 border-top">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <small class="text-muted" style="font-size: 0.7rem;">Incubation Stage: <strong>${j.stage_text}</strong></small>
-                                        <small class="text-muted font-monospace" style="font-size: 0.7rem;">Day ${j.day_number} of 21</small>
+                                        <small class="text-muted font-monospace" style="font-size: 0.7rem;">Day ${j.day_number} of ${j.total_days || 21}</small>
                                     </div>
                                     <div class="progress" style="height: 6px;">
                                         <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: ${j.progress_percent}%;"></div>
