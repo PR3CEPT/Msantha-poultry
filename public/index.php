@@ -254,6 +254,7 @@ $router->post('/api/notifications/dismiss', [\App\Controllers\Api\NotificationCo
 
 // Reports Routes
 $router->get('/reports', [ReportController::class, 'index']);
+$router->get('/reports/performance', [ReportController::class, 'performance']);
 $router->get('/reports/mortality', [ReportController::class, 'mortality']);
 $router->get('/reports/hatch', [ReportController::class, 'hatch']);
 $router->get('/reports/eggs', [ReportController::class, 'eggs']);

@@ -39,6 +39,11 @@ class ReportController
             $totalOverdue += (int) $d['total_due'];
         }
 
+        $format = $request->query('format');
+        if ($format === 'csv') {
+            return $this->exportPnlCsv($pnl, $year);
+        }
+
         return View::render('reports/index', [
             'pageTitle' => 'Management Reports & Analytics',
             'activeNav' => 'reports',
@@ -47,6 +52,48 @@ class ReportController
             'feed' => $feed,
             'totalOverdue' => $totalOverdue,
             'debtorsCount' => count($agedDebtors),
+        ]);
+    }
+
+    /**
+     * Executive Decision & Business Performance Report:
+     * Best sellers, worst sellers, high consumers, profit & loss, flock mortality financial loss.
+     */
+    public function performance(Request $request): Response
+    {
+        Auth::requirePermission('reports', 'view');
+        Audit::logView('reports_performance');
+
+        $from = trim((string) $request->query('from', ''));
+        $to = trim((string) $request->query('to', ''));
+        $year = $request->query('year') ? (int) $request->query('year') : null;
+
+        $report = $this->reportService->getExecutivePerformanceReport($from ?: null, $to ?: null, $year);
+
+        $format = $request->query('format');
+        if ($format === 'csv') {
+            return $this->exportPerformanceCsv($report);
+        }
+        if ($format === 'print' || $format === 'pdf') {
+            return View::render('reports/print_document', [
+                'pageTitle' => 'Executive Performance & Decision-Making Report',
+                'reportType' => 'performance',
+                'report' => $report,
+                'from' => $from,
+                'to' => $to,
+                'year' => $year,
+                'autoPrint' => ($format === 'pdf'),
+                'csvUrl' => url('/reports/performance?format=csv' . ($from ? '&from=' . urlencode($from) : '') . ($to ? '&to=' . urlencode($to) : '') . ($year ? '&year=' . $year : '')),
+            ], null);
+        }
+
+        return View::render('reports/performance', [
+            'pageTitle' => 'Executive Decision & Business Performance',
+            'activeNav' => 'reports',
+            'report' => $report,
+            'from' => $from,
+            'to' => $to,
+            'year' => $year,
         ]);
     }
 
@@ -247,6 +294,11 @@ class ReportController
         $year = (int) $request->query('year', (int) date('Y'));
         $data = $this->reportService->getFeedCostEfficiency($year);
 
+        $format = $request->query('format');
+        if ($format === 'csv') {
+            return $this->exportFeedEfficiencyCsv($data, $year);
+        }
+
         return View::render('reports/feed_efficiency', [
             'pageTitle' => 'Feed Cost Efficiency per Bird & Egg',
             'activeNav' => 'reports',
@@ -256,12 +308,154 @@ class ReportController
     }
 
     // ==========================================
-    // CSV Export Helpers
+    // CSV / Excel Export Helpers with Audit Metadata
     // ==========================================
+
+    /**
+     * Write standard corporate header into CSV stream with UTF-8 BOM.
+     * Records who produced the report and when.
+     */
+    private function writeCsvHeader($out, string $reportTitle, ?string $periodDesc = null): void
+    {
+        // Add UTF-8 BOM so Microsoft Excel cleanly renders symbols and formatting
+        fwrite($out, "\xEF\xBB\xBF");
+
+        $user = Auth::user();
+        $userName = $user['full_name'] ?? ($user['username'] ?? 'Authorized Staff');
+        $userRole = strtoupper((string)Auth::role());
+        $timestamp = date('d-M-Y H:i:s') . ' CAT';
+
+        fputcsv($out, ['MSANTHA INVESTMENTS & GENERAL SUPPLIERS — POULTRY FARM MANAGEMENT']);
+        fputcsv($out, ['Report Title:', $reportTitle]);
+        fputcsv($out, ['Prepared By:', "{$userName} ({$userRole})"]);
+        fputcsv($out, ['Generated On:', $timestamp]);
+        if ($periodDesc) {
+            fputcsv($out, ['Reporting Scope:', $periodDesc]);
+        }
+        fputcsv($out, []); // Blank separator line
+    }
+
+    private function exportPerformanceCsv(array $report): Response
+    {
+        $out = fopen('php://temp', 'r+');
+        $this->writeCsvHeader($out, 'Executive Decision & Business Performance Report', $report['period_desc']);
+
+        // 1. FINANCIAL SUMMARY SECTION
+        fputcsv($out, ['--- 1. PROFIT & LOSS FINANCIAL PERFORMANCE ---']);
+        fputcsv($out, ['Gross Commercial Revenue Inflow (MWK)', (int)$report['financials']['gross_revenue']]);
+        fputcsv($out, ['Direct Operating Outflows (MWK)', (int)$report['financials']['operating_expenses']]);
+        fputcsv($out, ['Flock Mortality Birds Lost', (int)$report['financials']['mortality_birds_lost']]);
+        fputcsv($out, ['Flock Mortality Economic Loss (MWK)', (int)$report['financials']['mortality_loss_mwk']]);
+        fputcsv($out, ['Net Operating Profit / Surplus (MWK)', (int)$report['financials']['net_profit']]);
+        fputcsv($out, ['Net Operating Profit Margin %', $report['financials']['profit_margin_pct'] . '%']);
+        fputcsv($out, []);
+
+        // 2. PRODUCT LINE & BEST SELLERS
+        fputcsv($out, ['--- 2. PRODUCT PERFORMANCE & BEST SELLERS ---']);
+        fputcsv($out, ['Product Line', 'Orders / Batches', 'Units Sold', 'Unit Type', 'Average Price (MWK)', 'Total Revenue (MWK)', '% Share of Revenue', 'Performance Class']);
+        foreach ($report['all_products'] as $idx => $p) {
+            fputcsv($out, [
+                $p['label'],
+                $p['orders_count'],
+                $p['total_units'],
+                $p['unit_name'],
+                $p['avg_price'],
+                $p['total_revenue'],
+                $p['share_pct'] . '%',
+                $idx === 0 && $p['total_revenue'] > 0 ? 'Best Seller #1' : ($p['total_revenue'] > 0 ? 'Active Revenue' : 'Slow / Zero Movement'),
+            ]);
+        }
+        fputcsv($out, []);
+
+        // 3. HIGH CONSUMERS & TOP CUSTOMERS
+        fputcsv($out, ['--- 3. HIGH CONSUMERS & TOP 10 CUSTOMERS ---']);
+        fputcsv($out, ['Customer Name', 'Contact Phone', 'Location', 'POS Sales Orders', 'Incubation Batches', 'Total Contribution (MWK)', 'Outstanding Balance (MWK)']);
+        foreach ($report['top_customers'] as $c) {
+            fputcsv($out, [
+                $c['name'],
+                $c['phone'],
+                $c['location'] ?? '—',
+                $c['sales_orders'],
+                $c['inc_batches'],
+                $c['total_spend'],
+                $c['balance_due'],
+            ]);
+        }
+        fputcsv($out, []);
+
+        // 4. ACTIONABLE INSIGHTS
+        fputcsv($out, ['--- 4. MANAGEMENT DECISION-MAKING ACTION ITEMS ---']);
+        foreach ($report['insights'] as $ins) {
+            fputcsv($out, [$ins['title'], $ins['text']]);
+        }
+
+        rewind($out);
+        $csv = stream_get_contents($out);
+        fclose($out);
+
+        $filename = 'msantha_executive_performance_' . date('Ymd_His') . '.csv';
+        return new Response((string)$csv, 200, [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    private function exportPnlCsv(array $pnl, int $year): Response
+    {
+        $out = fopen('php://temp', 'r+');
+        $this->writeCsvHeader($out, "Monthly Profit & Loss Operating Statement", "Year {$year}");
+
+        fputcsv($out, ['Month', 'Business Line', 'Total Receipts (MWK)', 'Total Expenses (MWK)', 'Net Profit / Surplus (MWK)']);
+        foreach ($pnl['rows'] as $r) {
+            fputcsv($out, [
+                $r['month_key'],
+                $r['unit_name'],
+                $r['total_receipts'],
+                $r['total_expenses'],
+                $r['net_profit'],
+            ]);
+        }
+        fputcsv($out, []);
+        fputcsv($out, ['OVERALL TOTALS', 'All Business Units', $pnl['total_receipts'], $pnl['total_expenses'], $pnl['net_profit']]);
+        fputcsv($out, ['POULTRY OPERATIONS ONLY', 'Poultry Unit', $pnl['poultry_receipts'], $pnl['poultry_expenses'], $pnl['poultry_profit']]);
+
+        rewind($out);
+        $csv = stream_get_contents($out);
+        fclose($out);
+
+        return new Response((string)$csv, 200, [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="msantha_monthly_pnl_' . $year . '.csv"',
+        ]);
+    }
+
+    private function exportFeedEfficiencyCsv(array $feed, int $year): Response
+    {
+        $out = fopen('php://temp', 'r+');
+        $this->writeCsvHeader($out, "Feed Cost Efficiency per Bird & Egg Report", "Year {$year}");
+
+        fputcsv($out, ['Operational Metric', 'Recorded Value', 'Unit']);
+        fputcsv($out, ['Total Feed Purchases Cost', (int)$feed['total_feed_cost'], 'MWK']);
+        fputcsv($out, ['Total Birds Stocked / Intake', (int)$feed['total_birds_stocked'], 'Birds']);
+        fputcsv($out, ['Total Eggs Produced', (int)$feed['total_eggs_produced'], 'Eggs']);
+        fputcsv($out, ['Average Feed Cost Per Bird', (int)$feed['feed_cost_per_bird'], 'MWK / Bird']);
+        fputcsv($out, ['Average Feed Cost Per Egg', (int)$feed['feed_cost_per_egg'], 'MWK / Egg']);
+
+        rewind($out);
+        $csv = stream_get_contents($out);
+        fclose($out);
+
+        return new Response((string)$csv, 200, [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="msantha_feed_efficiency_' . $year . '.csv"',
+        ]);
+    }
 
     private function exportMortalityCsv(array $flocks): Response
     {
         $out = fopen('php://temp', 'r+');
+        $this->writeCsvHeader($out, 'Flock Mortality % Analysis Report');
+
         fputcsv($out, ['Batch Code', 'Breed', 'Start Date', 'Start Count', 'Total Deaths', 'Total Sold', 'Current Stock', 'Mortality Rate %', 'Status']);
         foreach ($flocks as $f) {
             fputcsv($out, [
@@ -282,13 +476,15 @@ class ReportController
 
         return new Response((string)$csv, 200, [
             'Content-Type' => 'text/csv; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="flock_mortality_report.csv"',
+            'Content-Disposition' => 'attachment; filename="msantha_flock_mortality_report.csv"',
         ]);
     }
 
     private function exportHatchCsv(array $data, string $groupBy): Response
     {
         $out = fopen('php://temp', 'r+');
+        $this->writeCsvHeader($out, 'Incubation Hatch Rate % Performance Report', 'Grouped by ' . ucwords($groupBy));
+
         fputcsv($out, [ucwords($groupBy), 'Total Batches', 'Eggs Incubated', 'Infertile', 'Hatched Chicks', 'Hatch %']);
         foreach ($data as $r) {
             fputcsv($out, [
@@ -306,13 +502,15 @@ class ReportController
 
         return new Response((string)$csv, 200, [
             'Content-Type' => 'text/csv; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="hatch_rate_by_' . $groupBy . '.csv"',
+            'Content-Disposition' => 'attachment; filename="msantha_hatch_rate_by_' . $groupBy . '.csv"',
         ]);
     }
 
     private function exportEggsCsv(array $data): Response
     {
         $out = fopen('php://temp', 'r+');
+        $this->writeCsvHeader($out, 'Egg Production & Tray Yield Report');
+
         fputcsv($out, ['Month', 'Breed', 'Eggs Collected', 'Broken', 'Consumed', 'Sold', 'Incubated', 'Tray Yield (30s)']);
         foreach ($data as $r) {
             fputcsv($out, [
@@ -332,13 +530,15 @@ class ReportController
 
         return new Response((string)$csv, 200, [
             'Content-Type' => 'text/csv; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="egg_production_report.csv"',
+            'Content-Disposition' => 'attachment; filename="msantha_egg_production_report.csv"',
         ]);
     }
 
     private function exportDebtorsCsv(array $debtors): Response
     {
         $out = fopen('php://temp', 'r+');
+        $this->writeCsvHeader($out, 'Aged Debtors & Outstanding Customer Receivables');
+
         fputcsv($out, ['Customer Name', 'Mobile Phone', '0-30 Days (MWK)', '31-60 Days (MWK)', '61-90 Days (MWK)', 'Over 90 Days (MWK)', 'Total Overdue (MWK)']);
         foreach ($debtors as $d) {
             fputcsv($out, [
@@ -357,13 +557,15 @@ class ReportController
 
         return new Response((string)$csv, 200, [
             'Content-Type' => 'text/csv; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="aged_debtors_report.csv"',
+            'Content-Disposition' => 'attachment; filename="msantha_aged_debtors_report.csv"',
         ]);
     }
 
     private function exportSalesByItemCsv(array $items): Response
     {
         $out = fopen('php://temp', 'r+');
+        $this->writeCsvHeader($out, 'Sales Revenue by Product Line Report');
+
         fputcsv($out, ['Product Line', 'Order Count', 'Total Quantity Sold', 'Revenue (MWK)']);
         foreach ($items as $i) {
             fputcsv($out, [
@@ -379,13 +581,15 @@ class ReportController
 
         return new Response((string)$csv, 200, [
             'Content-Type' => 'text/csv; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="sales_by_item_report.csv"',
+            'Content-Disposition' => 'attachment; filename="msantha_sales_by_item_report.csv"',
         ]);
     }
 
     private function exportAllocationCsv(array $data): Response
     {
         $out = fopen('php://temp', 'r+');
+        $this->writeCsvHeader($out, 'Incubation Statutory Allocation Income Report (25/15/30/20/10)');
+
         fputcsv($out, ['Month', 'Electricity (25%)', 'Water (15%)', 'Labour (30%)', 'Telephone (20%)', 'Profit (10%)', 'Total Allocated (MWK)']);
         foreach ($data['monthly_rows'] as $r) {
             fputcsv($out, [
@@ -404,7 +608,7 @@ class ReportController
 
         return new Response((string)$csv, 200, [
             'Content-Type' => 'text/csv; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="incubation_allocation_income.csv"',
+            'Content-Disposition' => 'attachment; filename="msantha_incubation_allocation_income.csv"',
         ]);
     }
 }

@@ -139,6 +139,89 @@
         .app-footer a:hover {
             color: #ffffff;
         }
+
+        @media print {
+            .app-sidebar,
+            .app-topbar,
+            header,
+            .navbar,
+            .app-footer,
+            .btn,
+            .btn-group,
+            form.d-flex,
+            form select,
+            .pagination,
+            .breadcrumb,
+            .alert-dismissible .btn-close,
+            .no-print,
+            #quick-actions,
+            .modal,
+            .offcanvas {
+                display: none !important;
+            }
+
+            body, html {
+                background: #ffffff !important;
+                color: #000000 !important;
+                font-size: 9.5pt !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+
+            .app-main-content, .content-body {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #ffffff !important;
+                min-height: auto !important;
+                width: 100% !important;
+            }
+
+            .card {
+                border: 1px solid #dee2e6 !important;
+                box-shadow: none !important;
+                break-inside: avoid !important;
+                margin-bottom: 15px !important;
+            }
+
+            .card-header {
+                background-color: #f8f9fa !important;
+                border-bottom: 1px solid #dee2e6 !important;
+                color: #000000 !important;
+                font-weight: bold !important;
+            }
+
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+            }
+
+            th, td {
+                border: 1px solid #cbd5e1 !important;
+                padding: 5px 8px !important;
+                color: #000000 !important;
+            }
+
+            th {
+                background-color: #f1f5f9 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                font-weight: bold !important;
+            }
+
+            .badge {
+                border: 1px solid #94a3b8 !important;
+                color: #0f172a !important;
+                background: transparent !important;
+            }
+
+            .report-print-header {
+                display: block !important;
+                margin-bottom: 15px !important;
+                padding-bottom: 10px !important;
+                border-bottom: 2px solid #14532d !important;
+            }
+        }
     </style>
 </head>
 

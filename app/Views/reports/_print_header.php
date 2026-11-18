@@ -1,4 +1,12 @@
 <?php declare(strict_types=1); ?>
+<style>
+@media screen {
+    .report-print-header { display: none !important; }
+}
+@media print {
+    .report-print-header { display: block !important; }
+}
+</style>
 <div class="report-print-header">
     <div class="d-flex justify-content-between align-items-center mb-2">
         <div class="d-flex align-items-center gap-2">

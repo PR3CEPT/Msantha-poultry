@@ -70,16 +70,17 @@
         </div>
         <p class="text-muted small mb-3">Produce customized management reports for any specific date, week, month, or custom period.</p>
 
-        <form method="GET" action="<?= url('/reports/sales-by-item') ?>" id="customReportForm" class="row g-2 align-items-end">
+        <form method="GET" action="<?= url('/reports/performance') ?>" id="customReportForm" class="row g-2 align-items-end">
             <div class="col-12 col-md-4">
                 <label class="form-label small fw-semibold text-dark mb-1">Select Report Type</label>
                 <select id="reportTypeSelect" class="form-select form-select-sm" onchange="updateReportAction(this.value)">
-                    <option value="/reports/sales-by-item" selected>Commercial Sales Revenue by Item</option>
-                    <option value="/reports/eggs">Egg Production & Yield Breakdown</option>
+                    <option value="/reports/performance" selected>⭐ Executive Decision &amp; Business Performance (Best Sellers, Losses, High Consumers)</option>
+                    <option value="/reports/sales-by-item">Commercial Sales Revenue by Item</option>
+                    <option value="/reports/eggs">Egg Production &amp; Yield Breakdown</option>
                     <option value="/reports/hatch">Incubation Hatch Rate % Performance</option>
                     <option value="/reports/mortality">Flock Mortality % Analysis</option>
                     <option value="/reports/aged-debtors">Aged Customer Debtors</option>
-                    <option value="/finance/pnl">Profit & Loss Operating Statement</option>
+                    <option value="/finance/pnl">Profit &amp; Loss Operating Statement</option>
                     <option value="/reports/feed-efficiency">Feed Cost Efficiency</option>
                     <option value="/reports/incubation-allocation">Statutory Incubation Allocations</option>
                 </select>
@@ -199,6 +200,39 @@
     <!-- Reports Directory Cards Grid -->
     <h5 class="fw-bold text-dark mb-3"><i class="bi bi-grid-fill me-2 text-primary"></i>Standard Management Reports</h5>
     <div class="row g-3">
+        <!-- Featured: Executive Decision & Business Performance -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 p-3.5 bg-white border-start border-4 border-success position-relative overflow-hidden">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="rounded-circle bg-success-subtle text-success p-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px;">
+                            <i class="bi bi-stars fs-4"></i>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h5 class="fw-bold text-dark mb-0">Executive Decision &amp; Business Performance</h5>
+                                <span class="badge bg-success text-white fw-bold">EXECUTIVE INTELLIGENCE</span>
+                            </div>
+                            <p class="text-muted small mb-0">
+                                Strategic business report identifying <strong>Best Sellers &amp; Slow-Moving Items</strong>, <strong>High Consumers &amp; Top Debtors</strong>, <strong>Gross Profits &amp; Direct Operating Costs</strong>, and <strong>Flock Mortality Financial Losses</strong> in MWK. Includes actionable management takeaways and authentic PDF/Excel exports with preparer audit metadata.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 flex-shrink-0 align-self-stretch align-self-md-auto">
+                        <a href="<?= url('/reports/performance') ?>" class="btn btn-success btn-sm px-3 fw-bold rounded-pill shadow-sm">
+                            <i class="bi bi-eye me-1"></i>View Full Report
+                        </a>
+                        <a href="<?= url('/reports/performance?format=pdf') ?>" target="_blank" class="btn btn-outline-primary btn-sm px-3 fw-bold rounded-pill">
+                            <i class="bi bi-printer-fill me-1"></i>Official PDF
+                        </a>
+                        <a href="<?= url('/reports/performance?format=csv') ?>" class="btn btn-outline-success btn-sm px-3 fw-bold rounded-pill">
+                            <i class="bi bi-file-earmark-spreadsheet me-1"></i>Excel (CSV)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 1. Monthly P&L -->
         <div class="col-12 col-md-6 col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white d-flex flex-column justify-content-between">

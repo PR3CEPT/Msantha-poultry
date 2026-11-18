@@ -1,6 +1,8 @@
 <?php declare(strict_types=1); ?>
 
 <div class="p-3 p-md-4">
+    <?php include __DIR__ . '/_print_header.php'; ?>
+
     <!-- Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
@@ -14,8 +16,11 @@
             <p class="text-muted small mb-0 mt-1">Calculates feed expense per bird stocked and production cost per harvested egg.</p>
         </div>
         <div class="d-flex gap-2">
-            <button onclick="window.print()" class="btn btn-outline-dark btn-sm">
-                <i class="bi bi-printer me-1"></i>Print Report
+            <a href="<?= url('/reports/feed-efficiency?format=csv&year=' . $year) ?>" class="btn btn-outline-success btn-sm fw-bold">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i>Export to Excel (CSV)
+            </a>
+            <button onclick="window.print()" class="btn btn-primary btn-sm fw-bold shadow-sm">
+                <i class="bi bi-printer-fill me-1"></i>Save as PDF / Print
             </button>
         </div>
     </div>

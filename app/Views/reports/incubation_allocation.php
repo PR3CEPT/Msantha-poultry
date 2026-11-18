@@ -1,6 +1,8 @@
 <?php declare(strict_types=1); ?>
 
 <div class="p-3 p-md-4">
+    <?php include __DIR__ . '/_print_header.php'; ?>
+
     <!-- Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
@@ -14,11 +16,11 @@
             <p class="text-muted small mb-0 mt-1">Automatic allocation of incubation fee receipts: Electricity (25%), Water (15%), Labour (30%), Telephone (20%), and Profit (10%).</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="<?= url('/reports/incubation-allocation?format=csv&year=' . $year) ?>" class="btn btn-outline-success btn-sm">
-                <i class="bi bi-download me-1"></i>Export CSV
+            <a href="<?= url('/reports/incubation-allocation?format=csv&year=' . $year) ?>" class="btn btn-outline-success btn-sm fw-bold">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i>Export to Excel (CSV)
             </a>
-            <button onclick="window.print()" class="btn btn-outline-dark btn-sm">
-                <i class="bi bi-printer me-1"></i>Print Report
+            <button onclick="window.print()" class="btn btn-primary btn-sm fw-bold shadow-sm">
+                <i class="bi bi-printer-fill me-1"></i>Save as PDF / Print
             </button>
         </div>
     </div>

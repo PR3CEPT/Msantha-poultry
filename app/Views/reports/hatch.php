@@ -16,11 +16,11 @@
             <p class="text-muted small mb-0 mt-1">Hatchability ratios (chicks hatched ÷ eggs incubated) analyzed by breed, customer, and intake month.</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="<?= url('/reports/hatch?format=csv&group_by=' . urlencode($groupBy) . '&from=' . urlencode($from) . '&to=' . urlencode($to)) ?>" class="btn btn-outline-success btn-sm">
-                <i class="bi bi-download me-1"></i>Export CSV
+            <a href="<?= url('/reports/hatch?format=csv&group_by=' . urlencode($groupBy) . '&from=' . urlencode($from) . '&to=' . urlencode($to)) ?>" class="btn btn-outline-success btn-sm fw-bold">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i>Export to Excel (CSV)
             </a>
-            <button onclick="window.print()" class="btn btn-outline-dark btn-sm">
-                <i class="bi bi-printer me-1"></i>Print Report
+            <button onclick="window.print()" class="btn btn-primary btn-sm fw-bold shadow-sm">
+                <i class="bi bi-printer-fill me-1"></i>Save as PDF / Print
             </button>
         </div>
     </div>

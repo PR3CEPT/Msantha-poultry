@@ -506,5 +506,317 @@ class ReportService
             'totals' => $totals,
         ];
     }
+
+    /**
+     * 9. Executive Business Intelligence & Performance Report:
+     * - Best selling products (revenue & volume)
+     * - Worst selling / slow-moving products
+     * - High consumers (top customer accounts)
+     * - Profits & losses breakdown
+     * - Flock mortality financial loss (in MWK)
+     * - Feed efficiency & high consumers
+     * - Management decision-making action items
+     */
+    public function getExecutivePerformanceReport(?string $from = null, ?string $to = null, ?int $year = null): array
+    {
+        // 1. Establish date bounds
+        if ($year !== null && empty($from) && empty($to)) {
+            $from = "{$year}-01-01";
+            $to = "{$year}-12-31";
+        }
+        $dateFilterDesc = ($from && $to) ? "{$from} to {$to}" : ($year ? "Year {$year}" : "All Time to Date");
+
+        // 2. Sales by Product Line (Best Sellers vs Worst Sellers)
+        $saleWhere = " WHERE 1=1";
+        $saleParams = [];
+        if (!empty($from)) {
+            $saleWhere .= " AND s.sale_date >= ?";
+            $saleParams[] = $from;
+        }
+        if (!empty($to)) {
+            $saleWhere .= " AND s.sale_date <= ?";
+            $saleParams[] = $to;
+        }
+
+        // Query sale_items
+        $productQuery = "
+            SELECT 
+                si.item_type,
+                COUNT(DISTINCT s.id) AS orders_count,
+                COALESCE(SUM(si.quantity), 0) AS total_units,
+                COALESCE(SUM(si.amount), 0) AS total_revenue
+            FROM sale_items si
+            JOIN sales s ON s.id = si.sale_id
+            {$saleWhere}
+            GROUP BY si.item_type
+            ORDER BY total_revenue DESC
+        ";
+        $pStmt = $this->pdo->prepare($productQuery);
+        $pStmt->execute($saleParams);
+        $existingSales = $pStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Also incorporate Incubation Service as a primary product/revenue line
+        $incWhere = " WHERE 1=1";
+        $incParams = [];
+        if (!empty($from)) {
+            $incWhere .= " AND j.date_received >= ?";
+            $incParams[] = $from;
+        }
+        if (!empty($to)) {
+            $incWhere .= " AND j.date_received <= ?";
+            $incParams[] = $to;
+        }
+        $incStmt = $this->pdo->prepare("
+            SELECT 
+                COUNT(*) AS batches_count,
+                COALESCE(SUM(j.eggs_incubated), 0) AS total_eggs,
+                COALESCE(SUM(j.cost), 0) AS total_invoiced,
+                COALESCE(SUM(j.amount_paid), 0) AS total_paid
+            FROM incubation_jobs j
+            {$incWhere}
+        ");
+        $incStmt->execute($incParams);
+        $incSummary = $incStmt->fetch(PDO::FETCH_ASSOC) ?: ['batches_count' => 0, 'total_eggs' => 0, 'total_invoiced' => 0, 'total_paid' => 0];
+
+        // All standard poultry product lines catalog
+        $allProductLines = [
+            'table_eggs' => 'Table / Fresh Eating Eggs',
+            'fertilised_eggs' => 'Fertilised Hatching Eggs',
+            'chicks' => 'Day-Old & Started Chicks',
+            'live_birds' => 'Live Mature Birds (Broilers/Layers)',
+            'incubation_services' => 'Custom Incubation Service',
+            'manure' => 'Organic Poultry Manure',
+            'other' => 'Feed & Vet Equipment',
+        ];
+
+        $productPerformance = [];
+        $totalGrossRevenue = (int) $incSummary['total_invoiced'];
+
+        // Add incubation services
+        $productPerformance['incubation_services'] = [
+            'key' => 'incubation_services',
+            'label' => 'Custom Incubation Service',
+            'orders_count' => (int) $incSummary['batches_count'],
+            'total_units' => (int) $incSummary['total_eggs'],
+            'unit_name' => 'eggs',
+            'total_revenue' => (int) $incSummary['total_invoiced'],
+            'avg_price' => $incSummary['total_eggs'] > 0 ? (int) round($incSummary['total_invoiced'] / $incSummary['total_eggs']) : 120,
+        ];
+
+        foreach ($existingSales as $es) {
+            $k = (string) $es['item_type'];
+            $rev = (int) $es['total_revenue'];
+            $qty = (int) $es['total_units'];
+            $totalGrossRevenue += $rev;
+
+            $productPerformance[$k] = [
+                'key' => $k,
+                'label' => $allProductLines[$k] ?? ucwords(str_replace('_', ' ', $k)),
+                'orders_count' => (int) $es['orders_count'],
+                'total_units' => $qty,
+                'unit_name' => in_array($k, ['table_eggs', 'fertilised_eggs']) ? 'trays/eggs' : (in_array($k, ['chicks', 'live_birds']) ? 'birds' : 'units'),
+                'total_revenue' => $rev,
+                'avg_price' => $qty > 0 ? (int) round($rev / $qty) : 0,
+            ];
+        }
+
+        // Fill remaining zero-movement lines
+        foreach ($allProductLines as $k => $label) {
+            if (!isset($productPerformance[$k])) {
+                $productPerformance[$k] = [
+                    'key' => $k,
+                    'label' => $label,
+                    'orders_count' => 0,
+                    'total_units' => 0,
+                    'unit_name' => 'units',
+                    'total_revenue' => 0,
+                    'avg_price' => 0,
+                ];
+            }
+        }
+
+        // Calculate % share of total revenue
+        foreach ($productPerformance as &$p) {
+            $p['share_pct'] = $totalGrossRevenue > 0 ? round(($p['total_revenue'] / $totalGrossRevenue) * 100, 1) : 0.0;
+        }
+        unset($p);
+
+        // Sort descending by revenue
+        uasort($productPerformance, fn($a, $b) => $b['total_revenue'] <=> $a['total_revenue']);
+        $productPerformanceList = array_values($productPerformance);
+
+        $bestSellers = array_values(array_filter($productPerformanceList, fn($p) => $p['total_revenue'] > 0));
+        $worstSellers = array_values(array_filter($productPerformanceList, fn($p) => $p['total_revenue'] === 0 || $p['orders_count'] <= 1));
+
+        // 3. High Consumers / Top 10 Customers (Spend across POS + Incubation)
+        $topCustomerQuery = "
+            SELECT 
+                c.id, c.name, c.phone, c.location,
+                COALESCE(s.tot_sales, 0) AS sales_spend,
+                COALESCE(s.sales_orders, 0) AS sales_orders,
+                COALESCE(j.tot_inc, 0) AS inc_spend,
+                COALESCE(j.inc_batches, 0) AS inc_batches,
+                COALESCE(j.tot_paid, 0) AS inc_paid,
+                (COALESCE(s.tot_sales, 0) + COALESCE(j.tot_inc, 0)) AS total_spend,
+                GREATEST(0, CAST(COALESCE(j.tot_inc, 0) AS SIGNED) - CAST(COALESCE(j.tot_paid, 0) AS SIGNED)) AS balance_due
+            FROM customers c
+            LEFT JOIN (
+                SELECT customer_id, SUM(total) AS tot_sales, COUNT(*) AS sales_orders 
+                FROM sales 
+                " . (!empty($from) || !empty($to) ? "WHERE 1=1 " . (!empty($from) ? "AND sale_date >= '{$from}' " : "") . (!empty($to) ? "AND sale_date <= '{$to}' " : "") : "") . "
+                GROUP BY customer_id
+            ) s ON s.customer_id = c.id
+            LEFT JOIN (
+                SELECT customer_id, SUM(cost) AS tot_inc, SUM(amount_paid) AS tot_paid, COUNT(*) AS inc_batches 
+                FROM incubation_jobs 
+                " . (!empty($from) || !empty($to) ? "WHERE 1=1 " . (!empty($from) ? "AND date_received >= '{$from}' " : "") . (!empty($to) ? "AND date_received <= '{$to}' " : "") : "") . "
+                GROUP BY customer_id
+            ) j ON j.customer_id = c.id
+            WHERE c.is_internal = 0 AND LOWER(c.name) NOT LIKE '%msantha%'
+            ORDER BY total_spend DESC
+            LIMIT 10
+        ";
+        $topCustomers = $this->pdo->query($topCustomerQuery)->fetchAll(PDO::FETCH_ASSOC);
+
+        // 4. Profits & Losses Analysis
+        // A. Inflows: Cash entries (Poultry) + Incubation fees
+        $cashWhere = " WHERE bu.code = 'POULTRY' AND ce.entry_kind = 'transaction'";
+        $cashParams = [];
+        if (!empty($from)) {
+            $cashWhere .= " AND ce.entry_date >= ?";
+            $cashParams[] = $from;
+        }
+        if (!empty($to)) {
+            $cashWhere .= " AND ce.entry_date <= ?";
+            $cashParams[] = $to;
+        }
+        $cashStmt = $this->pdo->prepare("
+            SELECT 
+                COALESCE(SUM(ce.receipt), 0) AS total_cash_receipts,
+                COALESCE(SUM(ce.expenditure), 0) AS total_cash_expenses
+            FROM cash_entries ce
+            JOIN business_units bu ON bu.id = ce.business_unit_id
+            {$cashWhere}
+        ");
+        $cashStmt->execute($cashParams);
+        $cashTotals = $cashStmt->fetch(PDO::FETCH_ASSOC) ?: ['total_cash_receipts' => 0, 'total_cash_expenses' => 0];
+
+        $cashReceipts = (int) $cashTotals['total_cash_receipts'];
+        $cashExpenses = (int) $cashTotals['total_cash_expenses'];
+
+        // Feed purchases total in period
+        $feedWhere = " WHERE 1=1";
+        $feedParams = [];
+        if (!empty($from)) {
+            $feedWhere .= " AND purchase_date >= ?";
+            $feedParams[] = $from;
+        }
+        if (!empty($to)) {
+            $feedWhere .= " AND purchase_date <= ?";
+            $feedParams[] = $to;
+        }
+        $feedStmt = $this->pdo->prepare("SELECT COALESCE(SUM(cost), 0) FROM feed_purchases {$feedWhere}");
+        $feedStmt->execute($feedParams);
+        $feedCost = (int) $feedStmt->fetchColumn();
+
+        // Total gross revenue: use cash receipts + incubation total paid
+        $grossInflow = max($totalGrossRevenue, $cashReceipts);
+
+        // B. Flock Mortality Loss (Calculation of Financial Loss in MWK!)
+        // Standard replacement value per bird in Malawi: MWK 4,500
+        $deathWhere = " WHERE event_type = 'death'";
+        $deathParams = [];
+        if (!empty($from)) {
+            $deathWhere .= " AND event_date >= ?";
+            $deathParams[] = $from;
+        }
+        if (!empty($to)) {
+            $deathWhere .= " AND event_date <= ?";
+            $deathParams[] = $to;
+        }
+        $deathStmt = $this->pdo->prepare("
+            SELECT 
+                COUNT(*) AS death_events,
+                COALESCE(SUM(quantity), 0) AS birds_lost,
+                COALESCE(SUM(amount), 0) AS recorded_loss_amount
+            FROM flock_events
+            {$deathWhere}
+        ");
+        $deathStmt->execute($deathParams);
+        $deathRow = $deathStmt->fetch(PDO::FETCH_ASSOC) ?: ['death_events' => 0, 'birds_lost' => 0, 'recorded_loss_amount' => 0];
+
+        $birdsLost = (int) $deathRow['birds_lost'];
+        $mortalityLossMwk = (int) $deathRow['recorded_loss_amount'];
+        if ($mortalityLossMwk <= 0 && $birdsLost > 0) {
+            $mortalityLossMwk = $birdsLost * 4500; // estimated standard value MWK 4,500 / bird
+        }
+
+        // Net Operating Profit
+        $totalOperatingCosts = $cashExpenses > 0 ? $cashExpenses : $feedCost;
+        $netProfit = $grossInflow - $totalOperatingCosts;
+        $profitMarginPct = $grossInflow > 0 ? round(($netProfit / $grossInflow) * 100, 1) : 0.0;
+
+        // 5. High Mortality Flocks
+        $highConsumersFlocks = $this->pdo->query("
+            SELECT f.id, f.batch_code, b.name as breed_name, f.start_count,
+                   COALESCE(SUM(fe.quantity), 0) as total_deaths
+            FROM flocks f
+            JOIN breeds b ON b.id = f.breed_id
+            LEFT JOIN flock_events fe ON fe.flock_id = f.id AND fe.event_type = 'death'
+            GROUP BY f.id
+            ORDER BY total_deaths DESC
+            LIMIT 5
+        ")->fetchAll(PDO::FETCH_ASSOC);
+
+        // 6. Actionable Decision Making Insights
+        $insights = [];
+        if (!empty($bestSellers)) {
+            $topP = $bestSellers[0];
+            $insights[] = [
+                'type' => 'success',
+                'title' => 'Core Revenue Engine',
+                'text' => "{$topP['label']} is your #1 revenue generator, accounting for MWK " . number_format($topP['total_revenue']) . " ({$topP['share_pct']}% of total revenue). Maintain strong capacity and inventory.",
+            ];
+        }
+
+        if ($birdsLost > 0) {
+            $insights[] = [
+                'type' => 'danger',
+                'title' => 'Mortality Loss Impact',
+                'text' => "A total of " . number_format($birdsLost) . " birds were lost in this period, representing an economic loss of MWK " . number_format($mortalityLossMwk) . ". Immediate biosecurity and vaccination reviews are advised.",
+            ];
+        }
+
+        if (!empty($worstSellers)) {
+            $slowLabels = implode(', ', array_slice(array_column($worstSellers, 'label'), 0, 3));
+            $insights[] = [
+                'type' => 'warning',
+                'title' => 'Slow-Moving Lines',
+                'text' => "{$slowLabels} had minimal or zero activity. Review pricing, package bundling, or customer awareness campaigns.",
+            ];
+        }
+
+        return [
+            'period_desc' => $dateFilterDesc,
+            'from' => $from,
+            'to' => $to,
+            'year' => $year,
+            'best_sellers' => $bestSellers,
+            'worst_sellers' => $worstSellers,
+            'all_products' => $productPerformanceList,
+            'top_customers' => $topCustomers,
+            'financials' => [
+                'gross_revenue' => $grossInflow,
+                'operating_expenses' => $totalOperatingCosts,
+                'feed_cost' => $feedCost,
+                'mortality_birds_lost' => $birdsLost,
+                'mortality_loss_mwk' => $mortalityLossMwk,
+                'net_profit' => $netProfit,
+                'profit_margin_pct' => $profitMarginPct,
+            ],
+            'high_consumers_flocks' => $highConsumersFlocks,
+            'insights' => $insights,
+        ];
+    }
 }
 
