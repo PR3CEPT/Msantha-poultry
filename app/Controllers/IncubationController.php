@@ -172,8 +172,8 @@ class IncubationController
         }
 
         // Owner/Msantha internal jobs do not require payment
-        $isInternal = (int)($job['customer_is_internal'] ?? 0) === 1 || 
-                      str_contains(strtolower((string)($job['customer_name'] ?? '')), 'msantha');
+        $isInternal = (int) ($job['customer_is_internal'] ?? 0) === 1 ||
+            str_contains(strtolower((string) ($job['customer_name'] ?? '')), 'msantha');
         if ($isInternal) {
             $job['balance'] = 0;
             $job['is_internal_owner'] = true;
@@ -203,7 +203,7 @@ class IncubationController
 
         $allocationsByPayment = [];
         foreach ($rawAllocs as $ra) {
-            $allocationsByPayment[(int)$ra['payment_id']][] = $ra;
+            $allocationsByPayment[(int) $ra['payment_id']][] = $ra;
         }
 
         $flashSuccess = $_SESSION['flash_success'] ?? null;
@@ -381,7 +381,7 @@ class IncubationController
         }
 
         // Owner internal jobs do not require payment
-        if ((int)($job['customer_is_internal'] ?? 0) === 1 || str_contains(strtolower((string)($job['customer_name'] ?? '')), 'msantha')) {
+        if ((int) ($job['customer_is_internal'] ?? 0) === 1 || str_contains(strtolower((string) ($job['customer_name'] ?? '')), 'msantha')) {
             $job['balance'] = 0;
             $job['is_internal_owner'] = true;
         }
@@ -437,7 +437,7 @@ class IncubationController
         $collectorNotes = trim((string) $request->input('collector_notes', ''));
 
         // Format remarks to retain previous remarks and append collection details
-        $prevRemarks = trim((string)($job['remarks'] ?? ''));
+        $prevRemarks = trim((string) ($job['remarks'] ?? ''));
         $collectionStamp = "[Collected: " . date('d-M-Y', strtotime($dateCollected)) . " | {$chicksCollected} chicks" . ($collectorNotes !== '' ? " | Notes: {$collectorNotes}" : "") . "]";
         $newRemarks = $prevRemarks !== '' ? "{$prevRemarks} | {$collectionStamp}" : $collectionStamp;
 
@@ -545,9 +545,9 @@ class IncubationController
         $remarks = trim((string) $request->input('remarks', $oldJob['remarks'] ?? ''));
 
         // Candling / hatch results if completed or updated
-        $infertile = $request->input('infertile') !== '' && $request->input('infertile') !== null ? (int) $request->input('infertile') : ($oldJob['infertile'] !== null ? (int)$oldJob['infertile'] : null);
-        $fertile = $request->input('fertile') !== '' && $request->input('fertile') !== null ? (int) $request->input('fertile') : ($oldJob['fertile'] !== null ? (int)$oldJob['fertile'] : null);
-        $hatched = $request->input('hatched') !== '' && $request->input('hatched') !== null ? (int) $request->input('hatched') : ($oldJob['hatched'] !== null ? (int)$oldJob['hatched'] : null);
+        $infertile = $request->input('infertile') !== '' && $request->input('infertile') !== null ? (int) $request->input('infertile') : ($oldJob['infertile'] !== null ? (int) $oldJob['infertile'] : null);
+        $fertile = $request->input('fertile') !== '' && $request->input('fertile') !== null ? (int) $request->input('fertile') : ($oldJob['fertile'] !== null ? (int) $oldJob['fertile'] : null);
+        $hatched = $request->input('hatched') !== '' && $request->input('hatched') !== null ? (int) $request->input('hatched') : ($oldJob['hatched'] !== null ? (int) $oldJob['hatched'] : null);
         $dateHatched = trim((string) $request->input('date_hatched', '')) ?: ($oldJob['date_hatched'] ?? null);
 
         // Date calculations or manual overrides
@@ -568,7 +568,7 @@ class IncubationController
 
         // Batch code: if customer changed or batch_code is empty, generate new sequence
         $batchCode = $oldJob['batch_code'];
-        if (empty($batchCode) || (int)$oldJob['customer_id'] !== $customerId) {
+        if (empty($batchCode) || (int) $oldJob['customer_id'] !== $customerId) {
             $batchCode = IncubationService::generateBatchCode($customerId, $pdo);
         }
 
