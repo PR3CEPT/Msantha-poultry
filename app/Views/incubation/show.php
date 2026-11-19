@@ -37,20 +37,20 @@ $isOwnerBatch = !empty($job['customer_is_internal']) || stripos((string)($job['c
         </div>
         <div class="d-flex flex-wrap gap-2 align-items-center">
             <?php if (\App\Core\Auth::can('incubation', 'edit')): ?>
-                <a href="<?= url("/incubation-jobs/{$job['id']}/edit") ?>" class="btn btn-outline-primary">
+                <a href="<?= url("/incubation-jobs/{$job['id']}/edit") ?>" class="btn btn-outline-primary btn-sm rounded-pill px-3">
                     <i class="bi bi-pencil-square me-1"></i>Edit Batch
                 </a>
             <?php endif; ?>
-            <a href="<?= url("/incubation-jobs/{$job['id']}/receipt") ?>" target="_blank" class="btn btn-outline-dark">
+            <a href="<?= url("/incubation-jobs/{$job['id']}/receipt") ?>" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill px-3">
                 <i class="bi bi-receipt me-1"></i>Print Receipt
             </a>
             <?php if (!empty($job['hatched']) && (int)$job['hatched'] > 0): ?>
-                <a href="<?= url("/incubation-jobs/{$job['id']}/certificate") ?>" target="_blank" class="btn btn-outline-success">
+                <a href="<?= url("/incubation-jobs/{$job['id']}/certificate") ?>" target="_blank" class="btn btn-outline-success btn-sm rounded-pill px-3">
                     <i class="bi bi-award me-1"></i>Hatch Certificate
                 </a>
             <?php endif; ?>
             <?php if (\App\Core\Auth::hasRole(['owner', 'manager'])): ?>
-                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteBatchModal">
+                <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#deleteBatchModal">
                     <i class="bi bi-trash3 me-1"></i>Delete
                 </button>
             <?php endif; ?>
@@ -66,7 +66,7 @@ $isOwnerBatch = !empty($job['customer_is_internal']) || stripos((string)($job['c
                         <input type="hidden" name="purpose_id" value="<?= $job['id'] ?>">
                         <input type="hidden" name="customer_id" value="<?= $job['customer_id'] ?>">
                         <input type="hidden" name="amount" value="<?= (int)$job['balance'] ?>">
-                        <button type="submit" class="btn btn-primary fw-bold">
+                        <button type="submit" class="btn btn-primary btn-sm fw-bold rounded-pill px-3 shadow-sm">
                             <i class="bi bi-credit-card me-1"></i>Pay Online
                         </button>
                     </form>
@@ -77,13 +77,13 @@ $isOwnerBatch = !empty($job['customer_is_internal']) || stripos((string)($job['c
                             <input type="hidden" name="purpose_id" value="<?= $job['id'] ?>">
                             <input type="hidden" name="customer_id" value="<?= $job['customer_id'] ?>">
                             <input type="hidden" name="amount" value="<?= (int)$job['balance'] ?>">
-                            <button type="submit" class="btn btn-outline-info">
+                            <button type="submit" class="btn btn-outline-info btn-sm rounded-pill px-3">
                                 <i class="bi bi-chat-text me-1"></i>Send Pay Link SMS
                             </button>
                         </form>
                     <?php endif; ?>
                 <?php endif; ?>
-                <button type="button" class="btn btn-success fw-bold" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                <button type="button" class="btn btn-success btn-sm fw-bold rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#paymentModal">
                     <i class="bi bi-cash-stack me-1"></i>Add Payment
                 </button>
             <?php endif; ?>
@@ -215,13 +215,13 @@ $isOwnerBatch = !empty($job['customer_is_internal']) || stripos((string)($job['c
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100 fw-bold">
+                        <button type="submit" class="btn btn-primary w-100 fw-bold rounded-pill shadow-sm">
                             <i class="bi bi-check2-circle me-1"></i>Save Hatch Results
                         </button>
                     </form>
 
                     <?php if ($job['status'] === 'collected'): ?>
-                        <div class="alert alert-dark d-flex align-items-center py-2 px-3 mt-3 mb-0 small rounded-2">
+                        <div class="alert alert-dark d-flex align-items-center py-2 px-3 mt-3 mb-0 small rounded-3">
                             <i class="bi bi-box-seam text-warning fs-5 me-2"></i>
                             <div>
                                 <span class="fw-bold d-block text-white">Chicks Collected</span>
@@ -230,7 +230,7 @@ $isOwnerBatch = !empty($job['customer_is_internal']) || stripos((string)($job['c
                         </div>
                     <?php elseif (!empty($job['hatched']) && (int)$job['hatched'] > 0): ?>
                         <div class="mt-3 pt-3 border-top">
-                            <button type="button" class="btn btn-warning w-100 fw-bold shadow-sm text-dark" data-bs-toggle="modal" data-bs-target="#collectChicksModal">
+                            <button type="button" class="btn btn-warning w-100 fw-bold shadow-sm text-dark rounded-pill" data-bs-toggle="modal" data-bs-target="#collectChicksModal">
                                 <i class="bi bi-box-seam me-1"></i>Notify System: Chicks Collected
                             </button>
                             <small class="text-muted d-block text-center mt-1">Record handover of live chicks to customer</small>
@@ -242,11 +242,11 @@ $isOwnerBatch = !empty($job['customer_is_internal']) || stripos((string)($job['c
 
         <!-- Payments & 25/15/30/20/10 Allocations Section -->
         <div class="col-12 col-lg-7">
-            <div class="card border-0 shadow-sm rounded-3 h-100 bg-white">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white overflow-hidden">
                 <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold mb-0 text-dark fs-6"><i class="bi bi-wallet2 text-success me-2"></i>Payments & Allocations (25/15/30/20/10)</h5>
-                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#paymentModal">
-                        <i class="bi bi-plus-lg me-1"></i>Add
+                    <h5 class="fw-bold mb-0 text-dark fs-6"><i class="bi bi-wallet2 text-success me-2"></i>Payments &amp; Allocations (25/15/30/20/10)</h5>
+                    <button type="button" class="btn btn-sm btn-success rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                        <i class="bi bi-plus-lg me-1"></i>Add Payment
                     </button>
                 </div>
                 <div class="card-body p-0">

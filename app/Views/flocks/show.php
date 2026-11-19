@@ -26,18 +26,18 @@
         </div>
         <div class="d-flex flex-wrap gap-2">
             <?php if (\App\Core\Auth::can('flocks', 'edit')): ?>
-                <a href="<?= url("/flocks/{$flock['flock_id']}/edit") ?>" class="btn btn-outline-secondary fw-semibold">
-                    <i class="bi bi-pencil me-1"></i>Edit Batch Details
+                <a href="<?= url("/flocks/{$flock['flock_id']}/edit") ?>" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold">
+                    <i class="bi bi-pencil me-1"></i>Edit Batch
                 </a>
             <?php endif; ?>
-            <a href="<?= url("/flocks/quick-entry?flock_id={$flock['flock_id']}") ?>" class="btn btn-primary fw-bold">
+            <a href="<?= url("/flocks/quick-entry?flock_id={$flock['flock_id']}") ?>" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold shadow-sm">
                 <i class="bi bi-pencil-square me-1"></i>Quick Daily Entry
             </a>
-            <a href="<?= url("/flocks/price-ladder?breed_id={$flock['breed_id']}") ?>" class="btn btn-outline-secondary">
+            <a href="<?= url("/flocks/price-ladder?breed_id={$flock['breed_id']}") ?>" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
                 <i class="bi bi-ladder me-1"></i>Price Ladder
             </a>
             <?php if ((int)$flock['current_stock'] > 0): ?>
-                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#closeFlockModal">
+                <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#closeFlockModal">
                     <i class="bi bi-x-circle me-1"></i>Close Batch
                 </button>
             <?php endif; ?>
@@ -71,7 +71,7 @@
             <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-4 border-info">
                 <span class="text-muted small fw-semibold text-uppercase">Computed Age</span>
                 <div class="fs-3 fw-bold text-info mt-1 font-monospace"><?= $age['weeks'] ?> <small class="fs-6 text-muted font-sans-serif">Weeks</small></div>
-                <small class="text-muted font-monospace"><?= $age['days'] ?> Days &middot; <?= $age['months'] ?> Mths</small>
+                <small class="text-muted font-monospace"><strong class="text-dark"><?= $age['days'] ?></strong> Days &bull; <strong class="text-primary"><?= $age['months'] ?></strong> Months</small>
             </div>
         </div>
         <div class="col-6 col-md">

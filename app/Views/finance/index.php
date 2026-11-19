@@ -70,7 +70,7 @@
             <?php if ($activeUnit): ?>
                 <a href="<?= url('/finance/export-csv?business_unit_id=' . $activeUnit['id'] . (!empty($yearMonth) ? '&month=' . urlencode($yearMonth) : '')) ?>"
                     class="btn btn-outline-success btn-sm rounded-pill px-3 fw-semibold">
-                    <i class="bi bi-download me-1"></i>Export CSV
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i>Export to Excel (CSV)
                 </a>
             <?php endif; ?>
             <?php if (\App\Core\Auth::can('finance', 'create')): ?>

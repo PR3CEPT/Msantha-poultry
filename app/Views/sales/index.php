@@ -12,7 +12,7 @@
         </div>
         <div class="d-flex gap-2">
             <?php if (\App\Core\Auth::can('sales', 'create')): ?>
-            <a href="<?= url('/sales/create') ?>" class="btn btn-success fw-bold">
+            <a href="<?= url('/sales/create') ?>" class="btn btn-success btn-sm fw-bold rounded-pill px-3 shadow-sm">
                 <i class="bi bi-cart-plus me-1"></i>Record New Sale
             </a>
             <?php endif; ?>

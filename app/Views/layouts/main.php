@@ -126,18 +126,49 @@
         }
 
         .app-footer {
-            background-color: #0b2914;
-            color: #ffffff;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: #ffffff;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
         }
 
         .app-footer a {
-            color: rgba(255, 255, 255, 0.65);
+            color: #475569;
             transition: color 0.15s ease;
         }
 
         .app-footer a:hover {
-            color: #ffffff;
+            color: #14532d;
+        }
+
+        /* Consistent Page Elements & Containers */
+        .page-header-title {
+            letter-spacing: -0.3px;
+        }
+        .table > :not(caption) > * > * {
+            padding: 0.65rem 0.75rem;
+        }
+        .table thead th {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 700;
+            color: #475569;
+            background-color: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
+        }
+        .card {
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .card-header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .btn-action-group {
+            display: inline-flex;
+            gap: 0.35rem;
+            align-items: center;
         }
 
         @media print {
@@ -597,76 +628,17 @@
             </div>
 
             <!-- Global MIGS Professional Footer Across All System Pages -->
-            <footer class="app-footer pt-5 pb-4 mt-auto">
+            <footer class="app-footer py-3 mt-auto bg-white border-top">
                 <div class="container-fluid px-3 px-md-4">
-                    <div class="row g-4 mb-4">
-                        <div class="col-12 col-md-4">
-                            <div class="d-flex align-items-center gap-2 mb-3">
-                                <img src="<?= asset('assets/img/logo.png') ?>" alt="MIGS Logo"
-                                    style="height: 44px; width: auto; filter: brightness(1.2);">
-                                <div>
-                                    <h6 class="fw-bold text-white mb-0">Msantha Investments</h6>
-                                    <small class="text-white-50">And General Suppliers (MIGS)</small>
-                                </div>
-                            </div>
-                            <p class="text-white-50 small mb-3">
-                                Established in 2006. Dedicated to quality livestock breeding, commercial poultry egg
-                                incubation, veterinary products, animal ear tagging, and farmer training across Malawi.
-                            </p>
-                            <p class="text-warning small fw-bold mb-0">
-                                "WE ARE BEST AT WHAT WE DO, TRY US AND YOU WON'T REGRET"
-                            </p>
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 small text-muted">
+                        <div class="d-flex align-items-center gap-2">
+                            <img src="<?= asset('assets/img/logo.png') ?>" alt="MIGS" style="height: 22px; width: auto;">
+                            <span>&copy; <?= date('Y') ?> <strong>Msantha Investments &amp; General Suppliers</strong> &bull; Liwonde Station, Malawi</span>
                         </div>
-                        <div class="col-6 col-md-2">
-                            <h6 class="fw-bold text-white mb-3 text-uppercase small">Farm Operations</h6>
-                            <ul class="list-unstyled d-flex flex-column gap-2 small text-white-50">
-                                <li><a href="<?= url('/flocks') ?>" class="text-decoration-none">Flock Dynamics</a></li>
-                                <li><a href="<?= url('/eggs') ?>" class="text-decoration-none">Egg Production</a></li>
-                                <li><a href="<?= url('/incubation-jobs') ?>" class="text-decoration-none">Incubation
-                                        Hub</a></li>
-                                <li><a href="<?= url('/sales') ?>" class="text-decoration-none">Farm Sales / POS</a>
-                                </li>
-                                <li><a href="<?= url('/feed-drugs') ?>" class="text-decoration-none">Feed & Vet
-                                        Products</a></li>
-                            </ul>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <h6 class="fw-bold text-white mb-3 text-uppercase small">Intelligence & Access</h6>
-                            <ul class="list-unstyled d-flex flex-column gap-2 small text-white-50">
-                                <li><a href="<?= url('/reports') ?>" class="text-decoration-none">Executive Reports</a>
-                                </li>
-                                <li><a href="<?= url('/reports/aged-debtors') ?>" class="text-decoration-none">Aged
-                                        Debtors Analysis</a></li>
-                                <li><a href="<?= url('/profile') ?>" class="text-decoration-none">My Profile &
-                                        Security</a></li>
-                                <li><span class="text-white-50"><i class="bi bi-geo-alt me-1 text-warning"></i>Station:
-                                        Liwonde, Machinga</span></li>
-                                <li><span class="text-white-50"><i class="bi bi-cash me-1 text-warning"></i>Currency:
-                                        Malawi Kwacha (MWK)</span></li>
-                            </ul>
-                        </div>
-                        <div class="col-12 col-md-3">
-                            <h6 class="fw-bold text-white mb-3 text-uppercase small">Contact Details</h6>
-                            <ul class="list-unstyled d-flex flex-column gap-2 small text-white-50">
-                                <li><i class="bi bi-geo-alt-fill text-warning me-2"></i>Mawira Area by Chipamba Road,
-                                    Liwonde</li>
-                                <li><i class="bi bi-mailbox2 text-warning me-2"></i>P.O. Box 250, Liwonde, Machinga</li>
-                                <li><i class="bi bi-telephone-fill text-warning me-2"></i>+265 8888 996 20 / 9998 996 20
-                                </li>
-                                <li><i class="bi bi-envelope-fill text-warning me-2"></i>icchipeta@gmail.com</li>
-                                <li><i class="bi bi-envelope-fill text-warning me-2"></i>icchipeta@yahoo.co.uk</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <hr class="border-secondary my-4">
-                    <div
-                        class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 small text-white-50">
-                        <div>
-                            &copy; <?= date('Y') ?> <strong>Msantha Investments and General Suppliers (MIGS)</strong>.
-                            All rights reserved.
-                        </div>
-                        <div>
-                            Msantha Poultry Management System &bull; Production v2.0 &bull; Malawi
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">Online &bull; Production v2.0</span>
+                            <span class="text-secondary small"><i class="bi bi-geo-alt me-1 text-danger"></i>Mawira Area, Liwonde</span>
+                            <a href="tel:+265888899620" class="text-decoration-none text-muted"><i class="bi bi-telephone me-1 text-success"></i>+265 8888 996 20</a>
                         </div>
                     </div>
                 </div>

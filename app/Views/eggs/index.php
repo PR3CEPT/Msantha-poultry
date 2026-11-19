@@ -14,7 +14,7 @@
         </div>
         <div class="d-flex gap-2">
             <?php if (\App\Core\Auth::can('eggs', 'create')): ?>
-            <a href="<?= url('/eggs/create') ?>" class="btn btn-warning fw-bold text-dark">
+            <a href="<?= url('/eggs/create') ?>" class="btn btn-warning btn-sm fw-bold text-dark rounded-pill px-3 shadow-sm">
                 <i class="bi bi-plus-circle me-1"></i>Record Collection
             </a>
             <?php endif; ?>

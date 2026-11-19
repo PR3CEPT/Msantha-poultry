@@ -3,7 +3,7 @@
 <div class="p-3 p-md-4">
     <div class="row justify-content-center">
         <div class="col-12 col-lg-9">
-            <div class="card border-0 shadow-sm rounded-3 bg-white">
+            <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
                 <div class="card-header bg-white border-bottom p-3">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
@@ -15,7 +15,7 @@
                             </h1>
                         </div>
                         <div class="d-flex gap-2">
-                            <a href="<?= url("/incubation-jobs/{$job['id']}") ?>" class="btn btn-sm btn-outline-secondary">
+                            <a href="<?= url("/incubation-jobs/{$job['id']}") ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
                                 <i class="bi bi-arrow-left me-1"></i>Back to Batch
                             </a>
                         </div>
@@ -200,14 +200,14 @@
                         <div class="d-flex justify-content-between align-items-center pt-2 border-top">
                             <div>
                                 <?php if (\App\Core\Auth::hasRole(['owner', 'manager'])): ?>
-                                    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteBatchModal">
+                                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#deleteBatchModal">
                                         <i class="bi bi-trash3 me-1"></i>Delete Batch
                                     </button>
                                 <?php endif; ?>
                             </div>
                             <div class="d-flex gap-2">
-                                <a href="<?= url("/incubation-jobs/{$job['id']}") ?>" class="btn btn-outline-secondary">Cancel</a>
-                                <button type="submit" class="btn btn-primary fw-bold px-4">
+                                <a href="<?= url("/incubation-jobs/{$job['id']}") ?>" class="btn btn-outline-secondary btn-sm rounded-pill px-3">Cancel</a>
+                                <button type="submit" class="btn btn-primary btn-sm fw-bold rounded-pill px-4 shadow-sm">
                                     <i class="bi bi-save me-1"></i>Save Batch Changes
                                 </button>
                             </div>

@@ -626,53 +626,54 @@
     <!-- Comprehensive Professional Footer -->
     <footer class="text-white pt-5 pb-4" style="background-color: #0b2914;">
         <div class="container">
-            <div class="row g-4 mb-4">
-                <div class="col-12 col-md-4">
+            <div class="row g-4 mb-4 align-items-start">
+                <div class="col-12 col-lg-5">
                     <div class="d-flex align-items-center gap-2 mb-3">
-                        <img src="<?= asset('assets/img/logo.png') ?>" alt="MIGS Logo" style="height: 44px; width: auto; filter: brightness(1.2);">
+                        <img src="<?= asset('assets/img/logo.png') ?>" alt="MIGS Logo" style="height: 48px; width: auto; filter: brightness(1.2);">
                         <div>
-                            <h6 class="fw-bold text-white mb-0">Msantha Investments</h6>
-                            <small class="text-white-50">And General Suppliers (MIGS)</small>
+                            <h5 class="fw-bold text-white mb-0">Msantha Investments</h5>
+                            <small class="text-white-50">And General Suppliers (MIGS) &bull; Est. 2006</small>
                         </div>
                     </div>
-                    <p class="text-white-50 small mb-3">
-                        Established in 2006. Dedicated to quality livestock breeding, commercial poultry egg incubation, veterinary products, animal ear tagging, and farmer training across Malawi.
+                    <p class="text-white-50 small mb-3" style="max-width: 440px;">
+                        Delivering excellence in commercial egg incubation, livestock breeding, veterinary pharmaceuticals, animal identification &amp; tagging, and agricultural training across Malawi.
                     </p>
-                    <p class="text-warning small fw-bold mb-0">
-                        "WE ARE BEST AT WHAT WE DO, TRY US AND YOU WON'T REGRET"
-                    </p>
+                    <div class="badge bg-warning text-dark fw-bold px-3 py-1.5 rounded-pill text-uppercase" style="font-size: 0.72rem;">
+                        "We are best at what we do, try us and you won't regret"
+                    </div>
                 </div>
-                <div class="col-6 col-md-2">
-                    <h6 class="fw-bold text-white mb-3 text-uppercase small">Quick Links</h6>
-                    <ul class="list-unstyled d-flex flex-column gap-2 small text-white-50">
-                        <li><a href="#about" class="text-white-50 text-decoration-none hover-white">About Us</a></li>
-                        <li><a href="#services" class="text-white-50 text-decoration-none hover-white">Our Services</a></li>
-                        <li><a href="#incubation" class="text-white-50 text-decoration-none hover-white">Incubation</a></li>
-                        <li><a href="#livestock" class="text-white-50 text-decoration-none hover-white">Livestock</a></li>
-                        <li><a href="#contact" class="text-white-50 text-decoration-none hover-white">Contact</a></li>
-                        <li><a href="<?= url('/health') ?>" target="_blank" class="text-white-50 text-decoration-none hover-white">System Health</a></li>
+                <div class="col-6 col-lg-3">
+                    <h6 class="fw-bold text-white mb-3 text-uppercase small" style="letter-spacing: 0.05em;">Quick Navigation</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2 small text-white-50 mb-0">
+                        <li><a href="#about" class="text-white-50 text-decoration-none hover-white"><i class="bi bi-chevron-right me-1 text-warning small"></i>About Us</a></li>
+                        <li><a href="#services" class="text-white-50 text-decoration-none hover-white"><i class="bi bi-chevron-right me-1 text-warning small"></i>Our Services</a></li>
+                        <li><a href="#incubation" class="text-white-50 text-decoration-none hover-white"><i class="bi bi-chevron-right me-1 text-warning small"></i>Incubation Hub</a></li>
+                        <li><a href="#livestock" class="text-white-50 text-decoration-none hover-white"><i class="bi bi-chevron-right me-1 text-warning small"></i>Livestock &amp; Breeds</a></li>
+                        <li><a href="#contact" class="text-white-50 text-decoration-none hover-white"><i class="bi bi-chevron-right me-1 text-warning small"></i>Contact Headquarters</a></li>
+                        <li><a href="<?= url('/health') ?>" target="_blank" class="text-white-50 text-decoration-none hover-white"><i class="bi bi-activity me-1 text-warning small"></i>System Health</a></li>
                     </ul>
                 </div>
-                <div class="col-6 col-md-3">
-                    <h6 class="fw-bold text-white mb-3 text-uppercase small">Digital Portal</h6>
-                    <ul class="list-unstyled d-flex flex-column gap-2 small text-white-50">
-                        <li><a href="<?= url('/login') ?>" class="text-warning text-decoration-none fw-bold"><i class="bi bi-box-arrow-in-right me-1"></i>Staff & Farm Sign In</a></li>
-                        <li><a href="<?= url('/forgot-password') ?>" class="text-white-50 text-decoration-none hover-white">Forgot Password (SMS)</a></li>
-                        <li><a href="<?= asset('downloads/msantha-poultry-farm.apk') ?>" class="text-white-50 text-decoration-none hover-white"><i class="bi bi-android2 me-1"></i>Android Mobile App</a></li>
-                        <li><span class="text-white-50"><i class="bi bi-geo-alt me-1 text-warning"></i>Station: Liwonde, Machinga</span></li>
-                        <li><span class="text-white-50"><i class="bi bi-cash me-1 text-warning"></i>Currency: Malawi Kwacha (MWK)</span></li>
-                    </ul>
-                </div>
-                <div class="col-12 col-md-3">
-                    <h6 class="fw-bold text-white mb-3 text-uppercase small">Contact Details</h6>
-                    <ul class="list-unstyled d-flex flex-column gap-2 small text-white-50">
-                        <li><i class="bi bi-geo-alt-fill text-warning me-2"></i>Mawira Area by Chipamba Road, Liwonde, Machinga</li>
-                        <li><i class="bi bi-mailbox2 text-warning me-2"></i>P.O. Box 250, Liwonde, Machinga</li>
-                        <li><i class="bi bi-telephone-fill text-warning me-2"></i>+265 8888 996 20</li>
-                        <li><i class="bi bi-telephone-fill text-warning me-2"></i>+265 9998 996 20</li>
-                        <li><i class="bi bi-envelope-fill text-warning me-2"></i>icchipeta@gmail.com</li>
-                        <li><i class="bi bi-envelope-fill text-warning me-2"></i>icchipeta@yahoo.co.uk</li>
-                    </ul>
+                <div class="col-12 col-md-6 col-lg-4">
+                    <h6 class="fw-bold text-white mb-3 text-uppercase small" style="letter-spacing: 0.05em;">Farm Portal &amp; Direct Line</h6>
+                    <div class="d-flex flex-column gap-2.5">
+                        <a href="<?= url('/login') ?>" class="btn btn-warning btn-sm fw-bold text-dark rounded-pill px-3 py-2 text-center shadow-sm">
+                            <i class="bi bi-shield-lock-fill me-1"></i>Staff &amp; Management Sign In &rarr;
+                        </a>
+                        <a href="<?= asset('downloads/msantha-poultry-farm.apk') ?>" class="btn btn-outline-light btn-sm fw-semibold rounded-pill px-3 py-1.5 text-center">
+                            <i class="bi bi-android2 me-1 text-success"></i>Download Android App (APK)
+                        </a>
+                        <div class="p-2.5 rounded-3 bg-white bg-opacity-10 mt-1">
+                            <div class="small text-white-50 mb-1">Direct Station Hotline (Call / WhatsApp):</div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a href="tel:+265888899620" class="badge bg-success text-white text-decoration-none py-1.5 px-2.5 font-monospace">
+                                    <i class="bi bi-telephone-fill me-1"></i>08888 996 20
+                                </a>
+                                <a href="tel:+265999899620" class="badge bg-success text-white text-decoration-none py-1.5 px-2.5 font-monospace">
+                                    <i class="bi bi-telephone-fill me-1"></i>09998 996 20
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <hr class="border-secondary my-4">

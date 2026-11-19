@@ -73,7 +73,9 @@
                             <tr>
                                 <td class="ps-3 fw-bold text-dark fs-6">
                                     Week <?= $tier['from_week'] ?>+
-                                    <small class="text-muted fw-normal d-block">Birds &ge; <?= $tier['from_week'] ?> weeks old</small>
+                                    <small class="text-muted fw-normal d-block">
+                                        &ge; <?= $tier['from_week'] ?> weeks old (&ge; <?= $tier['from_week'] * 7 ?> days &bull; ~<?= round(($tier['from_week'] * 7) / 30.4, 1) ?> months)
+                                    </small>
                                 </td>
                                 <td class="text-end fw-bold text-success fs-5">
                                     <?= number_format((int)$tier['price']) ?> <small class="fs-6 text-muted">MWK</small>

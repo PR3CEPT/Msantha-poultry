@@ -3,12 +3,12 @@
 <div class="p-3 p-md-4">
     <div class="row justify-content-center">
         <div class="col-12 col-md-8 col-lg-6">
-            <div class="card border-0 shadow-sm rounded-3 bg-white">
+            <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
                 <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
                     <h1 class="h5 fw-bold mb-0 text-dark">
                         <i class="bi bi-feather text-success me-2"></i>New Flock Intake Batch
                     </h1>
-                    <a href="<?= url('/flocks') ?>" class="btn btn-sm btn-outline-secondary">
+                    <a href="<?= url('/flocks') ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
                         <i class="bi bi-arrow-left me-1"></i>Back
                     </a>
                 </div>
@@ -69,10 +69,10 @@
                         </div>
 
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success fw-bold flex-grow-1">
+                            <button type="submit" class="btn btn-success fw-bold flex-grow-1 rounded-pill shadow-sm">
                                 <i class="bi bi-check2-circle me-1"></i>Register Flock Batch
                             </button>
-                            <a href="<?= url('/flocks') ?>" class="btn btn-outline-secondary">Cancel</a>
+                            <a href="<?= url('/flocks') ?>" class="btn btn-outline-secondary rounded-pill px-3">Cancel</a>
                         </div>
                     </form>
                 </div>

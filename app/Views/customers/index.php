@@ -13,7 +13,7 @@
             <p class="text-muted small mb-0 mt-1">Hatchery clients, contact phones, normalized historical aliases, job history, and billing balances.</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="<?= url('/customers/create') ?>" class="btn btn-success fw-bold">
+            <a href="<?= url('/customers/create') ?>" class="btn btn-success btn-sm fw-bold rounded-pill px-3 shadow-sm">
                 <i class="bi bi-person-plus me-1"></i>Register Customer
             </a>
         </div>

@@ -3,12 +3,12 @@
 <div class="p-3 p-md-4">
     <div class="row justify-content-center">
         <div class="col-12 col-lg-8">
-            <div class="card border-0 shadow-sm rounded-3 bg-white">
+            <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
                 <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
                     <h1 class="h5 fw-bold mb-0 text-dark">
                         <i class="bi bi-cart-check text-success me-2"></i>Record Commercial Sale
                     </h1>
-                    <a href="<?= url('/sales') ?>" class="btn btn-sm btn-outline-secondary">
+                    <a href="<?= url('/sales') ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
                         <i class="bi bi-arrow-left me-1"></i>Back
                     </a>
                 </div>
@@ -87,8 +87,13 @@
                                         <select name="flock_id[]" class="form-select form-select-sm flock-select">
                                             <option value="">-- Deduct from Batch --</option>
                                             <?php foreach ($flocks as $f): ?>
+                                                <?php
+                                                $days = (int)($f['age_days'] ?? 0);
+                                                $weeks = (int)($f['age_weeks'] ?? floor($days / 7));
+                                                $months = (int)($f['age_months'] ?? floor($days / 30));
+                                                ?>
                                                 <option value="<?= $f['flock_id'] ?>" data-stock="<?= $f['current_stock'] ?>">
-                                                    <?= e($f['batch_code']) ?> (<?= e($f['breed_name']) ?> &bull; <?= number_format((int)$f['current_stock']) ?> avail)
+                                                    <?= e($f['batch_code']) ?> (<?= e($f['breed_name']) ?> &bull; Age: <?= $weeks ?>w / <?= $days ?>d / <?= $months ?>m &bull; <?= number_format((int)$f['current_stock']) ?> avail)
                                                 </option>
                                             <?php endforeach; ?>
                                         </select>
@@ -120,10 +125,10 @@
                         </div>
 
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success fw-bold flex-grow-1">
-                                <i class="bi bi-check2-circle me-1"></i>Complete Sale & Issue Receipt
+                            <button type="submit" class="btn btn-success fw-bold flex-grow-1 rounded-pill shadow-sm">
+                                <i class="bi bi-check2-circle me-1"></i>Complete Sale &amp; Issue Receipt
                             </button>
-                            <a href="<?= url('/sales') ?>" class="btn btn-outline-secondary">Cancel</a>
+                            <a href="<?= url('/sales') ?>" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
                         </div>
                     </form>
                 </div>

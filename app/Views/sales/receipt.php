@@ -64,9 +64,16 @@
                         <td>
                             <div class="fw-semibold text-dark"><?= ucwords(str_replace('_', ' ', $item['item_type'])) ?></div>
                             <?php if (!empty($item['batch_code'])): ?>
-                                <span class="badge bg-light text-dark border font-monospace" style="font-size: 0.72rem;">
-                                    <i class="bi bi-boxes me-1 text-success"></i>Batch: <?= e($item['batch_code']) ?>
-                                </span>
+                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                    <span class="badge bg-light text-dark border font-monospace" style="font-size: 0.72rem;">
+                                        <i class="bi bi-boxes me-1 text-success"></i>Batch: <?= e($item['batch_code']) ?>
+                                    </span>
+                                    <?php if (isset($item['age_weeks_at_sale']) && $item['age_weeks_at_sale'] !== null): ?>
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace" style="font-size: 0.72rem;">
+                                            <i class="bi bi-calendar-event me-1"></i>Age: <?= (int)$item['age_weeks_at_sale'] ?> wks (<?= (int)$item['age_days_at_sale'] ?>d &bull; <?= (int)$item['age_months_at_sale'] ?>mo)
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
                             <?php endif; ?>
                         </td>
                         <td><?= e($item['breed_name'] ?? 'General') ?></td>

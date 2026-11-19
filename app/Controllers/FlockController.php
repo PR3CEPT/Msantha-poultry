@@ -131,7 +131,8 @@ class FlockController
         $offset = ($page - 1) * $perPage;
 
         $sql = "
-            SELECT v.*, b.egg_tray_price
+            SELECT v.*, b.egg_tray_price,
+                   FLOOR(COALESCE(v.age_days, 0) / 30) AS age_months
             FROM v_flock_status v
             LEFT JOIN breeds b ON b.id = v.breed_id
             WHERE 1=1
@@ -311,7 +312,8 @@ class FlockController
 
         // Fetch active flocks
         $activeFlocks = $pdo->query("
-            SELECT flock_id, batch_code, breed_name, current_stock 
+            SELECT flock_id, batch_code, breed_name, current_stock, age_days, age_weeks,
+                   FLOOR(COALESCE(age_days, 0) / 30) AS age_months 
             FROM v_flock_status 
             WHERE current_stock > 0 
             ORDER BY batch_code ASC

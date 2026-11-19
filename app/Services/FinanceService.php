@@ -468,6 +468,23 @@ class FinanceService
             return '';
         }
 
+        // Add UTF-8 BOM for Microsoft Excel compatibility
+        fwrite($output, "\xEF\xBB\xBF");
+
+        $user = \App\Core\Auth::user();
+        $userName = $user['full_name'] ?? ($user['username'] ?? 'Authorized Staff');
+        $userRole = strtoupper((string)\App\Core\Auth::role());
+        $timestamp = date('d-M-Y H:i:s') . ' CAT';
+
+        fputcsv($output, ['MSANTHA INVESTMENTS & GENERAL SUPPLIERS — MULTI-BUSINESS CASH BOOKS']);
+        fputcsv($output, ['Business Unit:', $buName]);
+        fputcsv($output, ['Prepared By:', "{$userName} ({$userRole})"]);
+        fputcsv($output, ['Generated On:', $timestamp]);
+        if ($yearMonth) {
+            fputcsv($output, ['Accounting Month:', $yearMonth]);
+        }
+        fputcsv($output, []);
+
         // Header
         fputcsv($output, ['ID', 'Date', 'Business Unit', 'Description', 'Category', 'Kind', 'Receipt (MWK)', 'Expenditure (MWK)', 'Running Balance (MWK)', 'Legacy Ref']);
 

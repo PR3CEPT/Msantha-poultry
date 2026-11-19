@@ -135,7 +135,13 @@ class EggController
         $pdo = DB::pdo();
 
         $breeds = $pdo->query("SELECT * FROM breeds ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
-        $flocks = $pdo->query("SELECT flock_id, batch_code, breed_name FROM v_flock_status WHERE current_stock > 0 ORDER BY batch_code ASC")->fetchAll(PDO::FETCH_ASSOC);
+        $flocks = $pdo->query("
+            SELECT flock_id, batch_code, breed_name, age_days, age_weeks,
+                   FLOOR(COALESCE(age_days, 0) / 30) AS age_months 
+            FROM v_flock_status 
+            WHERE current_stock > 0 
+            ORDER BY batch_code ASC
+        ")->fetchAll(PDO::FETCH_ASSOC);
 
         return View::render('eggs/create', [
             'pageTitle' => 'Record Daily Egg Production',

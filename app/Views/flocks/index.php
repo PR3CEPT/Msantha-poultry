@@ -14,18 +14,18 @@
         </div>
         <div class="d-flex flex-wrap gap-2">
             <?php if (\App\Core\Auth::can('flocks', 'create')): ?>
-            <a href="<?= url('/flocks/quick-entry') ?>" class="btn btn-primary fw-bold">
+            <a href="<?= url('/flocks/quick-entry') ?>" class="btn btn-primary btn-sm fw-bold rounded-pill px-3 shadow-sm">
                 <i class="bi bi-pencil-square me-1"></i>Quick Daily Entry
             </a>
-            <a href="<?= url('/flocks/create') ?>" class="btn btn-success fw-bold">
+            <a href="<?= url('/flocks/create') ?>" class="btn btn-success btn-sm fw-bold rounded-pill px-3 shadow-sm">
                 <i class="bi bi-plus-circle me-1"></i>New Batch
             </a>
             <?php endif; ?>
-            <a href="<?= url('/flocks?tab=batches') ?>" class="btn <?= ($tab ?? 'batches') === 'batches' ? 'btn-outline-dark active' : 'btn-outline-secondary' ?>">
+            <a href="<?= url('/flocks?tab=batches') ?>" class="btn btn-sm rounded-pill px-3 <?= ($tab ?? 'batches') === 'batches' ? 'btn-dark' : 'btn-outline-secondary' ?>">
                 <i class="bi bi-grid-3x3-gap me-1"></i>Batches
             </a>
-            <a href="<?= url('/flocks?tab=events') ?>" class="btn <?= ($tab ?? '') === 'events' ? 'btn-danger' : 'btn-outline-secondary' ?>">
-                <i class="bi bi-heart-pulse me-1"></i>Mortality
+            <a href="<?= url('/flocks?tab=events') ?>" class="btn btn-sm rounded-pill px-3 <?= ($tab ?? '') === 'events' ? 'btn-danger' : 'btn-outline-secondary' ?>">
+                <i class="bi bi-heart-pulse me-1"></i>Mortality Events
             </a>
         </div>
     </div>
@@ -294,7 +294,7 @@
                         <tr>
                             <th class="ps-3 py-3">Batch Code</th>
                             <th class="py-3">Breed / Species</th>
-                            <th class="py-3" style="width: 110px;">Age</th>
+                            <th class="py-3" style="width: 130px;">Age (wks / d / mo)</th>
                             <th class="py-3" style="width: 115px;">Intake Date</th>
                             <th class="text-end py-3" style="width: 105px;">Initial Stock</th>
                             <th class="text-end py-3" style="width: 115px;">Deaths (Loss)</th>
@@ -335,8 +335,15 @@
                                         <span class="badge bg-light text-dark border"><?= e($f['breed_name']) ?></span>
                                     </td>
                                     <td class="font-monospace">
-                                        <span class="fw-bold text-dark"><?= (int)$f['age_weeks'] ?> wks</span>
-                                        <small class="text-muted d-block" style="font-size: 0.7rem;"><?= (int)$f['age_days'] ?> days</small>
+                                        <?php
+                                        $ageDays = (int)($f['age_days'] ?? 0);
+                                        $ageWeeks = (int)($f['age_weeks'] ?? floor($ageDays / 7));
+                                        $ageMonths = (int)($f['age_months'] ?? floor($ageDays / 30));
+                                        ?>
+                                        <div class="fw-bold text-dark"><?= $ageWeeks ?> wks</div>
+                                        <small class="text-muted d-block" style="font-size: 0.72rem;">
+                                            <span class="text-dark fw-semibold"><?= $ageDays ?></span>d &bull; <span class="text-primary fw-semibold"><?= $ageMonths ?></span>mo
+                                        </small>
                                     </td>
                                     <td class="font-monospace small text-muted">
                                         <?= !empty($f['start_date']) ? date('d-M-Y', strtotime($f['start_date'])) : '—' ?>

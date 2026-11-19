@@ -16,7 +16,7 @@
         </div>
         <div class="d-flex gap-2">
             <?php if (\App\Core\Auth::can('incubation', 'create')): ?>
-            <a href="<?= url('/incubation/receive') ?>" class="btn btn-success fw-bold">
+            <a href="<?= url('/incubation/receive') ?>" class="btn btn-success btn-sm fw-bold rounded-pill px-3 shadow-sm">
                 <i class="bi bi-plus-circle me-1"></i>Receive Eggs
             </a>
             <?php endif; ?>

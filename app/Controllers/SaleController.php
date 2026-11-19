@@ -120,7 +120,13 @@ class SaleController
 
         $customers = $pdo->query("SELECT id, name, phone FROM customers ORDER BY name ASC LIMIT 200")->fetchAll(PDO::FETCH_ASSOC);
         $breeds = $pdo->query("SELECT * FROM breeds ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
-        $flocks = $pdo->query("SELECT flock_id, batch_code, breed_name, current_stock FROM v_flock_status WHERE current_stock > 0 ORDER BY batch_code ASC")->fetchAll(PDO::FETCH_ASSOC);
+        $flocks = $pdo->query("
+            SELECT flock_id, batch_code, breed_name, current_stock, start_date, age_days, age_weeks,
+                   FLOOR(age_days / 30) AS age_months
+            FROM v_flock_status 
+            WHERE current_stock > 0 
+            ORDER BY batch_code ASC
+        ")->fetchAll(PDO::FETCH_ASSOC);
 
         return View::render('sales/create', [
             'pageTitle' => 'Record Commercial Sale',
@@ -276,8 +282,12 @@ class SaleController
         }
 
         $itemsStmt = $pdo->prepare("
-            SELECT si.*, b.name AS breed_name, f.batch_code
+            SELECT si.*, b.name AS breed_name, f.batch_code, f.start_date,
+                   DATEDIFF(s.sale_date, f.start_date) AS age_days_at_sale,
+                   FLOOR(DATEDIFF(s.sale_date, f.start_date) / 7) AS age_weeks_at_sale,
+                   FLOOR(DATEDIFF(s.sale_date, f.start_date) / 30) AS age_months_at_sale
             FROM sale_items si
+            JOIN sales s ON s.id = si.sale_id
             LEFT JOIN breeds b ON b.id = si.breed_id
             LEFT JOIN flocks f ON f.id = si.flock_id
             WHERE si.sale_id = ?

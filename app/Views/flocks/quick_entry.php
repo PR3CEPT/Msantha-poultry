@@ -37,7 +37,7 @@
                                     <option value="">-- Choose active flock batch --</option>
                                     <?php foreach ($activeFlocks as $f): ?>
                                         <option value="<?= $f['flock_id'] ?>" <?= ($selectedFlockId === (int)$f['flock_id']) ? 'selected' : '' ?>>
-                                            <?= e($f['batch_code']) ?> (<?= e($f['breed_name']) ?> &middot; <?= number_format((int)$f['current_stock']) ?> birds)
+                                            <?= e($f['batch_code']) ?> (<?= e($f['breed_name']) ?> &bull; Age: <?= (int)$f['age_weeks'] ?>w / <?= (int)$f['age_days'] ?>d / <?= (int)$f['age_months'] ?>m &bull; <?= number_format((int)$f['current_stock']) ?> birds)
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
